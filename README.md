@@ -3,13 +3,13 @@ JQuery router is a routing plugin for jQuery. It can be used for developing Sing
 
 # Installation
 
-Using NPM:<br/>
+<b>NPM:</b><br/>
 <pre><code>npm install jqueryrouter</code></pre>
 
-Using Bower:<br/>
+<b>Bower:</b><br/>
 <pre><code>bower install jqueryrouter</code></pre>
 
-Download:<br/>
+<b>Download:</b><br/><br/>
 Use <code>Clone or download</code> option above.
 
 # How to use?
