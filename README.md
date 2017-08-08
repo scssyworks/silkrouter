@@ -2,15 +2,15 @@
 JQuery router is a routing plugin for jQuery. It can be used for developing Single Page Applications.
 
 # Installation
-You can install jQuery router using npm
 
+Using NPM:<br/>
 <pre><code>npm install jqueryrouter</code></pre>
 
-You can also do a bower install as follows
-
+Using Bower:<br/>
 <pre><code>bower install jqueryrouter</code></pre>
 
-Or you can download the repository above.
+Download:<br/>
+Use <code>Clone or download</code> option above.
 
 # How to use?
 <b>1. Initialize router plugin</b><br/>
