@@ -2,7 +2,7 @@
   "name": "jqueryrouter",
   "version": "0.1.0",
   "description": "JQuery router is a routing plugin for jQuery",
-  "main": "dist/jquery.router.js",
+  "main": "dist/js/jquery.router.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,13 +12,9 @@
   },
   "keywords": [
     "jquery",
-    "jquery",
-    "router",
     "router",
     "SPA",
-    "single",
-    "page",
-    "applications"
+    "single page application"
   ],
   "author": "Sachin Singh",
   "license": "MIT",
