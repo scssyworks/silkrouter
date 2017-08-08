@@ -41,7 +41,7 @@ $.setRoute(route [, replaceMode [, noTrigger]]);
 
 <b>Parameters:</b><br/>
 <b>route</b>: &lt;string | object&gt;
-You can pass a string if you wish not to pass data. Otherwise, you need to construct a route object (e.g. <code>$.setRoute({ route: "path/to/route", data: { ... } })</code>).
+You can pass a string if you wish not to pass data. Otherwise, you need to construct a route object (e.g. <code>$.setRoute({ route: "path/to/route", data: { ... } });</code>).
 
 <b>replaceMode</b>: &lt;boolean&gt;
 By default setRoute updates the browser history. If you want to prevent that, set replaceMode to <code>true</code>.
