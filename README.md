@@ -46,6 +46,7 @@ You can pass a string if you wish not to pass data. Otherwise, you need to const
 By default setRoute updates the browser history. If you want to prevent that, set replaceMode to <code>true</code>.<br/>
 <b>noTrigger</b>: &lt;boolean&gt;<br/>
 By default setRoute triggers the route handler. If you want to change the route without executing route handler, set noTrigger to <code>true</code>.<br/>
+
 JQuery router uses history API and provides additional support for IE9 since it does not support <code>pushState</code>. It uses a custom event to trigger route handlers, hence triggering <code>popState</code> and <code>hashChange</code> events will have little or no effect. If you want to trigger a route handler without calling <code>setRoute</code>, the recommended way is follows: 
 <pre><code>$.router.events.trigger($.router.events.routeChanged)</code></pre>.
   
