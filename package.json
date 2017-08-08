@@ -1,0 +1,29 @@
+{
+  "name": "jqueryrouter",
+  "version": "0.1.0",
+  "description": "JQuery router is a routing plugin for jQuery",
+  "main": "dist/jquery.router.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scssyworks/jqueryrouter.git"
+  },
+  "keywords": [
+    "jquery",
+    "jquery",
+    "router",
+    "router",
+    "SPA",
+    "single",
+    "page",
+    "applications"
+  ],
+  "author": "Sachin Singh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/scssyworks/jqueryrouter/issues"
+  },
+  "homepage": "https://github.com/scssyworks/jqueryrouter#readme"
+}
