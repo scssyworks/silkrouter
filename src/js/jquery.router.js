@@ -6,7 +6,7 @@
  * @date         2017-08-08
  * @author       Sachin Singh <ssingh.300889@gmail.com>
  * @dependencies jQuery
- * @version      0.1.0
+ * @version      0.2.1
  */
 
 ;
@@ -24,7 +24,8 @@
         },
         // Regular expressions
         regex = {
-            pathname: /^\/(?=[^?]+)/
+            pathname: /^\/(?=[^?]+)/,
+            routeparams: /:[^\/]+/g
         },
         // Supported events
         eventNames = {
@@ -34,6 +35,14 @@
         errorMessage = {
             invalidPath: "Path is invalid"
         };
+
+    /**
+     * Converts any list to JavaScript array
+     * @param {array} arr 
+     */
+    function _arr(arr) {
+        return Array.prototype.slice.call(arr);
+    }
 
     /**
      * Triggers "routeChanged" event unless "noTrigger" flag is true
@@ -122,7 +131,38 @@
         });
     }
 
-    function _matched() { }
+
+    /**
+     * Trims leading/trailing special characters
+     * @param {string} param 
+     */
+    function _sanitize(str) {
+        return str.replace(/^([^a-zA-Z0-9]+)|([^a-zA-Z0-9]+)$/g, "");
+    }
+
+    /**
+     * Compares route with current URL
+     * @param {string} route 
+     * @param {string} url 
+     * @param {object} params 
+     */
+    function _matched(route, url, params) {
+        if (regex.routeparams.test(route)) {
+            var pathRegex = new RegExp(route.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
+            if (pathRegex.test(url)) {
+                var keys = _arr(route.match(regex.routeparams)).map(_sanitize),
+                    values = _arr(url.match(pathRegex));
+                values.shift();
+                keys.forEach(function (key, index) {
+                    params.params[key] = values[index];
+                });
+                return true;
+            }
+        } else {
+            return (route === url);
+        }
+        return false;
+    }
 
     /**
      * Triggers a router event
@@ -130,7 +170,8 @@
      * @param {object} params 
      */
     function _routeTrigger(eventName, params) {
-        params = params || {};
+        // Ensures that params is always an object
+        params = $.extend(params, {});
         router.handlers.forEach(function (eventObject) {
             if (eventObject.eventName === eventName) {
                 if (isHistorySupported && _matched(eventObject.route, w.location.pathname, params)) {
@@ -140,7 +181,7 @@
                         cache.data = params.data;
                         w.location.replace("#" + w.location.pathname); // <-- This will trigger router handler automatically
                     } else if (_matched(eventObject.route, w.location.hash.substring(1), params)) {
-                        eventObject.handler(params.data);
+                        eventObject.handler(params.data, params.params);
                     }
                 }
             }
