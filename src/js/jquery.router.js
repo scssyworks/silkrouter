@@ -244,7 +244,8 @@
     /**
      * Router internal init method
      */
-    (router.init = _bindRouterEvents)();
+    router.init = _bindRouterEvents;
+    router.init();
 }(
     window,
     window.jQuery,
