@@ -24,16 +24,16 @@ A route handler is triggered when a particular route is active. For example, if 
 <pre><code>$(selector).route(route, handler);
 $.route(route, handler);</code></pre>
 
-<b>Note:</b><code>$.router.init</code> does not execute route handlers which are added after the <code>init</code> method has been called. Make sure that you have attached route handlers beforehand.
+<b>Note:</b><code>$.router.init</code> does not execute route handlers which are added after the <code>init</code> call. Make sure that you have attached handlers beforehand.
 
 <b>3. Set route programmatically</b><br/>
-You can always change route manually by updating the URL. But this is just one side of the coin. We need a handle that would allow us to change route when something happens on the page. In other words, we should be able to change route programmatically. Fret not! We have a way.
+You can always change route manually by updating URL. But this is just one side of the coin. We need a handle which would allow us to change route when something happens on page. In other words, we should be able to change route programmatically. Don't worry! We have a solution.
 
 <pre><code>$.setRoute(route [, replaceMode [, noTrigger]]);</code></pre>
 
 <b>Parameters:</b><br/>
 <b>route</b>: &lt;string | object&gt;<br/>
-You can pass a string if you wish not to pass data. Otherwise, you need to construct a route object (e.g. <code>$.setRoute({ route: "path/to/route", data: { ... } });</code>).<br/>
+You can pass a string if you do not wish to pass data. Otherwise, you need to construct a route object (e.g. <code>$.setRoute({ route: "path/to/route", data: { ... } });</code>).<br/>
 <b>replaceMode</b>: &lt;boolean&gt; | optional<br/>
 By default setRoute updates the browser history. If you want to prevent that, set replaceMode to <code>true</code>.<br/>
 <b>noTrigger</b>: &lt;boolean&gt; | optional<br/>
