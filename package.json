@@ -21,5 +21,17 @@
   "bugs": {
     "url": "https://github.com/scssyworks/jqueryrouter/issues"
   },
-  "homepage": "https://github.com/scssyworks/jqueryrouter#readme"
+  "homepage": "https://github.com/scssyworks/jqueryrouter#readme",
+  "devDependencies": {
+    "del": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-cache": "^0.4.6",
+    "gulp-jshint": "^2.0.4",
+    "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^2.6.1",
+    "gulp-uglify": "^3.0.0",
+    "jshint": "^2.9.5",
+    "jshint-stylish": "^2.2.1",
+    "run-sequence": "^2.1.0"
+  }
 }

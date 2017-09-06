@@ -15,6 +15,8 @@ Use <code>Clone or download</code> option above.
 # How to use?
 <b>1. Initialize router plugin</b><br/>
 <pre><code>$.router.init();</code></pre>
+This step is used to execute route handlers on page load. 
+Calling init method is not mandatory. It is only used if a route handler needs to be called on page load.
 
 <b>2. Add a route handler</b><br/>
 A route handler is triggered when a particular route is active. For example, if you navigate to a route "path/to/route", the handler function associated with it get's triggerred. This is useful if you want to render a section of page or simply switch tabs depending on given route.
@@ -22,7 +24,7 @@ A route handler is triggered when a particular route is active. For example, if 
 <pre><code>$(selector).route(route, handler);
 $.route(route, handler);</code></pre>
 
-<b>Note:</b><code>$.router.init</code> does not execute route handlers (yet). If you wish to render something on page load, make sure that you have attached route handlers before calling <code>init</code>.
+<b>Note:</b><code>$.router.init</code> does not execute route handlers which are added after the <code>init</code> method has been called. Make sure that you have attached route handlers beforehand.
 
 <b>3. Set route programmatically</b><br/>
 You can always change route manually by updating the URL. But this is just one side of the coin. We need a handle that would allow us to change route when something happens on the page. In other words, we should be able to change route programmatically. Fret not! We have a way.
@@ -32,13 +34,13 @@ You can always change route manually by updating the URL. But this is just one s
 <b>Parameters:</b><br/>
 <b>route</b>: &lt;string | object&gt;<br/>
 You can pass a string if you wish not to pass data. Otherwise, you need to construct a route object (e.g. <code>$.setRoute({ route: "path/to/route", data: { ... } });</code>).<br/>
-<b>replaceMode</b>: &lt;boolean&gt;<br/>
+<b>replaceMode</b>: &lt;boolean&gt; | optional<br/>
 By default setRoute updates the browser history. If you want to prevent that, set replaceMode to <code>true</code>.<br/>
-<b>noTrigger</b>: &lt;boolean&gt;<br/>
+<b>noTrigger</b>: &lt;boolean&gt; | optional<br/>
 By default setRoute triggers the route handler. If you want to change the route without executing route handler, set noTrigger to <code>true</code>.<br/>
 
 # Summary
-JQuery router uses history API and provides additional support for IE9 since it does not support <code>pushState</code>. It uses a custom event to trigger route handlers, hence triggering <code>popState</code> and <code>hashChange</code> events will have little or no effect. If you want to trigger a route handler without calling <code>setRoute</code>, the recommended way is follows: 
+JQuery router uses history API and provides additional support for IE9 since it does not support <code>pushState</code>. It uses a custom event to trigger route handlers, hence triggering <code>popstate</code> and <code>hashchange</code> will not work properly. It might work in few cases. If you want to trigger a route handler without calling <code>setRoute</code>, the recommended way is to use custom <code>routeChanged</code> event: 
 <pre><code>$.router.events.trigger($.router.events.routeChanged);</code></pre>.
   
 Jquery router is supported by all major desktop and mobile browsers.
