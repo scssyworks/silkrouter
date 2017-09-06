@@ -39,10 +39,23 @@ By default setRoute updates the browser history. If you want to prevent that, se
 <b>noTrigger</b>: &lt;boolean&gt; | optional<br/>
 By default setRoute triggers the route handler. If you want to change the route without executing route handler, set noTrigger to <code>true</code>.<br/>
 
+# Dynamic routes (v0.2.1)
+As per version 0.2.1 jQuery router supports dynamic routes (or route parameters). 
+Routes with parameters are defined as follows:
+<pre><code>
+$(selector).route("/path/to/route/:param1/:param2", function (data, params) { 
+    ... 
+});
+
+$.setRoute("/path/to/route/<b>value1</b>/<b>value2</b>");
+</code></pre>
+
+Parameters are received in <code>params</code> object which is second argument in callback function.
+
 # Summary
 JQuery router uses history API and provides additional support for IE9 since it does not support <code>pushState</code>. It uses a custom event to trigger route handlers, hence triggering <code>popstate</code> and <code>hashchange</code> will not work properly. It might work in few cases. If you want to trigger a route handler without calling <code>setRoute</code>, the recommended way is to use custom <code>routeChanged</code> event: 
 <pre><code>$.router.events.trigger($.router.events.routeChanged);</code></pre>.
   
 Jquery router is supported by all major desktop and mobile browsers.
 
-This is still not a major release hence use JQuery router at your own risk.
+There are no major releases yet, hence use JQuery router at your own risk.
