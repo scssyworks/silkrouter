@@ -55,7 +55,7 @@ Parameters are received in <code>params</code> object which is second argument i
 # Summary
 JQuery router uses history API and provides additional support for IE9 since it does not support <code>pushState</code>. It uses a custom event to trigger route handlers, hence triggering <code>popstate</code> and <code>hashchange</code> will not work properly. Though it might work in few cases, it is not a recommended way. 
 If you want to trigger a route handler without calling <code>setRoute</code>, the best way is to use custom <code>routeChanged</code> event: 
-<pre><code>$.router.events.trigger($.router.events.routeChanged);</code></pre>.
+<pre><code>$.router.events.trigger($.router.events.routeChanged);</code></pre>
   
 Jquery router is supported by all major desktop and mobile browsers.
 
