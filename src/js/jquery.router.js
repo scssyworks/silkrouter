@@ -6,7 +6,7 @@
  * @date         2017-08-08
  * @author       Sachin Singh <ssingh.300889@gmail.com>
  * @dependencies jQuery
- * @version      0.2.1
+ * @version      0.3.0
  */
 
 ;
@@ -73,12 +73,33 @@
     }
 
     /**
-     * Checks if route is valid and returns the valid route
+     * Adds a query string
      * @param {string} sRoute 
+     * @param {string} qString 
+     * @param {boolean} appendQString 
      */
-    function _validateRoute(sRoute) {
+    function _resolveQueryString(sRoute, qString, appendQString) {
+        if (!qString && !appendQString) return sRoute;
+        if (typeof qString === "string") {
+            if ((qString = qString.trim()) && appendQString) {
+                return sRoute + w.location.search + "&" + qString.replace("?", "");
+            } else if (qString) {
+                return sRoute + "?" + qString.replace("?", "");
+            } else {
+                return sRoute;
+            }
+        }
+    }
+
+    /**
+     * Checks if route is valid and returns the valid route
+     * @param {string} sRoute
+     * @param {string} qString
+     * @param {boolean} appendQString
+     */
+    function _validateRoute(sRoute, qString, appendQString) {
         if (_isValidRoute(sRoute)) {
-            return sRoute;
+            return _resolveQueryString(sRoute, qString, appendQString);
         } else {
             _throwError(errorMessage.invalidPath);
         }
@@ -94,25 +115,29 @@
         var data = null,
             title = null,
             sRoute = "",
+            qString = "",
+            appendQString = false,
             routeMethod = replaceMode ? "replaceState" : "pushState";
         cache.noTrigger = noTrigger;
         if (typeof oRoute === "object") {
             cache.data = data = oRoute.data;
             title = oRoute.title;
             sRoute = oRoute.route;
+            qString = oRoute.queryString;
+            appendQString = oRoute.appendQuery;
         } else if (typeof oRoute === "string") {
             sRoute = oRoute;
         }
         if (isHistorySupported) {
-            history[routeMethod]({ data: data }, title, _validateRoute(sRoute));
+            history[routeMethod]({ data: data }, title, _validateRoute(sRoute, qString, appendQString));
             if (!noTrigger) {
                 $.router.events.trigger(eventNames.routeChanged, { data: cache.data });
             }
         } else {
             if (replaceMode) {
-                w.location.replace("#" + sRoute);
+                w.location.replace("#" + _validateRoute(sRoute, qString, appendQString));
             } else {
-                w.location.hash = _validateRoute(sRoute);
+                w.location.hash = _validateRoute(sRoute, qString, appendQString);
             }
         }
     }
