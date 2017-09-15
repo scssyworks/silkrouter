@@ -10,10 +10,10 @@ const gulp = require("gulp"),
     seq = require('run-sequence');
 
 gulp.task("del", () => {
-    del("dist");
+    return del("dist");
 });
 
-gulp.task("build", () => {
+gulp.task("build", ["del"], () => {
     return gulp.src("src/js/*.js")
         .pipe(jshint())
         .pipe(jshint.reporter(jshintReporter))
@@ -31,5 +31,5 @@ gulp.task("watch", () => {
 });
 
 gulp.task("default", () => {
-    seq("del", "build", "watch");
+    seq("build", "watch");
 });

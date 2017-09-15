@@ -76,8 +76,7 @@
                     if (isNumber(nextProp)) {
                         childObj = obj[prop];
                     } else {
-                        childObj = {};
-                        obj[prop].push(childObj);
+                        childObj = obj[prop] = _convertToObject(obj[prop]);
                     }
                 } else if (typeof obj[prop] === "object") { // Check if object
                     childObj = obj[prop];
@@ -100,9 +99,8 @@
                         if (isNumber(nextProp)) {
                             obj[prop][nextProp] = _val(value);
                         } else {
-                            childObj = {};
-                            childObj[nextProp] = _val(value);
-                            obj[prop].push(childObj);
+                            obj[prop] = _convertToObject(obj[prop]);
+                            obj[prop][nextProp] = _val(value);
                         }
                     } else if (typeof obj[prop] === "object") { // Check if object
                         obj[prop][nextProp] = _val(value);
@@ -161,5 +159,20 @@
         if (value.toLowerCase() === "true") return true;
         if (value.toLowerCase() === "false") return false;
         return value;
+    }
+
+    /**
+     * Converts an array to an object
+     * @param {array} arr 
+     */
+    function _convertToObject(arr) {
+        var convertedObj = {};
+        if (Array.isArray(arr)) {
+            arr.forEach(function (value, index) {
+                convertedObj[index] = value;
+            });
+            return convertedObj;
+        }
+        return {};
     }
 })(window, window.jQuery);
