@@ -92,6 +92,13 @@
     }
 
     /**
+     * Converts current query string into an object
+     */
+    function _getQueryParams() {
+        return $.deparam(w.location.search);
+    }
+
+    /**
      * Checks if route is valid and returns the valid route
      * @param {string} sRoute
      * @param {string} qString
@@ -200,13 +207,13 @@
         router.handlers.forEach(function (eventObject) {
             if (eventObject.eventName === eventName) {
                 if (isHistorySupported && _matched(eventObject.route, w.location.pathname, params)) {
-                    eventObject.handler(params.data, params.params);
+                    eventObject.handler(params.data, params.params, _getQueryParams());
                 } else {
                     if (!w.location.hash && _matched(eventObject.route, w.location.pathname, params)) {
                         cache.data = params.data;
                         w.location.replace("#" + w.location.pathname); // <-- This will trigger router handler automatically
                     } else if (_matched(eventObject.route, w.location.hash.substring(1), params)) {
-                        eventObject.handler(params.data, params.params);
+                        eventObject.handler(params.data, params.params, _getQueryParams());
                     }
                 }
             }

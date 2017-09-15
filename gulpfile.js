@@ -5,6 +5,7 @@ const gulp = require("gulp"),
     sourcemaps = require("gulp-sourcemaps"),
     cache = require("gulp-cache"),
     jshint = require("gulp-jshint"),
+    concat = require("gulp-concat"),
     jshintReporter = require("jshint-stylish"),
     seq = require('run-sequence');
 
@@ -17,6 +18,7 @@ gulp.task("build", () => {
         .pipe(jshint())
         .pipe(jshint.reporter(jshintReporter))
         .pipe(sourcemaps.init())
+        .pipe(concat("jquery.router.js"))
         .pipe(sourcemaps.write())
         .pipe(gulp.dest("dist/js"))
         .pipe(rename({ suffix: ".min" }))
