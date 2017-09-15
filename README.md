@@ -39,18 +39,25 @@ By default setRoute updates the browser history. If you want to prevent that, se
 <b>noTrigger</b>: &lt;boolean&gt; | optional<br/>
 By default setRoute triggers the route handler. If you want to change the route without executing route handler, set noTrigger to <code>true</code>.<br/>
 
-# Dynamic routes (v0.2.1)
-As per version 0.2.1 jQuery router supports dynamic routes (or route parameters). 
+# Dynamic routes (added in v0.2.1)
 Routes with parameters are defined as follows:
-<pre><code>
-$(selector).route("/path/to/route/:param1/:param2", function (data, params) { 
-    ... 
-});
-
+<pre><code>$(selector).route("/path/to/route/<b>:param1</b>/<b>:param2</b>", function (data, params) { ... });
 $.setRoute("/path/to/route/<b>value1</b>/<b>value2</b>");
 </code></pre>
 
 Parameters are received in <code>params</code> object which is second argument in callback function.
+
+# Query Parameters (added in v0.3.0)
+Query parameters can be passed as query string to the <code>setRoute</code> function. JQuery router automatically appends query string to the route. For IE9 this behavior is slightly different. The querystring gets appended to hash route instead of route since IE9 doesn't support <code>pushState</code>. 
+
+JQuery router parses the querystring into an object with the help of deparam plugin and passes it as a third parameter to the route handler.
+
+<pre><code>$(selector).route("/path/to/route", function (data, params, <b>query</b>) { ... });
+$.setRoute({
+    route: "/path/to/route",
+    <b>queryString: "param1=value1&amp;param2=value2"</b>
+});
+</code></pre>
 
 # Summary
 JQuery router uses history API and provides additional support for IE9 since it does not support <code>pushState</code>. It uses a custom event to trigger route handlers, hence triggering <code>popstate</code> and <code>hashchange</code> will not work properly. Though it might work in few cases, it is not a recommended way. 
