@@ -95,7 +95,12 @@
      * Converts current query string into an object
      */
     function _getQueryParams() {
-        return $.deparam(w.location.search);
+        var qsObject = $.deparam(w.location.search),
+            hashStringParams = {};
+        if (w.location.hash.match(/\?.+/)) {
+            hashStringParams = $.deparam(w.location.hash.match(/\?.+/)[0]);
+        }
+        return $.extend(qsObject, hashStringParams);
     }
 
     /**
