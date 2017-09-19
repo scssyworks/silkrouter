@@ -124,6 +124,7 @@
      * @param {boolean} noTrigger 
      */
     function _setRoute(oRoute, replaceMode, noTrigger) {
+        if (!oRoute) return;
         var data = null,
             title = null,
             sRoute = "",
