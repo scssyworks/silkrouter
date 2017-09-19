@@ -50,7 +50,7 @@ Parameters are received in <code>params</code> object which is second argument i
 # Query Parameters (added in v0.3.0)
 Query parameters can be passed as query string to the <code>setRoute</code> function. JQuery router automatically appends query string to the route. For IE9 this behavior is slightly different. The querystring gets appended to hash route instead of route since IE9 doesn't support <code>pushState</code>. 
 
-JQuery router parses the querystring into an object with the help of deparam plugin and passes it as a third parameter to the route handler.
+JQuery router parses the querystring into an object with the help of <a href="https://github.com/scssyworks/jquerydeparam">deparam plugin</a> and passes it as a third parameter to the route handler.
 
 <pre><code>$(selector).route("/path/to/route", function (data, params, <b>query</b>) { ... });
 $.setRoute({
