@@ -6,7 +6,7 @@
  * @date         2017-08-08
  * @author       Sachin Singh <ssingh.300889@gmail.com>
  * @dependencies jQuery
- * @version      0.3.0
+ * @version      0.3.1
  */
 
 ;
@@ -124,6 +124,7 @@
      * @param {boolean} noTrigger 
      */
     function _setRoute(oRoute, replaceMode, noTrigger) {
+        if (!oRoute) return;
         var data = null,
             title = null,
             sRoute = "",
