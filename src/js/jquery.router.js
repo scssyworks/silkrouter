@@ -6,7 +6,7 @@
  * @date         2017-08-08
  * @author       Sachin Singh <ssingh.300889@gmail.com>
  * @dependencies jQuery
- * @version      0.3.1
+ * @version      0.4.0
  */
 
 ;
@@ -130,6 +130,7 @@
             sRoute = "",
             qString = "",
             appendQString = false,
+            isHashString = false,
             routeMethod = replaceMode ? "replaceState" : "pushState";
         cache.noTrigger = noTrigger;
         if (typeof oRoute === "object") {
@@ -141,7 +142,12 @@
         } else if (typeof oRoute === "string") {
             sRoute = oRoute;
         }
-        if (isHistorySupported) {
+        // Support for hash routes
+        if (sRoute.charAt(0) === "#") {
+            isHashString = true;
+            sRoute = sRoute.replace("#", "");
+        }
+        if (isHistorySupported && !isHashString) {
             history[routeMethod]({ data: data }, title, _validateRoute(sRoute, qString, appendQString));
             if (!noTrigger) {
                 $.router.events.trigger(eventNames.routeChanged, { data: cache.data });
@@ -238,7 +244,6 @@
     }
 
     if (!$.router) {
-        // jQuery router object
         $.router = {
             events: eventNames,
             init: function () {
@@ -246,42 +251,24 @@
             },
             historySupported: isHistorySupported
         };
-        /**
-         * Triggers event for jQuery router
-         * @param {string} eventName
-         * @param {object} params
-         */
         $.router.events.trigger = function (eventName, params) {
             _routeTrigger.apply(this, [eventName, params]);
         };
-    }
-    if (!$.fn.route) {
-        /**
-         * Adds a handler function for given route
-         * @param {string} sRoute
-         * @param {function} callback
-         */
-        var route = $.fn.route = function (sRoute, callback) {
-            _route.apply(this, [sRoute, callback]);
-        };
-        if (!$.route) {
-            $.route = route.bind(null);
+        if (!$.fn.route) {
+            var route = $.fn.route = function () {
+                _route.apply(this, arguments);
+            };
+            if (!$.route) {
+                $.route = route.bind(null);
+            }
         }
+        if (!$.setRoute) {
+            $.setRoute = function () {
+                _setRoute.apply(this, arguments);
+            };
+        }
+        $.router.set = $.setRoute;
     }
-    if (!$.setRoute) {
-        /**
-         * Changes current page route
-         * @param {string|object} oRoute
-         * @param {boolean} replaceMode
-         * @param {boolean} noTrigger
-         */
-        $.setRoute = function (oRoute, replaceMode, noTrigger) {
-            _setRoute.apply(this, [oRoute, replaceMode, noTrigger]);
-        };
-    }
-    /**
-     * Router internal init method
-     */
     router.init = _bindRouterEvents;
     router.init();
 }(
