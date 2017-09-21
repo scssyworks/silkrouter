@@ -1,0 +1,40 @@
+.c-container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+nav {
+    box-shadow: 0 0 6px 2px #dadada;
+}
+
+.c-navbar-brand>a {
+    text-decoration: none;
+    color: #7d7d7d;
+}
+
+.body-section {
+    padding-top: 5.5rem;
+}
+
+.body-section h2 {
+    padding-top: 1rem;
+}
+
+pre {
+    margin-top: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 3px;
+}
+
+@media (min-width: 768px) {
+    .c-nav-item>a {
+        background-color: #eee;
+        border-radius: .25rem;
+    }
+    .c-nav-item+.c-nav-item {
+        margin-left: 5px;
+    }
+    .c-nav-item.active>a {
+        background-color: #dadada;
+    }
+}

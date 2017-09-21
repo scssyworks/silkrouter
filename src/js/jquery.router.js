@@ -6,7 +6,7 @@
  * @date         2017-08-08
  * @author       Sachin Singh <ssingh.300889@gmail.com>
  * @dependencies jQuery
- * @version      0.4.0
+ * @version      0.4.1
  */
 
 ;
@@ -24,7 +24,7 @@
         },
         // Regular expressions
         regex = {
-            pathname: /^\/(?=[^?]+)/,
+            pathname: /^\/(?=[^?]*)/,
             routeparams: /:[^\/]+/g
         },
         // Supported events
@@ -47,12 +47,12 @@
     /**
      * Triggers "routeChanged" event unless "noTrigger" flag is true
      */
-    function _triggerRoute() {
+    function _triggerRoute(isHashRoute) {
         if (cache.noTrigger) {
             cache.noTrigger = false;
             return;
         }
-        $.router.events.trigger(eventNames.routeChanged, { data: cache.data });
+        $.router.events.trigger(eventNames.routeChanged, { data: cache.data }, isHashRoute);
     }
 
     /**
@@ -213,12 +213,12 @@
      * @param {string} eventName 
      * @param {object} params 
      */
-    function _routeTrigger(eventName, params) {
+    function _routeTrigger(eventName, params, isHashRoute) {
         // Ensures that params is always an object
         params = $.extend(params, {});
         router.handlers.forEach(function (eventObject) {
             if (eventObject.eventName === eventName) {
-                if (isHistorySupported && _matched(eventObject.route, w.location.pathname, params)) {
+                if (isHistorySupported && !isHashRoute && _matched(eventObject.route, w.location.pathname, params)) {
                     eventObject.handler(params.data, params.params, _getQueryParams());
                 } else {
                     if (!w.location.hash && _matched(eventObject.route, w.location.pathname, params)) {
@@ -239,7 +239,9 @@
         if (isHistorySupported) {
             $(w).on("popstate", _triggerRoute);
         } else {
-            $(w).on("hashchange", _triggerRoute);
+            $(w).on("hashchange", function () {
+                _triggerRoute.apply(this, [true]);
+            });
         }
     }
 
