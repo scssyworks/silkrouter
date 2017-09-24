@@ -21,16 +21,16 @@
                 </button>
                     <div class="collapse navbar-collapse" id="navbarContent">
                         <ul class="navbar-nav mr-auto">
-                            <li class="nav-item c-nav-item js-nav-item <% if (path.match(/^\/$/)) {%>active<% } %>" data-route="/">
+                            <li class="nav-item c-nav-item js-nav-item js-home-link <% if (path.match(/^\/$/)) {%>active<% } %>" data-route="/">
                                 <a href="javascript:void(0)" class="home nav-link">Home</a>
                             </li>
-                            <li class="nav-item c-nav-item js-nav-item <% if (path.match(/\/demos\/demo1/)) {%>active<% } %>" data-route="/demos/demo1">
+                            <li class="nav-item c-nav-item js-nav-item js-demo-link-1 <% if (path.match(/\/demos\/demo1/)) {%>active<% } %>" data-route="/demos/demo1">
                                 <a href="javascript:void(0)" class="demo nav-link">Demo 1</a>
                             </li>
-                            <li class="nav-item c-nav-item js-nav-item <% if (path.match(/\/demos\/demo2/)) {%>active<% } %>" data-route="/demos/demo2">
+                            <li class="nav-item c-nav-item js-nav-item js-demo-link-2 <% if (path.match(/\/demos\/demo2/)) {%>active<% } %>" data-route="/demos/demo2">
                                 <a href="javascript:void(0)" class="demo2 nav-link">Demo 2</a>
                             </li>
-                            <li class="nav-item c-nav-item js-nav-item <% if (path.match(/\/demos\/demo3/)) {%>active<% } %>"  data-route="/demos/demo3">
+                            <li class="nav-item c-nav-item js-nav-item js-demo-link-3 <% if (path.match(/\/demos\/demo3/)) {%>active<% } %>"  data-route="/demos/demo3">
                                 <a href="javascript:void(0)" class="demo3 nav-link">Demo 3</a>
                             </li>
                         </ul>
@@ -51,16 +51,17 @@
                     JQuery router uses history API to set routes, and provides with a mechanism to update the view based on active route.
                     <br/> To change the route use <code>$.router.set</code>.<br/> To change the route view, use a route handler
                     <pre><code>
-                        $("#viewToBeActivated").route("/path/to/route", function () {
-                            $all.addClass("d-none");
-                            $(this).removeClass("d-none");
-                        });
+    $("#viewToBeActivated").route("/path/to/route", function () {
+        $all.addClass("d-none");
+        $(this).removeClass("d-none");
+    });
                     </code></pre>
                     <br/>
                     JQuery router uses primary routes on supported browsers, and hash routes on non-supported browsers. It means browsers such as Internet Explorer 9 and earlier would display a hash routes as shown in the image below:<br/>
                     <img src="/images/hashRoutes.png" alt="hash route image" class="img" />
                     <br/>
-                    You must have noticed that the links have disappeared on IE9 as shown in image above. This is because we are using bootstrap v4 for our demo and it does not support legacy browsers.
+                    You must have noticed that the links disappeared on IE9 as shown in image above. This is because this demo uses bootstrap v4 which does not support IE9.
+                    Please note that this demo will not work properly on old browsers. This is because we are going to show you the working of secondary (or hash) routing within primary routing. Unfortunately, we have very limited support on old browsers and multilevel routing is not supported on old browsers yet. Thanks to bootstrap 4 the links aren't visible :P.
                 </div>
             </div>
             <div class="c-demo-1 js-demo-1 js-demos <% if (!path.match(/\/demos\/demo1/)) { %>d-none<% } %>">
@@ -68,6 +69,74 @@
                 <div class="desc">
                 This demo shows how we can use jquery router to switch routes in accordion. Since the primary routes are being switched by the tabs above, we have used hash routes for accordion. This also demonstrates working of hash routes in JQuery router. It's pretty simple by the way!
                 </div>
+                <div id="accordion" class="c-accordion" role="tablist" aria-multiselectable="true">
+                    <div class="card">
+                        <div class="card-header js-card-reader" role="tab" id="headingOne">
+                        <h5 class="mb-0">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" data-route="/tab1">
+                            Collapsible Group Item #1
+                            </a>
+                        </h5>
+                        </div>
+
+                        <div id="collapseOne" class="collapse show" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="card-block">
+                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                        </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header js-card-reader" role="tab" id="headingTwo">
+                        <h5 class="mb-0">
+                            <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" data-route="/tab2">
+                            Collapsible Group Item #2
+                            </a>
+                        </h5>
+                        </div>
+                        <div id="collapseTwo" class="collapse" role="tabpanel" aria-labelledby="headingTwo">
+                        <div class="card-block">
+                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                        </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header js-card-reader" role="tab" id="headingThree">
+                        <h5 class="mb-0">
+                            <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree" data-route="/tab3">
+                            Collapsible Group Item #3
+                            </a>
+                        </h5>
+                        </div>
+                        <div id="collapseThree" class="collapse" role="tabpanel" aria-labelledby="headingThree">
+                        <div class="card-block">
+                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="desc">
+                Notice that when you switch between accordion tabs, the hash routes gets changed. For each hash route the corresponding tab gets activated. Switch tab and try refreshing the page.<br/>
+                </div>
+                <h2>Working</h2>
+                We have added route handlers respectively for hash routes "/tab1", "tab2", and "/tab3".
+                <pre><code>
+    $.route("/tab1", function () {
+        $accordionLinks.filter("[data-route='/tab1']").trigger("click");
+    });
+    $.route("/tab2", function () {
+        $accordionLinks.filter("[data-route='/tab2']").trigger("click");
+    });
+    $.route("/tab3", function () {
+        $accordionLinks.filter("[data-route='/tab3']").trigger("click");
+    });
+                </code></pre>
+                We then trigger a hash route as below:
+                <pre><code>
+    $accordionLinks.on("click", function () {
+        $.router.set("#" + $(this).data("route"), true, true);
+    });
+                </code></pre>
+                Notice that we have passed three parameters to the <code>set</code> function. The first parameter is a hash route (with # prepended to the route). The second parameter specifies whether we should update the history or not. If we want to prevent history updates, we need to pass the value <code>true</code> as the second parameter. The third parameter is needed if we don't want to trigger the handler associated with the route. If the value is <code>true</code> the route handler is not triggered. In example above, you must have notice that the route handler itself triggers click on accordion tab. This will start an infinite cycle of events as the click event on accordion tabs trigger a route. We don't want that to happen.
             </div>
             <div class="c-demo-2 js-demo-2 js-demos <% if (!path.match(/\/demos\/demo2/)) { %>d-none<% } %>">Demo 2</div>
             <div class="c-demo-3 js-demo-3 js-demos <% if (!path.match(/\/demos\/demo3/)) { %>d-none<% } %>">Demo 3</div>

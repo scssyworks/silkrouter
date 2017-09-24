@@ -14,6 +14,7 @@ nav {
 
 .body-section {
     padding-top: 5.5rem;
+    padding-bottom: 5.5rem;
 }
 
 .body-section h2 {
@@ -24,6 +25,24 @@ pre {
     margin-top: 1rem;
     background-color: #f9f9f9;
     border-radius: 3px;
+}
+
+img {
+    margin: 1.5rem 0;
+    box-shadow: 0 0 7px 1px #9d9d9d;
+    max-width: 90%;
+}
+
+.c-accordion {
+    margin: 1.4rem 0;
+}
+
+.c-accordion a {
+    text-decoration: none;
+}
+
+.c-accordion .card-block {
+    padding: 0.5rem;
 }
 
 @media (min-width: 768px) {
