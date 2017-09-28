@@ -14,7 +14,7 @@
         <header>
             <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
                 <div class="container">
-                    <h1 class="navbar-brand c-navbar-brand"><a href="/">JQuery Router v0.4.1</a></h1>
+                    <h1 class="navbar-brand c-navbar-brand"><a href="/">JQuery Router v0.5.0</a></h1>
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent"
                         aria-expanded="false" aria-label="Toggle Navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -138,7 +138,63 @@
                 </code></pre>
                 Notice that we have passed three parameters to the <code>set</code> function. The first parameter is a hash route (with # prepended to the route). The second parameter specifies whether we should update the history or not. If we want to prevent history updates, we need to pass the value <code>true</code> as the second parameter. The third parameter is needed if we don't want to trigger the handler associated with the route. If the value is <code>true</code> the route handler is not triggered. In example above, you must have notice that the route handler itself triggers click on accordion tab. This will start an infinite cycle of events as the click event on accordion tabs trigger a route. We don't want that to happen.
             </div>
-            <div class="c-demo-2 js-demo-2 js-demos <% if (!path.match(/\/demos\/demo2/)) { %>d-none<% } %>">Demo 2</div>
+            <div class="c-demo-2 js-demo-2 js-demos <% if (!path.match(/\/demos\/demo2/)) { %>d-none<% } %>">
+                <h2>Demo 2: Switching route in modal</h2>
+                <div class="desc">In this demo we will see how we can use route mechanism to handle modals.</div><br/>
+                <button type="button" class="btn btn-primary js-modal-open" data-route="/modalRoute">
+                Launch demo modal
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                        <button type="button" class="close js-modal-close" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        This is some sample text
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary js-modal-close">Close</button>
+                        <button type="button" class="btn btn-primary js-modal-save">Save changes</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <h2>Working:</h2>
+                <div class="desc">
+                First we create a route handler for modal and call bootstrap modal within the handler function:
+                <pre><code>
+    $.route("/modalRoute", function () {
+        $modal.modal("show");
+    });
+                </code></pre>
+                Then we trigger the hash route on button click
+                <pre><code>
+    $modalOpen.on("click", function () {
+        $.router.set("#/modalRoute");
+    });
+                </code></pre>
+                We now want to close the modal and navigate back to previous route. For this we call <code>history.back()</code> on close action:
+                <pre><code>
+    $modalClose.on("click", function () {
+        history.back();
+    });
+                </code></pre>
+                To close the modal we need to call <code>$modal.modal("close")</code> in appropriate route handler.<br/>
+                If you notice <code>history.back</code> triggers a route change event. In our case, the route changes from <code>/demos/demo2#/modalRoute</code> to <code>/demos/demo2</code> which should trigger the route handler associated with <code>/demos/demo2</code>. We can close our modal there.
+                <pre><code>
+    $("#currentView").route("/demos/demo1", function () {
+        ...
+        $modal.modal("hide");
+    });
+                </code></pre>
+                </div> 
+            </div>
             <div class="c-demo-3 js-demo-3 js-demos <% if (!path.match(/\/demos\/demo3/)) { %>d-none<% } %>">Demo 3</div>
         </section>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

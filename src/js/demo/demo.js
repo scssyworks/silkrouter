@@ -14,6 +14,9 @@
             _cache.$demo3 = $(".js-demo-3");
             _cache.$demoLink3 = $(".js-demo-link-3");
             _cache.$accordionLinks = $(".js-card-reader a");
+            _cache.$modal = $("#myModal");
+            _cache.$modalOpen = $(".js-modal-open");
+            _cache.$modalClose = $(".js-modal-close");
         },
         bindEvents: function () {
             _cache.$home.route("/", function () {
@@ -33,6 +36,7 @@
                 $(this).removeClass("d-none");
                 _cache.$links.removeClass("active");
                 _cache.$demoLink2.addClass("active");
+                _cache.$modal.modal("hide");
             });
             _cache.$demo3.route("/demos/demo3", function () {
                 _cache.$all.addClass("d-none");
@@ -49,6 +53,9 @@
             $.route("/tab3", function () {
                 _cache.$accordionLinks.filter("[data-route='/tab3']").trigger("click");
             });
+            $.route("/modalRoute", function () {
+                _cache.$modal.modal("show");
+            });
             _cache.$links.on("click", function () {
                 $.router.set($(this).data("route"));
             });
@@ -59,6 +66,12 @@
                 }
                 $.router.set(("#" + $(this).data("route")), true, true);
                 console.log("Tab activated");
+            });
+            _cache.$modalOpen.on("click", function () {
+                $.router.set(("#" + $(this).data("route")));
+            });
+            _cache.$modalClose.on("click", function () {
+                history.back();
             });
         },
         init: function () {
