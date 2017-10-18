@@ -211,7 +211,11 @@
      * @param {object} params 
      */
     function _matched(route, url, params) {
+        if (~url.indexOf("?")) {
+            url = url.substring(0, url.indexOf("?"));
+        }
         if (regex.routeparams.test(route)) {
+            params.params = {};
             var pathRegex = new RegExp(route.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
             if (pathRegex.test(url)) {
                 var keys = _arr(route.match(regex.routeparams)).map(_sanitize),

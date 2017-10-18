@@ -30,7 +30,7 @@
                             <li class="nav-item c-nav-item js-nav-item js-demo-link-2 <% if (path.match(/\/demos\/demo2/)) {%>active<% } %>" data-route="/demos/demo2">
                                 <a href="javascript:void(0)" class="demo2 nav-link">Demo 2</a>
                             </li>
-                            <li class="nav-item c-nav-item js-nav-item js-demo-link-3 <% if (path.match(/\/demos\/demo3/)) {%>active<% } %>"  data-route="/demos/demo3">
+                            <li class="nav-item c-nav-item js-nav-item js-demo-link-3 <% if (path.match(/\/demos\/demo3/)) {%>active<% } %>"  data-route="/demos/demo3/John/Doe" data-query-string="q1=Hello&q2=World">
                                 <a href="javascript:void(0)" class="demo3 nav-link">Demo 3</a>
                             </li>
                         </ul>
@@ -195,7 +195,50 @@
                 </code></pre>
                 </div> 
             </div>
-            <div class="c-demo-3 js-demo-3 js-demos <% if (!path.match(/\/demos\/demo3/)) { %>d-none<% } %>">Demo 3</div>
+            <div class="c-demo-3 js-demo-3 js-demos <% if (!path.match(/\/demos\/demo3/)) { %>d-none<% } %>">
+                <h2>Demo 3: Passing data</h2>
+                <div class="desc">
+                    JQuery router allows data to be passed in following 3 ways:
+                    <ol>
+                        <li>Directly using <code>$.router.set</code></li>
+                        <li>Route parameters</li>
+                        <li>Query parameters</li>
+                    </ol>
+                    Below section presents the data based on current URL and default data passed on page load. Data passed through #2 and #3 methods can be directly tested by making modifications in URL. To simulate #1, trigger the route from developer console to see if your changes reflect.
+
+                    <h2>#1 Data</h2>
+                    <pre><code class="js-set-data">Waiting for data...</code></pre>
+                    <h2>#2 Data</h2>
+                    <div class="js-route-data"><b>First name:</b> <span class="first-name">Waiting for data...</span><br/><b>Last name:</b> <span class="last-name">Waiting for data...</span></div>
+                    <h2>#3 Data</h2>
+                    <pre><code class="js-queryparam-data">Waiting for data...</code></pre>
+                    <h2>Working</h2>
+                    <div class="desc">
+                    We can pass data directly to route handers. To pass the data we call <code>$.router.set</code> as follows:
+                    <pre><code>
+    $.router.set({
+        route: "/path/to/route",
+        data: {key: "value"}
+    });
+    $.route("/path/to/route", function (<b>data</b>) { ... });
+                    </code></pre>
+                    Data is passed this way when obtained from server via ajax call.<br/><br/>
+                    Another way of passing data is via <b>route parameters</b>. Route parameters are convenient way of passing unique data such as user id or user name. We create a dynamic route to handle route parameters. Example:
+                    <pre><code>
+    $.route("/path/to/route/<b>:param</b>", function (data, <b>params</b>) { ... });
+    $.router.set("/path/to/route/<b>value</b>");
+                    </code></pre>
+                    The third and final way of passing data is via query string. Please note that query string is not set to the route directly. Instead, we pass it in string format as follows:
+                    <pre><code>
+    $.router.set({
+        route: "path/to/route",
+        <b>queryString: "q1=Hello&amp;q2=World"</b>
+    });
+    $.route("/path/to/route", function (data, param, <b>query</b>) { ... });
+                    </code></pre>
+                    </div>
+                </div>
+            </div>
         </section>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"

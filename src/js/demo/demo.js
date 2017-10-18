@@ -17,6 +17,9 @@
             _cache.$modal = $("#myModal");
             _cache.$modalOpen = $(".js-modal-open");
             _cache.$modalClose = $(".js-modal-close");
+            _cache.$setData = $(".js-set-data");
+            _cache.$paramData = $(".js-route-data");
+            _cache.$queryData = $(".js-queryparam-data");
         },
         bindEvents: function () {
             _cache.$home.route("/", function () {
@@ -38,11 +41,15 @@
                 _cache.$demoLink2.addClass("active");
                 _cache.$modal.modal("hide");
             });
-            _cache.$demo3.route("/demos/demo3", function () {
+            _cache.$demo3.route("/demos/demo3/:firstname/:lastname", function (data, param, query) {
                 _cache.$all.addClass("d-none");
                 $(this).removeClass("d-none");
                 _cache.$links.removeClass("active");
                 _cache.$demoLink3.addClass("active");
+                _cache.$setData.text(JSON.stringify(data, null, 4));
+                _cache.$paramData.find(".first-name").text(param.firstname);
+                _cache.$paramData.find(".last-name").text(param.lastname);
+                _cache.$queryData.text(JSON.stringify(query, null, 4));
             });
             $.route("/tab1", function () {
                 _cache.$accordionLinks.filter("[data-route='/tab1']").trigger("click");
@@ -57,7 +64,10 @@
                 _cache.$modal.modal("show");
             });
             _cache.$links.on("click", function () {
-                $.router.set($(this).data("route"));
+                $.router.set({
+                    route: $(this).data("route"),
+                    queryString: $(this).data("queryString")
+                });
             });
             _cache.$accordionLinks.on("click", function (e) {
                 if ($(this).attr("aria-expanded") === "true") {
