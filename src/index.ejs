@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Demo</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M"
+        crossorigin="anonymous" />
+    <link rel="stylesheet" href="/css/demo.css" type="text/css" />
+</head>
+
+<body>
+    <div class="container-fluid c-container-fluid">
+        <header>
+            <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
+                <div class="container">
+                    <h1 class="navbar-brand c-navbar-brand"><a href="/">JQuery Router v0.5.0</a></h1>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent"
+                        aria-expanded="false" aria-label="Toggle Navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                    <div class="collapse navbar-collapse" id="navbarContent">
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item c-nav-item js-nav-item js-home-link <% if (path.match(/^\/$/)) {%>active<% } %>" data-route="/">
+                                <a href="javascript:void(0)" class="home nav-link">Home</a>
+                            </li>
+                            <li class="nav-item c-nav-item js-nav-item js-demo-link-1 <% if (path.match(/\/demos\/demo1/)) {%>active<% } %>" data-route="/demos/demo1">
+                                <a href="javascript:void(0)" class="demo nav-link">Demo 1</a>
+                            </li>
+                            <li class="nav-item c-nav-item js-nav-item js-demo-link-2 <% if (path.match(/\/demos\/demo2/)) {%>active<% } %>" data-route="/demos/demo2">
+                                <a href="javascript:void(0)" class="demo2 nav-link">Demo 2</a>
+                            </li>
+                            <li class="nav-item c-nav-item js-nav-item js-demo-link-3 <% if (path.match(/\/demos\/demo3/)) {%>active<% } %>"  data-route="/demos/demo3/John/Doe" data-query-string="q1=Hello&q2=World">
+                                <a href="javascript:void(0)" class="demo3 nav-link">Demo 3</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <section class="container body-section">
+            <div class="c-home-section js-home-section js-demos <% if (!path.match(/^\/$/)) { %>d-none<% } %>">
+                <h2>Welcome to jQuery router homepage</h2>
+                <div class="desc">
+                    JQuery router is used for creating single page applications. For example, this demo uses jQuery router to show the working
+                    of an SPA. The navigation section above demonstrate a simple use case of an SPA. However, jQuery router
+                    can be used in several ways. Checkout the demos in the links above.
+                </div>
+                <h2>Basics</h2>
+                <div class="desc">
+                    JQuery router uses history API to set routes, and provides with a mechanism to update the view based on active route.
+                    <br/> To change the route use <code>$.router.set</code>.<br/> To change the route view, use a route handler
+                    <pre><code>
+    $("#viewToBeActivated").route("/path/to/route", function () {
+        $all.addClass("d-none");
+        $(this).removeClass("d-none");
+    });
+                    </code></pre>
+                    <br/>
+                    JQuery router uses primary routes on supported browsers, and hash routes on non-supported browsers. It means browsers such as Internet Explorer 9 and earlier would display a hash routes as shown in the image below:<br/>
+                    <img src="/images/hashRoutes.png" alt="hash route image" class="img" />
+                    <br/>
+                    You must have noticed that the links disappeared on IE9 as shown in image above. This is because this demo uses bootstrap v4 which does not support IE9.
+                    Please note that this demo will not work properly on old browsers. This is because we are going to show you the working of secondary (or hash) routing within primary routing. Unfortunately, we have very limited support on old browsers and multilevel routing is not supported on old browsers yet. Thanks to bootstrap 4 the links aren't visible :P.
+                </div>
+            </div>
+            <div class="c-demo-1 js-demo-1 js-demos <% if (!path.match(/\/demos\/demo1/)) { %>d-none<% } %>">
+                <h2>Demo 1: Switching routes in accordion</h2>
+                <div class="desc">
+                This demo shows how we can use jquery router to switch routes in accordion. Since the primary routes are being switched by the tabs above, we have used hash routes for accordion. This also demonstrates working of hash routes in JQuery router. It's pretty simple by the way!
+                </div>
+                <div id="accordion" class="c-accordion" role="tablist" aria-multiselectable="true">
+                    <div class="card">
+                        <div class="card-header js-card-reader" role="tab" id="headingOne">
+                        <h5 class="mb-0">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" data-route="/tab1">
+                            Collapsible Group Item #1
+                            </a>
+                        </h5>
+                        </div>
+
+                        <div id="collapseOne" class="collapse show" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="card-block">
+                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                        </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header js-card-reader" role="tab" id="headingTwo">
+                        <h5 class="mb-0">
+                            <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" data-route="/tab2">
+                            Collapsible Group Item #2
+                            </a>
+                        </h5>
+                        </div>
+                        <div id="collapseTwo" class="collapse" role="tabpanel" aria-labelledby="headingTwo">
+                        <div class="card-block">
+                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                        </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header js-card-reader" role="tab" id="headingThree">
+                        <h5 class="mb-0">
+                            <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree" data-route="/tab3">
+                            Collapsible Group Item #3
+                            </a>
+                        </h5>
+                        </div>
+                        <div id="collapseThree" class="collapse" role="tabpanel" aria-labelledby="headingThree">
+                        <div class="card-block">
+                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="desc">
+                Notice that when you switch between accordion tabs, the hash routes gets changed. For each hash route the corresponding tab gets activated. Switch tab and try refreshing the page.<br/>
+                </div>
+                <h2>Working</h2>
+                We have added route handlers respectively for hash routes "/tab1", "tab2", and "/tab3".
+                <pre><code>
+    $.route("/tab1", function () {
+        $accordionLinks.filter("[data-route='/tab1']").trigger("click");
+    });
+    $.route("/tab2", function () {
+        $accordionLinks.filter("[data-route='/tab2']").trigger("click");
+    });
+    $.route("/tab3", function () {
+        $accordionLinks.filter("[data-route='/tab3']").trigger("click");
+    });
+                </code></pre>
+                We then trigger a hash route as below:
+                <pre><code>
+    $accordionLinks.on("click", function () {
+        $.router.set("#" + $(this).data("route"), true, true);
+    });
+                </code></pre>
+                Notice that we have passed three parameters to the <code>set</code> function. The first parameter is a hash route (with # prepended to the route). The second parameter specifies whether we should update the history or not. If we want to prevent history updates, we need to pass the value <code>true</code> as the second parameter. The third parameter is needed if we don't want to trigger the handler associated with the route. If the value is <code>true</code> the route handler is not triggered. In example above, you must have notice that the route handler itself triggers click on accordion tab. This will start an infinite cycle of events as the click event on accordion tabs trigger a route. We don't want that to happen.
+            </div>
+            <div class="c-demo-2 js-demo-2 js-demos <% if (!path.match(/\/demos\/demo2/)) { %>d-none<% } %>">
+                <h2>Demo 2: Switching route in modal</h2>
+                <div class="desc">In this demo we will see how we can use route mechanism to handle modals.</div><br/>
+                <button type="button" class="btn btn-primary js-modal-open" data-route="/modalRoute">
+                Launch demo modal
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                        <button type="button" class="close js-modal-close" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        This is some sample text
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary js-modal-close">Close</button>
+                        <button type="button" class="btn btn-primary js-modal-save">Save changes</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <h2>Working:</h2>
+                <div class="desc">
+                First we create a route handler for modal and call bootstrap modal within the handler function:
+                <pre><code>
+    $.route("/modalRoute", function () {
+        $modal.modal("show");
+    });
+                </code></pre>
+                Then we trigger the hash route on button click
+                <pre><code>
+    $modalOpen.on("click", function () {
+        $.router.set("#/modalRoute");
+    });
+                </code></pre>
+                We now want to close the modal and navigate back to previous route. For this we call <code>history.back()</code> on close action:
+                <pre><code>
+    $modalClose.on("click", function () {
+        history.back();
+    });
+                </code></pre>
+                To close the modal we need to call <code>$modal.modal("close")</code> in appropriate route handler.<br/>
+                If you notice <code>history.back</code> triggers a route change event. In our case, the route changes from <code>/demos/demo2#/modalRoute</code> to <code>/demos/demo2</code> which should trigger the route handler associated with <code>/demos/demo2</code>. We can close our modal there.
+                <pre><code>
+    $("#currentView").route("/demos/demo1", function () {
+        ...
+        $modal.modal("hide");
+    });
+                </code></pre>
+                </div> 
+            </div>
+            <div class="c-demo-3 js-demo-3 js-demos <% if (!path.match(/\/demos\/demo3/)) { %>d-none<% } %>">
+                <h2>Demo 3: Passing data</h2>
+                <div class="desc">
+                    JQuery router allows data to be passed in following 3 ways:
+                    <ol>
+                        <li>Directly using <code>$.router.set</code></li>
+                        <li>Route parameters</li>
+                        <li>Query parameters</li>
+                    </ol>
+                    Below section presents the data based on current URL and default data passed on page load. Data passed through #2 and #3 methods can be directly tested by making modifications in URL. To simulate #1, trigger the route from developer console to see if your changes reflect.
+
+                    <h2>#1 Data</h2>
+                    <pre><code class="js-set-data">Waiting for data...</code></pre>
+                    <h2>#2 Data</h2>
+                    <div class="js-route-data"><b>First name:</b> <span class="first-name">Waiting for data...</span><br/><b>Last name:</b> <span class="last-name">Waiting for data...</span></div>
+                    <h2>#3 Data</h2>
+                    <pre><code class="js-queryparam-data">Waiting for data...</code></pre>
+                    <h2>Working</h2>
+                    <div class="desc">
+                    We can pass data directly to route handers. To pass the data we call <code>$.router.set</code> as follows:
+                    <pre><code>
+    $.router.set({
+        route: "/path/to/route",
+        data: {key: "value"}
+    });
+    $.route("/path/to/route", function (<b>data</b>) { ... });
+                    </code></pre>
+                    Data is passed this way when obtained from server via ajax call.<br/><br/>
+                    Another way of passing data is via <b>route parameters</b>. Route parameters are convenient way of passing unique data such as user id or user name. We create a dynamic route to handle route parameters. Example:
+                    <pre><code>
+    $.route("/path/to/route/<b>:param</b>", function (data, <b>params</b>) { ... });
+    $.router.set("/path/to/route/<b>value</b>");
+                    </code></pre>
+                    The third and final way of passing data is via query string. Please note that query string is not set to the route directly. Instead, we pass it in string format as follows:
+                    <pre><code>
+    $.router.set({
+        route: "path/to/route",
+        <b>queryString: "q1=Hello&amp;q2=World"</b>
+    });
+    $.route("/path/to/route", function (data, param, <b>query</b>) { ... });
+                    </code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+            crossorigin="anonymous"></script>
+        <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1"
+            crossorigin="anonymous"></script>
+        <script type="text/javascript" src="/js/jquery.deparam.js"></script>
+        <script type="text/javascript" src="/js/jquery.router.js"></script>
+        <script type="text/javascript" src="/js/demo/demo.js"></script>
+    </div>
+</body>
+
+</html>

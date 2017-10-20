@@ -1,0 +1,59 @@
+.c-container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+nav {
+    box-shadow: 0 0 6px 2px #dadada;
+}
+
+.c-navbar-brand>a {
+    text-decoration: none;
+    color: #7d7d7d;
+}
+
+.body-section {
+    padding-top: 5.5rem;
+    padding-bottom: 5.5rem;
+}
+
+.body-section h2 {
+    padding-top: 1rem;
+}
+
+pre {
+    margin-top: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 3px;
+}
+
+img {
+    margin: 1.5rem 0;
+    box-shadow: 0 0 7px 1px #9d9d9d;
+    max-width: 90%;
+}
+
+.c-accordion {
+    margin: 1.4rem 0;
+}
+
+.c-accordion a {
+    text-decoration: none;
+}
+
+.c-accordion .card-block {
+    padding: 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .c-nav-item>a {
+        background-color: #eee;
+        border-radius: .25rem;
+    }
+    .c-nav-item+.c-nav-item {
+        margin-left: 5px;
+    }
+    .c-nav-item.active>a {
+        background-color: #dadada;
+    }
+}

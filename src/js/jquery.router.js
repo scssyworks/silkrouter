@@ -6,7 +6,7 @@
  * @date         2017-08-08
  * @author       Sachin Singh <ssingh.300889@gmail.com>
  * @dependencies jQuery
- * @version      0.4.0
+ * @version      0.5.0
  */
 
 ;
@@ -14,8 +14,8 @@
     if (!$ || !$.fn) return;
     // Object containing a map of attached handlers
     var router = {
-        handlers: []
-    },
+            handlers: []
+        },
         // Variable to check if browser supports history API properly    
         isHistorySupported = history && history.pushState,
         // Data cache
@@ -24,12 +24,14 @@
         },
         // Regular expressions
         regex = {
-            pathname: /^\/(?=[^?]+)/,
+            pathname: /^\/(?=[^?]*)/,
             routeparams: /:[^\/]+/g
         },
         // Supported events
         eventNames = {
-            routeChanged: "routeChanged"
+            routeChanged: "routeChanged",
+            hashchange: "hashchange",
+            popstate: "popstate"
         },
         // Error messages
         errorMessage = {
@@ -47,12 +49,21 @@
     /**
      * Triggers "routeChanged" event unless "noTrigger" flag is true
      */
-    function _triggerRoute() {
-        if (cache.noTrigger) {
+    function _triggerRoute(route, eventType, isHashRoute) {
+        isHashRoute = !!isHashRoute;
+        if (cache.noTrigger && eventType === eventNames.hashchange) {
             cache.noTrigger = false;
             return;
         }
-        $.router.events.trigger(eventNames.routeChanged, { data: cache.data });
+        cache.data = cache.data || {
+            data: {}
+        };
+        cache.data.data = $.extend({}, cache.data.data, {
+            eventType: eventType,
+            hash: isHashRoute,
+            route: route
+        });
+        $.router.events.trigger(eventNames.routeChanged, cache.data);
     }
 
     /**
@@ -125,8 +136,7 @@
      */
     function _setRoute(oRoute, replaceMode, noTrigger) {
         if (!oRoute) return;
-        var data = null,
-            title = null,
+        var title = null,
             sRoute = "",
             qString = "",
             appendQString = false,
@@ -134,12 +144,17 @@
             routeMethod = replaceMode ? "replaceState" : "pushState";
         cache.noTrigger = noTrigger;
         if (typeof oRoute === "object") {
-            cache.data = data = oRoute.data;
+            cache.data = {
+                data: oRoute.data
+            };
             title = oRoute.title;
             sRoute = oRoute.route;
             qString = oRoute.queryString;
             appendQString = oRoute.appendQuery;
         } else if (typeof oRoute === "string") {
+            cache.data = {
+                data: {}
+            };
             sRoute = oRoute;
         }
         // Support for hash routes
@@ -148,9 +163,14 @@
             sRoute = sRoute.replace("#", "");
         }
         if (isHistorySupported && !isHashString) {
-            history[routeMethod]({ data: data }, title, _validateRoute(sRoute, qString, appendQString));
+            history[routeMethod](cache.data, title, _validateRoute(sRoute, qString, appendQString));
             if (!noTrigger) {
-                $.router.events.trigger(eventNames.routeChanged, { data: cache.data });
+                cache.data.data = $.extend({}, cache.data.data, {
+                    eventType: eventNames.popstate,
+                    hash: false,
+                    route: sRoute
+                });
+                $.router.events.trigger(eventNames.routeChanged, cache.data);
             }
         } else {
             if (replaceMode) {
@@ -191,7 +211,11 @@
      * @param {object} params 
      */
     function _matched(route, url, params) {
+        if (~url.indexOf("?")) {
+            url = url.substring(0, url.indexOf("?"));
+        }
         if (regex.routeparams.test(route)) {
+            params.params = {};
             var pathRegex = new RegExp(route.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
             if (pathRegex.test(url)) {
                 var keys = _arr(route.match(regex.routeparams)).map(_sanitize),
@@ -216,16 +240,20 @@
     function _routeTrigger(eventName, params) {
         // Ensures that params is always an object
         params = $.extend(params, {});
+        params.data = $.extend({}, params.data);
+        var isHashRoute = params.data.hash;
         router.handlers.forEach(function (eventObject) {
             if (eventObject.eventName === eventName) {
-                if (isHistorySupported && _matched(eventObject.route, w.location.pathname, params)) {
+                if (isHistorySupported && !isHashRoute && _matched(eventObject.route, w.location.pathname, params)) {
                     eventObject.handler(params.data, params.params, _getQueryParams());
                 } else {
-                    if (!w.location.hash && _matched(eventObject.route, w.location.pathname, params)) {
-                        cache.data = params.data;
-                        w.location.replace("#" + w.location.pathname); // <-- This will trigger router handler automatically
-                    } else if (_matched(eventObject.route, w.location.hash.substring(1), params)) {
-                        eventObject.handler(params.data, params.params, _getQueryParams());
+                    if (isHashRoute) {
+                        if (!w.location.hash && !isHistorySupported && _matched(eventObject.route, w.location.pathname, params)) {
+                            cache.data = params.data;
+                            w.location.replace("#" + w.location.pathname); // <-- This will trigger router handler automatically
+                        } else if (_matched(eventObject.route, w.location.hash.substring(1), params)) {
+                            eventObject.handler(params.data, params.params, _getQueryParams());
+                        }
                     }
                 }
             }
@@ -236,18 +264,29 @@
      * Initializes router events
      */
     function _bindRouterEvents() {
-        if (isHistorySupported) {
-            $(w).on("popstate", _triggerRoute);
-        } else {
-            $(w).on("hashchange", _triggerRoute);
-        }
+        $(w).on(eventNames.popstate, function (e) {
+            _triggerRoute.apply(this, [w.location.pathname, e.type]);
+        });
+        $(w).on(eventNames.hashchange, function (e) {
+            _triggerRoute.apply(this, [w.location.hash, e.type, true]);
+        });
     }
 
     if (!$.router) {
         $.router = {
             events: eventNames,
             init: function () {
-                $.router.events.trigger(eventNames.routeChanged);
+                var settings = {
+                    eventType: (isHistorySupported ? eventNames.popstate : eventNames.hashchange),
+                    hash: !isHistorySupported,
+                    route: (isHistorySupported ? w.location.pathname : w.location.hash)
+                };
+                $.router.events.trigger(eventNames.routeChanged, {
+                    data: settings
+                });
+                if (w.location.hash) {
+                    $(w).trigger(eventNames.hashchange);
+                }
             },
             historySupported: isHistorySupported
         };
@@ -262,12 +301,12 @@
                 $.route = route.bind(null);
             }
         }
+        $.router.set = function () {
+            _setRoute.apply(this, arguments);
+        };
         if (!$.setRoute) {
-            $.setRoute = function () {
-                _setRoute.apply(this, arguments);
-            };
+            $.setRoute = $.router.set;
         }
-        $.router.set = $.setRoute;
     }
     router.init = _bindRouterEvents;
     router.init();
@@ -275,4 +314,4 @@
     window,
     window.jQuery,
     window.history
-    ));
+));

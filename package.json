@@ -2,9 +2,10 @@
   "name": "jqueryrouter",
   "version": "0.4.0",
   "description": "JQuery router is a routing plugin for jQuery",
-  "main": "dist/js/jquery.router.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -34,5 +35,9 @@
     "jshint": "^2.9.5",
     "jshint-stylish": "^2.2.1",
     "run-sequence": "^2.1.0"
+  },
+  "dependencies": {
+    "ejs": "^2.5.7",
+    "express": "^4.15.4"
   }
 }
