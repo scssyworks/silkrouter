@@ -70,3 +70,5 @@ If you want to trigger a route handler without calling <code>setRoute</code>, th
 Jquery router is supported by all major desktop and mobile browsers.
 
 There are no major releases yet, hence use JQuery router at your own risk.
+
+<a href="https://jqueryrouter.herokuapp.com/">DEMO</a>
