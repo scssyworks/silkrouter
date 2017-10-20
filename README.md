@@ -9,27 +9,30 @@ JQuery router is a routing plugin for jQuery used for developing Single Page App
 <b>Bower:</b><br/>
 <pre><code>bower install jqueryrouter</code></pre>
 
-<b>Download:</b><br/><br/>
-Use <code>Clone or download</code> option above.
+or simply clone the repository.
 
 # How to use?
 <b>1. Initialize router plugin</b><br/>
 <pre><code>$.router.init();</code></pre>
 This step is used to execute route handlers on page load. 
-Calling init method is not mandatory. It is only used if a route handler needs to be called on page load.
+Calling init method is not mandatory. It is used only when a route handler needs to be called on page load.
 
 <b>2. Add a route handler</b><br/>
-A route handler is triggered when a particular route is active. For example, if you navigate to a route "path/to/route", the handler function associated with it get's triggerred. This is useful if you want to render a section of page or simply switch tabs depending on given route.
+A route handler is a function that executes when a route is activated. For example, if you navigate to a route "path/to/route", the handler associated with it gets called.
 
 <pre><code>$(selector).route(route, handler);
 $.route(route, handler);</code></pre>
 
-<b>Note:</b><code>$.router.init</code> does not execute route handlers which are added after the <code>init</code> call. Make sure that you have attached handlers beforehand.
+<b>Note:</b><code>$.router.init</code> does not execute handlers which are added after the initialization. Make sure that the handlers are attached before the <code>init</code> call.
 
-<b>3. Set route programmatically</b><br/>
-You can always change route manually by updating URL. But this is just one side of the coin. We need a handle which would allow us to change route when something happens on page. In other words, we should be able to change route programmatically. Don't worry! We have a solution.
+<b>3. Set route</b><br/>
+You can always change route manually by updating URL in address bar. JQuery router also provides with options to change route from code. You can use the the old and conventional <code>$.setRoute</code> method,
+or the new <code>$.router.set</code>.
 
-<pre><code>$.setRoute(route [, replaceMode [, noTrigger]]);</code></pre>
+<pre><code>$.setRoute(route [, replaceMode [, noTrigger]]);
+$.router.set(route, [, replaceMode [, noTrigger]]);</code></pre>
+
+Both <code>$.setRoute</code> and <code>$.router.set</code> works in exact same way. However, there will be no future updates to <code>$.setRoute</code> method. It is there only for backward compatibility.
 
 <b>Parameters:</b><br/>
 <b>route</b>: &lt;string | object&gt;<br/>
@@ -37,7 +40,7 @@ You can pass a string if you do not wish to pass data. Otherwise, you need to co
 <b>replaceMode</b>: &lt;boolean&gt; | optional<br/>
 By default setRoute updates the browser history. If you want to prevent that, set replaceMode to <code>true</code>.<br/>
 <b>noTrigger</b>: &lt;boolean&gt; | optional<br/>
-By default setRoute triggers the route handler. If you want to change the route without executing route handler, set noTrigger to <code>true</code>.<br/>
+By default setRoute executes the route handler. If you want to prevent that, set noTrigger to <code>true</code>.<br/>
 
 # Dynamic routes (added in v0.2.1)
 Routes with parameters are defined as follows:
@@ -48,9 +51,9 @@ $.setRoute("/path/to/route/<b>value1</b>/<b>value2</b>");
 Parameters are received in <code>params</code> object which is second argument in callback function.
 
 # Query Parameters (added in v0.3.0)
-Query parameters can be passed as query string to the <code>setRoute</code> function. JQuery router automatically appends query string to the route. For IE9 this behavior is slightly different. The querystring gets appended to hash route instead of route since IE9 doesn't support <code>pushState</code>. 
+Query parameters can be passed as query string to the <code>setRoute</code> function. JQuery router automatically appends query string to the route. For IE9 this behavior is slightly different. The querystring is appended to hash route instead of route due to lack of <code>pushState</code> support. 
 
-JQuery router parses the querystring into an object with the help of <a href="https://github.com/scssyworks/jquerydeparam">deparam plugin</a> and passes it as a third parameter to the route handler.
+JQuery router uses <a href="https://github.com/scssyworks/jquerydeparam">deparam plugin</a> to parse the query string and passes it as a third parameter to the route handler.
 
 <pre><code>$(selector).route("/path/to/route", function (data, params, <b>query</b>) { ... });
 $.setRoute({
