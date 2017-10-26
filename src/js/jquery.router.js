@@ -227,7 +227,7 @@
                 return true;
             }
         } else {
-            return (route === url);
+            return ((route === url) || (route === "*"));
         }
         return false;
     }
