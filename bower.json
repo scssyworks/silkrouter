@@ -1,6 +1,6 @@
 {
   "name": "jqueryrouter",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "JQuery router is a routing plugin for jQuery",
   "main": "dist/js/jquery.router.js",
   "authors": [
@@ -9,11 +9,10 @@
   "license": "MIT",
   "keywords": [
     "jquery",
-    "router",
-    "SPA",
-    "single",
-    "page",
-    "application"
+    "jquery router",
+    "single page applications",
+    "routing",
+    "SPA"
   ],
   "homepage": "https://github.com/scssyworks/jqueryrouter"
 }

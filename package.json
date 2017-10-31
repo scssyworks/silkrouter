@@ -13,9 +13,10 @@
   },
   "keywords": [
     "jquery",
-    "router",
+    "jquery router",
+    "routing",
     "SPA",
-    "single page application"
+    "single page applications"
   ],
   "author": "Sachin Singh",
   "license": "MIT",
