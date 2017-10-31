@@ -1,5 +1,5 @@
 # JQuery Routing Plugin
-JQuery router is a routing plugin for jQuery used for developing Single Page Applications.
+JQuery router is a routing plugin for creating Single Page Applications.
 
 # Installation
 
