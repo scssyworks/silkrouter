@@ -3,12 +3,15 @@ const express = require("express"),
     path = require("path"),
     router = express.Router;
 
+let pluginVersion = require("./package.json").version;
+
 app.set("views", path.join(__dirname, "src"));
 app.set('view engine', 'ejs');
 app.use("/", express.static(path.join(__dirname, "src")));
 app.get("*", function (req, res) {
     res.render("index", {
-        path: req.url
+        path: req.url,
+        version: pluginVersion
     });
 });
 var server = app.listen((process.env.PORT || 8800), function () {
