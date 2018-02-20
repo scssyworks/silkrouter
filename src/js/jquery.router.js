@@ -214,6 +214,7 @@
         if (~url.indexOf("?")) {
             url = url.substring(0, url.indexOf("?"));
         }
+        regex.routeparams.lastIndex = 0;
         if (regex.routeparams.test(route)) {
             params.params = {};
             var pathRegex = new RegExp(route.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
