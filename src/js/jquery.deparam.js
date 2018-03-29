@@ -9,7 +9,7 @@
  * @version      0.1.0
  */
 
-; (function (w, $) {
+(function (w, $) {
     if (!$) return;
     if (!$.deparam) {
         /**
@@ -17,7 +17,7 @@
          * @param {string} qs
          */
         $.deparam = function (qs) {
-            if (!(typeof qs === "string")) return;
+            if (typeof qs !== "string") return;
             qs = decodeURIComponent(qs).replace("?", "").trim();
             if (qs === "") return {};
             var queryParamList = qs.split("&"),
@@ -31,7 +31,7 @@
                 }
             });
             return queryObject;
-        }
+        };
     }
     /**
      * Checks if input is a number
@@ -149,7 +149,7 @@
      * @param {string} value 
      */
     function _val(value) {
-        if (!(typeof value === "string")) return "";
+        if (typeof value !== "string") return "";
         value = value.trim();
         if (!value) return "";
         if (value === "undefined") return;

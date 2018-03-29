@@ -6,16 +6,15 @@
  * @date         2017-08-08
  * @author       Sachin Singh <ssingh.300889@gmail.com>
  * @dependencies jQuery
- * @version      0.6.1
+ * @version      1.0.0
  */
 
-;
 (function (w, $, history) {
     if (!$ || !$.fn) return;
     // Object containing a map of attached handlers
     var router = {
-            handlers: []
-        },
+        handlers: []
+    },
         // Variable to check if browser supports history API properly    
         isHistorySupported = history && history.pushState,
         // Data cache
@@ -304,9 +303,6 @@
         $.router.set = function () {
             _setRoute.apply(this, arguments);
         };
-        if (!$.setRoute) {
-            $.setRoute = $.router.set;
-        }
     }
     router.init = _bindRouterEvents;
     router.init();
