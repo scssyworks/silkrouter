@@ -27,7 +27,7 @@ The method execute handler methods that matches the current route (without <code
     data: <b>{
         key1: value1,
         key2: value2
-    }</b>>
+    }</b>
 });
 ...
 $.route('/path/to/route', function (<b>data</b>) {
