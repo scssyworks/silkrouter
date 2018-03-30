@@ -14,7 +14,7 @@ $.route('/path/to/route3', function () { ... });</code></pre><br/>
 <b>2. Trigger a route by calling <code>$.router.set</code></b><br/>
 <pre><code>$.router.set('/path/to/route1')</code></pre><br/>
 The method changes current route and call the appropriate method that matches it.<br/><br/>
-<b>3. Execute routes on page load. Call the router's <code>init</code> method for that magic:</b><br/>
+<b>3. Execute routes on page load. Call router's <code>init</code> method for that magic:</b><br/>
 <pre><code>$.router.init();</code></pre>
 The method execute handler methods that matches the current route (without <code>$.router.set</code>). Alternatively, you can call <code>$.router.set(location.pathname);</code> on DOM ready.
 <pre><code>$(function () {
