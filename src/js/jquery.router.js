@@ -6,7 +6,7 @@
  * @date         2017-08-08
  * @author       Sachin Singh <ssingh.300889@gmail.com>
  * @dependencies jQuery
- * @version      1.0.0
+ * @version      1.0.1
  */
 
 (function (w, $, history) {
@@ -213,10 +213,12 @@
         if (~url.indexOf("?")) {
             url = url.substring(0, url.indexOf("?"));
         }
+        regex.routeparams.lastIndex = 0;
         if (regex.routeparams.test(route)) {
             params.params = {};
             var pathRegex = new RegExp(route.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
             if (pathRegex.test(url)) {
+                regex.routeparams.lastIndex = 0;
                 var keys = _arr(route.match(regex.routeparams)).map(_sanitize),
                     values = _arr(url.match(pathRegex));
                 values.shift();
