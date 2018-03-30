@@ -7,14 +7,14 @@ JQuery router is a web routing plugin created to support single page application
 
 
 # How to use?
-<b>1. Create routes</b><br/>
+<b>1. Create routes:</b><br/>
 <pre><code>$.route('/path/to/route1', function () { ... });
 $.route('/path/to/route2', function () { ... });
 $.route('/path/to/route3', function () { ... });</code></pre><br/>
 <b>2. Trigger a route by calling <code>$.router.set</code></b><br/>
 <pre><code>$.router.set('/path/to/route1')</code></pre><br/>
 The method changes current route and call the appropriate method that matches it.<br/><br/>
-<b>3. Want to execute routes on page load? Call the router's <code>init</code> method for magic</b><br/>
+<b>3. Execute routes on page load. Call the router's <code>init</code> method for that magic:</b><br/>
 <pre><code>$.router.init();</code></pre>
 The method execute handler methods that matches the current route (without <code>$.router.set</code>). Alternatively, you can call <code>$.router.set(location.pathname);</code> on DOM ready.
 <pre><code>$(function () {
@@ -84,6 +84,17 @@ Simply add a safety check to identify which is which:
         console.log('Executes on popstate');
     }
 });</code></pre><br/>
+<b>2. Router's <code>init</code> method doesn't work:</b><br/>
+The only reason why it doesn't work is because it needs route handlers to be attached first.
+<pre><code>$.router.init();
+$.route('/path/to/route', function () {
+    console.log('Does it work?'); // No
+});</code>
+...
+$.route('/path/to/route', function () {
+    console.log('Does it work?'); // Yes! It does
+});
+$.router.init();</code></pre><br/>
 
 # Demo
 https://jqueryrouter.herokuapp.com/
