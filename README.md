@@ -129,8 +129,8 @@ JQuery router plugin does a validation check on routes. A correct route always s
 $.route('/path/to/route', function () { ... }); // Correct
 $.route('path/to/route', function () { ... }); // Incorrect
 ```
-<b>4. I am creating too many routes for doing same set of things.</b><br/>
-JQuery router comes with an option of setting generic route.
+<b>4. I am creating too many routes for doing same set of things</b><br/>
+JQuery router comes with an option of generic routes.
 ```js
 $.route('*', function (data) {
     if (data.route === '/path/to/route') {
