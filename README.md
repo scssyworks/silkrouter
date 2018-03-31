@@ -123,5 +123,21 @@ $.route('/path/to/route', function () {
 });
 $.router.init();
 ```
+<b>3. My routes are not working</b><br/>
+JQuery router plugin does a validation check on routes. A correct route always starts with a <code>/</code>.
+```js
+$.route('/path/to/route', function () { ... }); // Correct
+$.route('path/to/route', function () { ... }); // Incorrect
+```
+<b>4. I am creating too many routes for doing same set of things.</b><br/>
+JQuery router comes with an option of setting generic route.
+```js
+$.route('*', function (data) {
+    if (data.route === '/path/to/route') {
+        console.log('Just works!');
+    }
+});
+```
+You can always differentiate between <code>hashchange</code> and <code>popstate</code> events by checking <code>data.hash</code>.
 # Demo
 https://jqueryrouter.herokuapp.com/
