@@ -10,6 +10,37 @@
         window.$ = $ = {};
     }
 
+    // Array polyfills
+    if (!Array.prototype.includes) {
+        Array.prototype.includes = function (searchElement, fromIndex) {
+            return (this.indexOf(searchElement, fromIndex) > -1);
+        };
+    }
+    // String polyfills
+    if (!String.prototype.contains) {
+        String.prototype.contains = function (searchString, fromIndex) {
+            return (this.indexOf(searchString, fromIndex) > -1);
+        };
+    }
+    if (!String.prototype.startsWith) {
+        String.prototype.startsWith = function (searchString, position) {
+            if (typeof searchString === 'string') {
+                position = (position > 0) ? position : 0;
+                return (this.substr(position).indexOf(searchString) === 0);
+            }
+            return false;
+        };
+    }
+    if (!String.prototype.endsWith) {
+        String.prototype.endsWith = function (searchString, length) {
+            if (typeof searchString === 'string') {
+                length = (length > 0) ? length : this.length;
+                return (this.substr(0, length).indexOf(searchString) === (length - searchString.length));
+            }
+            return false;
+        };
+    }
+
     /**
      * Sets user cookie
      * @param {string} key name of cookie
