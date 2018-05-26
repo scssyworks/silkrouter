@@ -51,14 +51,20 @@
                 _cache.$paramData.find(".last-name").text(param.lastname);
                 _cache.$queryData.text(JSON.stringify(query, null, 4));
             });
-            $.route("/tab1", function () {
-                _cache.$accordionLinks.filter("[data-route='/tab1']").trigger("click");
+            $.route("/tab1", function (r) {
+                if (r.hash) {
+                    _cache.$accordionLinks.filter("[data-route='/tab1']").trigger("click");
+                }
             });
-            $.route("/tab2", function () {
-                _cache.$accordionLinks.filter("[data-route='/tab2']").trigger("click");
+            $.route("/tab2", function (r) {
+                if (r.hash) {
+                    _cache.$accordionLinks.filter("[data-route='/tab2']").trigger("click");
+                }
             });
-            $.route("/tab3", function () {
-                _cache.$accordionLinks.filter("[data-route='/tab3']").trigger("click");
+            $.route("/tab3", function (r) {
+                if (r.hash) {
+                    _cache.$accordionLinks.filter("[data-route='/tab3']").trigger("click");
+                }
             });
             $.route("/modalRoute", function () {
                 _cache.$modal.modal("show");
@@ -74,7 +80,7 @@
                     e.preventDefault();
                     e.stopPropagation();
                 }
-                $.router.set(("#" + $(this).data("route")), true, true);
+                $.router.set(("#" + $(this).data("route")));
                 console.log("Tab activated");
             });
             _cache.$modalOpen.on("click", function () {
@@ -95,4 +101,4 @@
 })(
     window,
     window.jQuery
-    );
+);
