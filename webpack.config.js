@@ -35,7 +35,7 @@ module.exports = {
         })]
     },
     plugins: [
-        new Clean(['dist'], {
+        new Clean(['dist/js'], {
             verbose: true
         })
     ]
