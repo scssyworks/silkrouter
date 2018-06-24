@@ -7,7 +7,7 @@ let pluginVersion = require("./package.json").version;
 
 app.set("views", path.join(__dirname, "src"));
 app.set('view engine', 'ejs');
-app.use("/", express.static(path.join(__dirname, "src")));
+app.use("/", express.static(path.join(__dirname, "dist")));
 app.get("*", function (req, res) {
     res.render("index", {
         path: req.url,

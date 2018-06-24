@@ -37,6 +37,6 @@
   "dependencies": {
     "ejs": "^2.5.7",
     "express": "^4.15.4",
-    "jquerydeparam": "^1.0.1"
+    "jquerydeparam": "^1.0.2"
   }
 }
