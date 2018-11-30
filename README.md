@@ -7,7 +7,7 @@ JQuery router is a web routing plugin created to support single page application
 npm install jqueryrouter
 ```
 
-<b>Note:</b> This is still an IIFE build, therefore you would need to manually include a script tag to make it work. We are working on version 2.0 which is a <b>UMD</b> build which will be released on November 30th. Stay tuned!
+<b>Note:</b> This is an IIFE build, hence you need to add it as script tag to make it work. If you are looking for a UMD build, please checkout <a href="https://github.com/scssyworks/jqueryrouter/tree/feature/ver2">dev branch</a>. You can install the beta version using <code>npm install jqueryrouter@beta</code>.
 
 # How to use?
 <b>1. Create routes:</b><br/>
