@@ -9,7 +9,7 @@ export default [
         output: {
             file: "dist/js/jquery.router.js",
             format: "umd",
-            name: "deparam",
+            name: "jqueryrouter",
             sourcemap: true
         },
         plugins: [
@@ -29,7 +29,7 @@ export default [
         output: {
             file: "dist/js/jquery.router.min.js",
             format: "umd",
-            name: "deparam"
+            name: "jqueryrouter"
         },
         plugins: [
             resolve({

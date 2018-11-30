@@ -1,14 +1,36 @@
 # JQuery Routing Plugin
 JQuery router is a web routing plugin created to support single page applications.
 
+<b>Note:</b> This version of jquery router is in <b>beta</b> hence use it at your own risk. At present the library only works in browser context. Therefore, you will be disappointed ff you're planning to test it with RunKit or some other NodeJS virtual environments. But hold on! Since we are migrating this plugin to UMD, we have some great future plans for this library. Please do provide your feedback and suggestions so that we can make this library even better than what it's now.
+
 # Installation
 
 ```js
 npm install jqueryrouter
 ```
 
-
 # How to use?
+
+<b>Add a script tag</b><br/>
+```js
+<script src="jquery.router.js"></script>
+<script>
+    const { router, route } = jqueryrouter;
+</script>
+```
+<b>Or if you already have jQuery</b>
+```js
+<script>
+    const router = $.router;
+    const route = $.route;
+</script>
+```
+<b>Use ES6 import (in Webpack or Rollup)</b><br/>
+```js
+import { router, route } from 'jqueryrouter';
+```
+
+# How it works?
 <b>1. Create routes:</b><br/>
 ```js
 $.route('/path/to/route1', function () { ... });
