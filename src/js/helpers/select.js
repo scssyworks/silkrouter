@@ -5,7 +5,7 @@
 function isValidNode(el) {
     return (
         el instanceof Node
-        || window
+        || el === window
     );
 }
 

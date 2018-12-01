@@ -409,7 +409,7 @@
    * Simple selector engine with event handling
    */
   function isValidNode(el) {
-    return el instanceof Node || window;
+    return el instanceof Node || el === window;
   }
 
   function isCallable(handler) {
