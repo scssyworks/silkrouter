@@ -43,5 +43,24 @@ export default [
             }),
             uglify()
         ]
+    },
+    {
+        input: "src/js/demo/demo.js",
+        output: {
+            file: "dist/demo/demo.js",
+            format: "iife",
+            sourcemap: true
+        },
+        plugins: [
+            resolve({
+                customResolveOptions: {
+                    moduleDirectory: "node_modules"
+                }
+            }),
+            commonjs(),
+            babel({
+                exclude: "node_modules/**"
+            })
+        ]
     }
 ]

@@ -416,6 +416,12 @@
     return typeof handler === 'function';
   }
 
+  function getClassList(classSet) {
+    return classSet.split(' ').map(function (st) {
+      return !!st.trim();
+    });
+  }
+
   var Init =
   /*#__PURE__*/
   function () {
@@ -425,7 +431,7 @@
       _classCallCheck(this, Init);
 
       this.length = 0;
-      selector = isValidNode(selector) ? [selector] : selector instanceof NodeList || selector instanceof HTMLCollection ? _toConsumableArray(selector) : typeof selector === 'string' ? _toConsumableArray(document.querySelectorAll(selector)) : Array.isArray(selector) ? selector.map(isValidNode) : null;
+      selector = isValidNode(selector) ? [selector] : selector instanceof NodeList || selector instanceof HTMLCollection ? _toConsumableArray(selector) : typeof selector === 'string' ? _toConsumableArray(document.querySelectorAll(selector)) : Array.isArray(selector) ? selector.map(isValidNode) : selector instanceof select ? selector.map() : null;
 
       if (selector) {
         selector.forEach(function (el) {
@@ -439,7 +445,7 @@
       value: function each(handler) {
         for (var i = 0; i < this.length; i++) {
           if (isCallable(handler)) {
-            var result = handler(i, this[i], this);
+            var result = handler.apply(this[i], [i, this[i], this]);
 
             if (result === true) {
               continue;
@@ -450,6 +456,61 @@
             }
           }
         }
+
+        return this;
+      }
+    }, {
+      key: "addClass",
+      value: function addClass(classNames) {
+        if (typeof classNames === 'string') {
+          var classList = getClassList(classNames);
+          this.each(function () {
+            var currentClassSet = this.getAttribute('class');
+
+            if (typeof currentClassSet === 'string') {
+              var currentClassList = getClassList(currentClassSet);
+              classList.forEach(function (className) {
+                if (currentClassList.indexOf(className) === -1) {
+                  currentClassList.push(className);
+                }
+              });
+              this.setAttribute('class', currentClassList.join(' '));
+            } else {
+              this.setAttribute('class', classList.join(' '));
+            }
+          });
+        }
+
+        return this;
+      }
+    }, {
+      key: "removeClass",
+      value: function removeClass(classNames) {
+        if (typeof classNames === 'string') {
+          var classList = getClassList(classNames);
+          var removedCounter = 0;
+          this.each(function () {
+            var currentClassSet = this.getAttribute('class');
+
+            if (typeof currentClassSet === 'string') {
+              var currentClassList = getClassList(currentClassSet);
+              classList.forEach(function (className) {
+                var classIndex = currentClassList.indexOf(className);
+
+                if (classIndex > -1) {
+                  currentClassList.splice(classIndex, 1);
+                  removedCounter += 1;
+                }
+              });
+
+              if (removedCounter > 0) {
+                this.setAttribute('class', currentClassList.join(' '));
+              }
+            }
+          });
+        }
+
+        return this;
       }
     }, {
       key: "on",
@@ -464,6 +525,7 @@
             }
           }, useCapture);
         });
+        return this;
       }
     }, {
       key: "trigger",
@@ -478,6 +540,112 @@
         this.each(function (i, el) {
           el.dispatchEvent(customEvent);
         });
+        return this;
+      }
+    }, {
+      key: "map",
+      value: function map() {
+        var map = [];
+        this.each(function () {
+          if (map.indexOf(this) === -1) {
+            map.push(this);
+          }
+        });
+        return map;
+      }
+    }, {
+      key: "add",
+      value: function add(selector) {
+        var currentSelection = this.map();
+        var newSelection = select(selector);
+        var self = this;
+        newSelection.each(function () {
+          if (currentSelection.indexOf(this) === -1) {
+            self[self.length++] = this;
+          }
+        });
+        return this;
+      }
+    }, {
+      key: "filter",
+      value: function filter(filterArg) {
+        var newSelection = select();
+
+        if (isCallable(filterArg)) {
+          this.each(function () {
+            if (filterArg(this)) {
+              newSelection.add(this);
+            }
+          });
+        } else {
+          var matched = select(filterArg).map();
+          this.each(function () {
+            if (matched.indexOf(this) > -1) {
+              newSelection.add(this);
+            }
+          });
+        }
+
+        return newSelection;
+      }
+    }, {
+      key: "find",
+      value: function find(selector) {
+        var children = [];
+        var newSelection = select();
+        this.each(function () {
+          var childrenEach = _toConsumableArray(this.childNodes);
+
+          childrenEach.forEach(function (child) {
+            if (children.indexOf(child) === -1 && child.nodeType === 1) {
+              children.push(child);
+            }
+          });
+        });
+        var matched = select(selector).map();
+        matched.forEach(function (el) {
+          if (children.indexOf(el) > -1) {
+            newSelection.add(el);
+          }
+        });
+        return newSelection;
+      }
+    }, {
+      key: "eq",
+      value: function eq(index) {
+        return select(this[index]);
+      }
+    }, {
+      key: "first",
+      value: function first() {
+        return this.eq(0);
+      }
+    }, {
+      key: "last",
+      value: function last() {
+        return this.eq(this.length - 1);
+      }
+    }, {
+      key: "html",
+      value: function html(htmlText) {
+        if (typeof htmlText === 'undefined') {
+          return this[0].innerHTML;
+        } else if (typeof htmlText === 'string') {
+          this.each(function () {
+            this.innerHTML = htmlText;
+          });
+        }
+      }
+    }, {
+      key: "text",
+      value: function text(textData) {
+        if (typeof textData === 'undefined') {
+          return this[0].textContent;
+        } else if (typeof textData === 'string') {
+          this.each(function () {
+            this.textContent = textData;
+          });
+        }
       }
     }]);
 
@@ -487,6 +655,8 @@
   function select(selector) {
     return new Init(selector);
   }
+
+  select.fn = Init.prototype;
 
   var libs = {
     handlers: []
