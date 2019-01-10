@@ -18,7 +18,10 @@
          */
         $.deparam = function (qs) {
             if (typeof qs !== "string") return;
-            qs = decodeURIComponent(qs).replace("?", "").trim();
+            qs = decodeURIComponent(qs).trim();
+            if (qs.charAt(0) === '?') {
+                qs = qs.replace("?", "");
+            }
             if (qs === "") return {};
             var queryParamList = qs.split("&"),
                 queryObject = {};
