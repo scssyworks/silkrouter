@@ -1,6 +1,6 @@
 {
   "name": "jqueryrouter",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "JQuery router is a routing plugin for jQuery",
   "main": "server.js",
   "scripts": {
