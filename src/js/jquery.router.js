@@ -186,14 +186,37 @@
      * @param {function} callback 
      */
     function _route(sRoute, callback) {
-        router.handlers.push({
-            eventName: eventNames.routeChanged,
-            handler: callback.bind(this),
-            element: this,
-            route: sRoute
+        var existing = router.handlers.filter(function (routeOb) {
+            return (routeOb.route === sRoute && routeOb.handler === callback);
         });
+        if (existing.length === 0) {
+            router.handlers.push({
+                eventName: eventNames.routeChanged,
+                handler: callback.bind(this),
+                element: this,
+                route: sRoute
+            });
+        }
     }
 
+    /**
+     * Removes a route handler function
+     * @param {string} sRoute route string
+     * @param {function} callback callback function
+     */
+    function _unroute(sRoute, callback) {
+        var args = arguments;
+        if (args.length === 0) {
+            // Removed all routes
+            router.handlers.length = 0;
+        }
+        router.handlers = router.handlers.filter(function (routeOb) {
+            if (args.length === 1) {
+                return routeOb.route !== sRoute;
+            }
+            return !(routeOb.route === sRoute && routeOb.handler === callback);
+        });
+    }
 
     /**
      * Trims leading/trailing special characters
@@ -296,10 +319,18 @@
         };
         if (!$.fn.route) {
             var route = $.fn.route = function () {
-                _route.apply(this, arguments);
+                return _route.apply(this, arguments);
             };
             if (!$.route) {
                 $.route = route.bind(null);
+            }
+        }
+        if (!$.fn.unroute) {
+            var unroute = $.fn.unroute = function () {
+                return _unroute.apply(this, arguments);
+            };
+            if (!$.unroute) {
+                $.unroute = unroute.bind(null);
             }
         }
         $.router.set = function () {
