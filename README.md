@@ -89,6 +89,14 @@ $.route('/path/to/route', function () {
 ```
 This forces plugin to change URL hash instead of pathname.<br/>
 
+<b>10. Remove set routes:</b><br/>
+For performance reasons, it's often a good idea to remove routes that are currently attached when your application unmounts. As of version 1.3.0 we have added ``unroute`` method which allows us to remove attached handlers.
+```js
+$.unroute(); // Removes all routes
+$.unroute('/path/to/route'); // Removes all handlers attached to given route
+$.unroute('/path/to/route', handlerFn); // Removes handler function attached to the given route
+```
+
 # Browser support
 Jquery router supports all major desktop and mobile browsers including IE9.
 
