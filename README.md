@@ -101,6 +101,7 @@ $.unroute('/path/to/route', handlerFn); // Removes handler function attached to 
 Jquery router supports all major desktop and mobile browsers including IE9.
 
 # Debugging
+<a href="https://github.com/scssyworks/jqueryrouter/blob/master/DEBUGGING.md">Debugging</a>
 
 # Demo
 https://jqueryrouter.herokuapp.com/
