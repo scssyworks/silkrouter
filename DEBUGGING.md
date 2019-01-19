@@ -46,10 +46,10 @@ $.route('*', function (data) {
     }
 });
 ```
-You can differentiate between <code>hashchange</code> and <code>popstate</code> events by checking <code>data.hash</code>.<br/>
+You can differentiate between <code>hashchange</code> and <code>popstate</code> events by checking <code>data.hash</code>.<br/><br/>
 <b>4. JQuery router does not maintain state</b><br/>
 JQuery router does not maintain state like history API. This is because state management is not fully supported by hash routing and is partially supported by pushstate in some browsers. These is also a size limit. Pushstate allocates a limited amount of memory for state, hence it can only handle small amount of data.<br/>
-For now state management is not part of JQuery router. This feature is under development and should be available soon.
+For now state management is not part of JQuery router. This feature is under development and should be available soon.<br/><br/>
 <b>5. JQuery router is executing route handlers unexpectedly!</b><br/>
 It is a familiar fact that ``popstate`` event fires only when a state change occurs in browser history. It means that the ``popstate`` is fired only when you navigate back or forth. If you are createing new history, you need to execute your code manually. This is not true for hash routes. The ``hashchange`` event is fired even when new history entry is created. To the most part JQuery router relies on history API. However, as hash routes are integral part of browser routing, we have added some elements of our own to provide proper cross browser support. For example, custom ``popstate`` event is fired on creation of new history. And there you go! That's why your code behaves weird.<br/>
 Think of JQuery router in terms of browser events. When an event is triggered, you expect that event handler to be executed. Similarly, when a route is added or changed, the route handler is executed.
