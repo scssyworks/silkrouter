@@ -101,52 +101,6 @@ $.unroute('/path/to/route', handlerFn); // Removes handler function attached to 
 Jquery router supports all major desktop and mobile browsers including IE9.
 
 # Debugging
-<b>1. Differentiating between \# and pathname if both are same:</b><br/>
-In certain scenarios modern browsers trigger both <code>hashchange</code> and <code>popstate</code> events when URL hash is updated. This causes route handler to execute twice when both \# and pathname are same.
-Example: http://example.com/path/to/route#/path/to/route
-```js
-$.route('/path/to/route', function () {
-   console.log('Executed twice');
-});
-```
-Simply add a safety check to identify which is which:
-```js
-$.route('/path/to/route', function (data) {
-    if (data.hash) {
-        console.log('Executes on hashchange');
-    } else {
-        console.log('Executes on popstate');
-    }
-});
-```
-<b>2. Router's <code>init</code> method doesn't work:</b><br/>
-The only reason why it doesn't work is because it needs route handlers to be attached first.
-```js
-$.router.init();
-$.route('/path/to/route', function () {
-    console.log('Does it work?'); // No
-});
-...
-$.route('/path/to/route', function () {
-    console.log('Does it work?'); // Yes! It does
-});
-$.router.init();
-```
-<b>3. My routes are not working</b><br/>
-JQuery router plugin does a validation check on routes. A correct route always starts with a <code>/</code>.
-```js
-$.route('/path/to/route', function () { ... }); // Correct
-$.route('path/to/route', function () { ... }); // Incorrect
-```
-<b>4. I am creating too many routes for doing same set of things</b><br/>
-JQuery router comes with an option of generic routes.
-```js
-$.route('*', function (data) {
-    if (data.route === '/path/to/route') {
-        console.log('Just works!');
-    }
-});
-```
-You can always differentiate between <code>hashchange</code> and <code>popstate</code> events by checking <code>data.hash</code>.
+
 # Demo
 https://jqueryrouter.herokuapp.com/
