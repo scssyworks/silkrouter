@@ -2,15 +2,21 @@ import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
 import babel from "rollup-plugin-babel";
 import { uglify } from "rollup-plugin-uglify";
+import pkg from './package.json';
 
 export default [
     {
         input: "src/js/jquery.router.js",
+        external: Object.keys(pkg.peerDependencies),
         output: {
             file: "dist/js/jquery.router.js",
             format: "umd",
             name: "jqueryrouter",
-            sourcemap: true
+            sourcemap: true,
+            globals: {
+                jquery: 'jQuery',
+                jquerydeparam: 'deparam'
+            }
         },
         plugins: [
             resolve({
@@ -26,10 +32,15 @@ export default [
     },
     {
         input: "src/js/jquery.router.js",
+        external: Object.keys(pkg.peerDependencies),
         output: {
             file: "dist/js/jquery.router.min.js",
             format: "umd",
-            name: "jqueryrouter"
+            name: "jqueryrouter",
+            globals: {
+                jquery: 'jQuery',
+                jquerydeparam: 'deparam'
+            }
         },
         plugins: [
             resolve({

@@ -3,14 +3,14 @@
  * This file contains SPA router methods to handle routing mechanism in single page applications (SPA). Supported versions IE9+, Chrome, Safari, Firefox
  *
  * @project      Jquery Routing Plugin
- * @date         2018-11-25
+ * @date         2019-02-21
  * @author       Sachin Singh <ssingh.300889@gmail.com>
  * @dependencies jQuery
- * @version      2.0.0
+ * @version      2.1.0
  */
 
+import $ from 'jquery';
 import deparam from 'jquerydeparam';
-import { select as $ } from './helpers/select';
 
 // Object containing a map of attached handlers
 const libs = {
@@ -301,10 +301,11 @@ function _routeTrigger(eventName, params) {
  * Initializes router events
  */
 function _bindRouterEvents() {
-    $(window).on(eventNames.popstate, function (e) {
+    const $win = $(window);
+    $win.on(eventNames.popstate, function (e) {
         _triggerRoute.apply(this, [window.location.pathname, e.type]);
     });
-    $(window).on(eventNames.hashchange, function (e) {
+    $win.on(eventNames.hashchange, function (e) {
         _triggerRoute.apply(this, [window.location.hash, e.type, true]);
     });
 }
@@ -339,10 +340,10 @@ function route() {
     return _route.apply(this, arguments);
 }
 
-// Adds the router object to jQuery if available
-if (typeof jQuery === 'function' && jQuery.fn) {
-    jQuery.route = jQuery.fn.route = route;
-    jQuery.router = router;
+// Hooking route and router to jQuery
+if ($ && $.fn) {
+    $.route = $.fn.route = route;
+    $.router = router;
 }
 
 _bindRouterEvents();
