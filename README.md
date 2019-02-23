@@ -1,34 +1,55 @@
 # JQuery Routing Plugin
-JQuery router is a web routing plugin created to support single page applications.
-
-<b>Note:</b> This version of jquery router is in <b>beta</b> hence use it at your own risk. At present the library only works in browser context. Therefore, you will be disappointed if you're planning to test it with RunKit or some other NodeJS virtual environments. But hold on! Since we are migrating this plugin to UMD, we have some great future plans for this library. So stay tuned! <br/>
-Please do provide your feedback and suggestions so that we can make this library even better than what it currently is.
+JQuery router is a routing plugin for single page jquery applications.
 
 # Installation
 
-```js
-npm install jqueryrouter
+Using npm:
+
+```sh
+npm install --save jqueryrouter
+```
+
+Using CDN:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@2.1.0/dist/js/jquery.router.min.js"></script>
+```
+
+Previous version:
+```sh
+npm install --save jqueryrouter@1.3.0
+```
+
+### Note
+1. Library version 1.X is an IIFE build and does not support ES6 applications. To use the library in ES6 porjects please use version 2.X.
+2. For library version 2.X, you need to separately install ``jquery`` and ``jquerydeparam`` as peer dependencies.
+
+```sh
+npm install --save jquery jquerydeparam
 ```
 
 # How to use?
 
 <b>Add a script tag</b><br/>
-```js
+```html
 <script src="jquery.router.js"></script>
 <script>
     const { router, route } = jqueryrouter;
 </script>
 ```
-<b>Or if you already have jQuery</b>
-```js
-<script>
-    const router = $.router;
-    const route = $.route;
-</script>
-```
-<b>Use ES6 import (in Webpack or Rollup)</b><br/>
+
+<b>Use ES6 import (Webpack or Rollup)</b><br/>
 ```js
 import { router, route } from 'jqueryrouter';
+```
+
+<b>Using jQuery</b>
+```js
+import $ from 'jquery';
+import 'jqueryrouter';
+
+$.route(...);
+$.router.set(...);
 ```
 
 # How it works?
@@ -111,56 +132,22 @@ $.route('/path/to/route', function () {
 ```
 This forces plugin to change URL hash instead of pathname.<br/>
 
+<b>10. Detach routes:</b><br/>
+For performance reasons, it's a good idea to detach routes when your application unmounts. As of version 1.3.0 we have added ``unroute`` method which allows us to remove attached handlers.
+
+```js
+$.unroute(); // Removes all routes
+$.unroute('/path/to/route'); // Removes all handlers attached to given route
+$.unroute('/path/to/route', handlerFn); // Removes handler function attached to the given route
+```
+
 # Browser support
-Jquery router supports all major desktop and mobile browsers including IE9.
+Jquery router has been tested in following browsers:
+<b>Desktop:</b> IE 9 - 11, Chrome, Firefox, Safari, Opera, Edge
+<b>Mobile:</b> Chrome, Safari, Firefox
 
 # Debugging
-<b>1. Differentiating between \# and pathname if both are same:</b><br/>
-In certain scenarios modern browsers trigger both <code>hashchange</code> and <code>popstate</code> events when URL hash is updated. This causes route handler to execute twice when both \# and pathname are same.
-Example: http://example.com/path/to/route#/path/to/route
-```js
-$.route('/path/to/route', function () {
-   console.log('Executed twice');
-});
-```
-Simply add a safety check to identify which is which:
-```js
-$.route('/path/to/route', function (data) {
-    if (data.hash) {
-        console.log('Executes on hashchange');
-    } else {
-        console.log('Executes on popstate');
-    }
-});
-```
-<b>2. Router's <code>init</code> method doesn't work:</b><br/>
-The only reason why it doesn't work is because it needs route handlers to be attached first.
-```js
-$.router.init();
-$.route('/path/to/route', function () {
-    console.log('Does it work?'); // No
-});
-...
-$.route('/path/to/route', function () {
-    console.log('Does it work?'); // Yes! It does
-});
-$.router.init();
-```
-<b>3. My routes are not working</b><br/>
-JQuery router plugin does a validation check on routes. A correct route always starts with a <code>/</code>.
-```js
-$.route('/path/to/route', function () { ... }); // Correct
-$.route('path/to/route', function () { ... }); // Incorrect
-```
-<b>4. I am creating too many routes for doing same set of things</b><br/>
-JQuery router comes with an option of generic routes.
-```js
-$.route('*', function (data) {
-    if (data.route === '/path/to/route') {
-        console.log('Just works!');
-    }
-});
-```
-You can always differentiate between <code>hashchange</code> and <code>popstate</code> events by checking <code>data.hash</code>.
+<a href="https://github.com/scssyworks/jqueryrouter/blob/master/DEBUGGING.md">Debugging</a>
+
 # Demo
 https://jqueryrouter.herokuapp.com/
