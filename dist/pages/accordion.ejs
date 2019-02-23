@@ -1,3 +1,94 @@
 <div class="c-demo-1 js-demo-1 js-demos <% if (!path.match(/\/demos\/demo1/)) { %>d-none<% } %>">
-    Accordion demo
+    <h2>Accordion with routes</h2>
+    <p>This example demonstrates how you can switch accordion tabs and change browser route along with it.</p>
+    <div class="accordion" id="accordionExample">
+        <div class="card">
+            <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                <button class="btn btn-link js-acc-btn-link" type="button" data-route="#/accordion1" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                Collapsible Group Item #1
+                </button>
+            </h5>
+            </div>
+            <div id="collapseOne" data-route="#/accordion1" class="collapse js-collapsed-section show" aria-labelledby="headingOne" data-parent="#accordionExample">
+            <div class="card-body">
+                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+            </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="headingTwo">
+            <h5 class="mb-0">
+                <button class="btn btn-link js-acc-btn-link collapsed" type="button" data-route="#/accordion2" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                Collapsible Group Item #2
+                </button>
+            </h5>
+            </div>
+            <div id="collapseTwo" data-route="#/accordion2" class="collapse js-collapsed-section" aria-labelledby="headingTwo" data-parent="#accordionExample">
+            <div class="card-body">
+                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+            </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="headingThree">
+            <h5 class="mb-0">
+                <button class="btn btn-link js-acc-btn-link collapsed" type="button" data-route="#/accordion3" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                Collapsible Group Item #3
+                </button>
+            </h5>
+            </div>
+            <div id="collapseThree" data-route="#/accordion3" class="collapse js-collapsed-section" aria-labelledby="headingThree" data-parent="#accordionExample">
+            <div class="card-body">
+                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+            </div>
+            </div>
+        </div>
+    </div>
+    <p>Activate an accordion tab and try refreshing the page.</p>
+    <br/>
+    <h3>Implementation:</h3>
+    <p>The implementation is fairly straight forward.</p>
+    <b>Step 1:</b>
+    <p>Set <code>data-route</code> attribute to button link and collapse section.</p>
+    <p>We will use <code>data-route</code> to trigger route, as well as to filter sections for activation.</p>
+    <p>We will also use <code>hash</code> routing this time to demonstrate how hash routing works. We will set hash route as follows:</p>
+    <pre>
+        <code>
+    &lt;button ... data-route="<b>#/accordion1</b>"&gt;...&lt;/button&gt;</code>
+    </pre>
+    <p>For the three buttons above we will set routes as <code>#/accordion1</code>, <code>#/accordion2</code>, and <code>#/accordion3</code>.</p>
+    <b>Step 2:</b>
+    <p>Bind click event to button link.</p>
+    <pre>
+        <code>
+    $('.btn-link').on('click', function (e) {
+        if ($(this).attr('aria-expanded') === 'true') {
+            e.stopPropagation(); <span class="comment">// To register true accordion functionality</span>
+        } else {
+            $.router.set($(this).data('route'), <b>false, true</b>);
+        }
+    });</code>
+    </pre>
+    <p>Notice the last two parameters in <code>router.set</code> method. The second last parameter is set to <code>false</code> so that we can register new history entries. The last parameter is set to <code>true</code> in order to prevent calling route handler. We want to let bootstrap handle the expand/collapse functionality of accordion.</p>
+    <b>Step 3:</b>
+    <p>Handle routing when user refreshes the page. Since the route is triggered by browser itself, the handler will be called anyway.</p>
+    <pre>
+        <code>
+    $.route(function (data) {
+        if (<b>/accordion/</b>.test(data.route) && data.hash) {
+            $('.btn-link')
+                .attr('aria-expanded', false)
+                .filter(`[data-route="${<b>data.route</b>}"]`)
+                .attr('aria-expanded', true);
+            $('.collapse')
+                .removeClass('show')
+                .filter(`[data-route="${<b>data.route</b>}"]`)
+                .addClass('show');
+        }
+    });</code>
+    </pre>
+    <p>We have registered a generic route because it makes it easier to handle multiple urls in a single handler. A generic route listens to all kinds of route changes.</p>
+    <p>A specific route is registered by passing a route string parameter: <code>$.route('&lt;route&gt;', handler);</code></p>
+    <p>However, in cases where there are too many routes, registering individual handlers invite lots of issues especially related to performance.</p>
 </div>

@@ -61,3 +61,8 @@ img {
         background-color: #dadada;
     }
 }
+
+.comment {
+    color: #999;
+    font-style: italic;
+}

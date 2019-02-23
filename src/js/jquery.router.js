@@ -45,7 +45,7 @@ const errorMessage = {
 
 /**
  * Converts any list to JavaScript array
- * @param {array} arr 
+ * @param {any[]} arr Array like object
  */
 function _arr(arr) {
     return Array.prototype.slice.call(arr);
@@ -89,7 +89,7 @@ function _triggerRoute(route, eventType, isHashRoute = false) {
 
 /**
  * Throw JavaScript errors with custom message
- * @param {string} message 
+ * @param {string} message Error message
  */
 function _throwError(message) {
     throw new Error(message);
@@ -97,7 +97,7 @@ function _throwError(message) {
 
 /**
  * Checks if given route is valid
- * @param {string} sRoute 
+ * @param {string} sRoute Route string
  */
 function _isValidRoute(sRoute) {
     if (typeof sRoute !== "string") {
@@ -108,9 +108,9 @@ function _isValidRoute(sRoute) {
 
 /**
  * Adds a query string
- * @param {string} sRoute 
- * @param {string} qString 
- * @param {boolean} appendQString 
+ * @param {string} sRoute Route string
+ * @param {string} qString Query string
+ * @param {boolean} appendQString Append query string flag
  */
 function _resolveQueryString(sRoute, qString, appendQString) {
     if (!qString && !appendQString) return sRoute;
@@ -142,9 +142,9 @@ function _getQueryParams() {
 
 /**
  * Checks if route is valid and returns the valid route
- * @param {string} sRoute
- * @param {string} qString
- * @param {boolean} appendQString
+ * @param {string} sRoute Route string
+ * @param {string} qString Query string
+ * @param {boolean} appendQString Append query string flag
  */
 function _validateRoute(sRoute, qString, appendQString) {
     if (_isValidRoute(sRoute)) {
@@ -155,9 +155,9 @@ function _validateRoute(sRoute, qString, appendQString) {
 
 /**
  * Set route for given view
- * @param {string|object} oRoute 
- * @param {boolean} replaceMode 
- * @param {boolean} noTrigger 
+ * @param {string|object} oRoute Route string or object
+ * @param {boolean} replaceMode Replace mode
+ * @param {boolean} noTrigger Do not trigger handler
  */
 function _setRoute(oRoute, replaceMode, noTrigger) {
     if (!oRoute) return;
@@ -213,15 +213,21 @@ function _setRoute(oRoute, replaceMode, noTrigger) {
 
 /**
  * Attaches a route handler function
- * @param {string} sRoute 
- * @param {function} callback 
+ * @param {string} sRoute Route string
+ * @param {function} callback Callback function
  */
 function _route(sRoute, callback) {
-    if (!libs.handlers.filter(ob => (
-        ob.originalHandler === callback
-        && ob.route === sRoute
-        && ob.element === this
-    )).length) {
+    if (typeof sRoute === 'function') {
+        callback = sRoute;
+        sRoute = '*'; // Generic route
+    }
+    if (!libs.handlers.filter(ob => {
+        let filterCriteria = (ob.originalHandler === callback && ob.route === sRoute);
+        if (this) {
+            filterCriteria = filterCriteria && ob.element === this;
+        }
+        return filterCriteria;
+    }).length) {
         libs.handlers.push({
             eventName: eventNames.routeChanged,
             originalHandler: callback,
@@ -232,10 +238,32 @@ function _route(sRoute, callback) {
     }
 }
 
+/**
+ * 
+ * @param {string} sRoute Route string
+ * @param {function} callback Callback function
+ */
+function _unroute(sRoute, callback) {
+    const args = arguments.length;
+    if (args.length === 0) {
+        libs.handlers.length = 0;
+    }
+    libs.handlers = libs.handlers.filter(routeOb => {
+        if (args.length === 1 && typeof args[0] === 'string') {
+            return routeOb.route !== sRoute;
+        }
+        // Check for generic route
+        if (args.length === 1 && typeof args[0] === 'function') {
+            callback = args[0];
+            sRoute = '*'; // Generic route
+        }
+        return !(routeOb.route === sRoute && routeOb.handler === callback);
+    });
+}
 
 /**
  * Trims leading/trailing special characters
- * @param {string} param 
+ * @param {string} param Parameters
  */
 function _sanitize(str) {
     return str.replace(/^([^a-zA-Z0-9]+)|([^a-zA-Z0-9]+)$/g, "");
@@ -243,9 +271,9 @@ function _sanitize(str) {
 
 /**
  * Compares route with current URL
- * @param {string} route 
- * @param {string} url 
- * @param {object} params 
+ * @param {string} route Route string
+ * @param {string} url Current url
+ * @param {object} params Parameters
  */
 function _matched(route, url, params) {
     if (~url.indexOf("?")) {
@@ -273,8 +301,8 @@ function _matched(route, url, params) {
 
 /**
  * Triggers a router event
- * @param {string} eventName 
- * @param {object} params 
+ * @param {string} eventName Name of route event
+ * @param {object} params Parameters
  */
 function _routeTrigger(eventName, params) {
     // Ensures that params is always an object
@@ -311,38 +339,73 @@ function _bindRouterEvents() {
 }
 
 const router = {
+    // Events object
     events: {
+        // Available event names
         ...eventNames,
+        /**
+         * Triggers a custom route event
+         * @param {string} eventName Name of event
+         * @param {object} params Parameters object
+         */
         trigger(eventName, params) {
             return _routeTrigger.apply(this, [eventName, params]);
         }
     },
+    /**
+     * Initializes router
+     */
     init: function () {
+        // Routing settings
         let settings = {
             eventType: (isHistorySupported ? eventNames.popstate : eventNames.hashchange),
             hash: !isHistorySupported,
             route: (isHistorySupported ? window.location.pathname : window.location.hash)
         };
+        // Triggers route change event on initialize
         this.events.trigger(eventNames.routeChanged, {
             data: settings
         });
+        // Triggers a hashchange event on initialize if url hash is available
         if (window.location.hash) {
             $(window).trigger(eventNames.hashchange);
         }
     },
+    /**
+     * Sets a route url
+     * @param {string|object} route Route object or URL
+     * @param {boolean} replaceMode Flag to enable replace mode
+     * @param {boolean} noTrigger Flag to disable handler while changing route
+     */
     set() {
         return _setRoute.apply(this, arguments);
     },
+    // Flag to check if history API is supported in current browser
     historySupported: isHistorySupported
 }
 
+/**
+ * Attaches a route handler
+ * @param {string|function} route Route string or handler function (in case of generic route)
+ * @param {function} handler Handler function
+ */
 function route() {
     return _route.apply(this, arguments);
 }
 
+/**
+ * Detaches a route handler
+ * @param {string|function} route Route string or handler function (in case of generic route)
+ * @param {function} handler Handler function
+ */
+function unroute() {
+    return _unroute.apply(this, arguments);
+}
+
 // Hooking route and router to jQuery
-if ($ && $.fn) {
-    $.route = $.fn.route = route;
+if (typeof $ === 'function') {
+    $.route = $.prototype.route = route;
+    $.unroute = $.prototype.unroute = unroute;
     $.router = router;
 }
 

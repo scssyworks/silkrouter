@@ -1,3 +1,88 @@
 <div class="c-home-section js-home-section js-demos <% if (!path.match(/^\/$/)) { %>d-none<% } %>">
-    Welcome to homepage
+    <h2>Welcome to JQuery router Home Page</h2>
+    <p>JQuery router is a routing plugin written for jQuery. As of version 2.X.X, jquery router now supports UMD. It means you can use ES2015 syntax in addition to the old ES5 syntax you have been following so far:</p>
+    <p>
+        <pre>
+            <code>
+    import { router, route } from 'jqueryrouter';</code>
+        </pre>
+    </p>
+    <p>
+        <pre>
+            <code>
+    import $ from 'jquery';
+    import 'jqueryrouter';
+    $.route(...);
+    $.router.set(...);</code>
+        </pre>
+    </p>
+    <p>Old syntax:</p>
+    <p>
+        <pre>
+            <code>
+    &ltscript src="jquery.js"&gt;&lt;/script&gt;
+    &ltscript src="jqueryrouter.js"&gt;&lt;/script&gt;
+    &ltscript&gt;
+        $.route(...);
+        $.router.set(...);
+    &lt;/script&gt;</code>
+        </pre>
+    </p>
+    <h3>Installation</h3>
+    <p>
+        JQuery router can be installed using <b>node package manager (npm)</b> as follows:
+        <pre>
+            <code>
+    npm install --save jqueryrouter</code>
+        </pre>
+    </p>
+    <p>
+        You can also use jquery router through <b>CDN</b> as follows:
+        <pre>
+            <code>
+    https://cdn.jsdelivr.net/npm/jqueryrouter@<%=version%>/dist/js/jquery.router.min.js</code>
+        </pre>
+        Or simply:
+        <pre>
+            <code>
+    https://cdn.jsdelivr.net/npm/jqueryrouter@<%=version%></code>
+        </pre>
+    </p>
+    <p>
+        <b>Please note: </b> JQuery router is dependent on <code>jQuery</code> and <code>jquerydeparam</code>. You can install these dependencies as follows:
+        <pre>
+            <code>
+    npm install --save jquery jquerydeparam</code>
+        </pre>
+    </p>
+    <h3>How does it work?</h3>
+    <p>JQuery router is very simple to use. It is similar to JavaScript events except that it can change website path and browser history.</p>
+    <p>Let's compare the two:</p>
+    <p><b>Events:</b></p>
+    <pre>
+        <code>
+    $('selector').on('eventName', handler);</code>
+    </pre>
+    <p><b>Router:</b></p>
+    <pre>
+        <code>
+    $('selector').route('path', handler);
+    $.route('path', handler);</code>
+    </pre>
+    <p><b>Triggering events:</b></p>
+    <pre>
+        <code>
+    $('selector').trigger('event');</code>
+    </pre>
+    <p><b>Triggering routes:</b></p>
+     <pre>
+        <code>
+    $.router.set('path');</code>
+    </pre>
+    <p>This project is a live example of <b>jquery router</b> in action.</p>
+    <p></p>
+    <p>JQuery router uses history push API to update browser history. In IE9 or earlier it fallbacks to hash urls.</p>
+    <p>JQuery router supports following browsers:</p>
+    <p><b>IE9-11, Edge, Opera, Safari, Chrome, Firefox</b></p>
+    <p>JQuery router also supports mobile browsers.</p>
 </div>

@@ -1,5 +1,6 @@
 import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
+import postcss from "rollup-plugin-postcss";
 import babel from "rollup-plugin-babel";
 import { uglify } from "rollup-plugin-uglify";
 import pkg from './package.json';
@@ -63,6 +64,12 @@ export default [
             sourcemap: true
         },
         plugins: [
+            postcss({
+                extensions: ['.css'],
+                minimize: true,
+                sourceMap: true,
+                extract: true
+            }),
             resolve({
                 customResolveOptions: {
                     moduleDirectory: "node_modules"
@@ -71,7 +78,8 @@ export default [
             commonjs(),
             babel({
                 exclude: "node_modules/**"
-            })
+            }),
+            uglify()
         ]
     }
 ]

@@ -1,8 +1,8 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('jquery'), require('jquerydeparam')) :
   typeof define === 'function' && define.amd ? define(['exports', 'jquery', 'jquerydeparam'], factory) :
-  (factory((global.jqueryrouter = {}),global.jQuery,global.deparam));
-}(this, (function (exports,$,deparam) { 'use strict';
+  (global = global || self, factory(global.jqueryrouter = {}, global.jQuery, global.deparam));
+}(this, function (exports, $, deparam) { 'use strict';
 
   $ = $ && $.hasOwnProperty('default') ? $['default'] : $;
   deparam = deparam && deparam.hasOwnProperty('default') ? deparam['default'] : deparam;
@@ -82,7 +82,7 @@
   };
   /**
    * Converts any list to JavaScript array
-   * @param {array} arr 
+   * @param {any[]} arr Array like object
    */
 
   function _arr(arr) {
@@ -128,7 +128,7 @@
   }
   /**
    * Throw JavaScript errors with custom message
-   * @param {string} message 
+   * @param {string} message Error message
    */
 
 
@@ -137,7 +137,7 @@
   }
   /**
    * Checks if given route is valid
-   * @param {string} sRoute 
+   * @param {string} sRoute Route string
    */
 
 
@@ -149,9 +149,9 @@
   }
   /**
    * Adds a query string
-   * @param {string} sRoute 
-   * @param {string} qString 
-   * @param {boolean} appendQString 
+   * @param {string} sRoute Route string
+   * @param {string} qString Query string
+   * @param {boolean} appendQString Append query string flag
    */
 
 
@@ -185,9 +185,9 @@
   }
   /**
    * Checks if route is valid and returns the valid route
-   * @param {string} sRoute
-   * @param {string} qString
-   * @param {boolean} appendQString
+   * @param {string} sRoute Route string
+   * @param {string} qString Query string
+   * @param {boolean} appendQString Append query string flag
    */
 
 
@@ -200,9 +200,9 @@
   }
   /**
    * Set route for given view
-   * @param {string|object} oRoute 
-   * @param {boolean} replaceMode 
-   * @param {boolean} noTrigger 
+   * @param {string|object} oRoute Route string or object
+   * @param {boolean} replaceMode Replace mode
+   * @param {boolean} noTrigger Do not trigger handler
    */
 
 
@@ -260,16 +260,27 @@
   }
   /**
    * Attaches a route handler function
-   * @param {string} sRoute 
-   * @param {function} callback 
+   * @param {string} sRoute Route string
+   * @param {function} callback Callback function
    */
 
 
   function _route(sRoute, callback) {
     var _this = this;
 
+    if (typeof sRoute === 'function') {
+      callback = sRoute;
+      sRoute = '*'; // Generic route
+    }
+
     if (!libs.handlers.filter(function (ob) {
-      return ob.originalHandler === callback && ob.route === sRoute && ob.element === _this;
+      var filterCriteria = ob.originalHandler === callback && ob.route === sRoute;
+
+      if (_this) {
+        filterCriteria = filterCriteria && ob.element === _this;
+      }
+
+      return filterCriteria;
     }).length) {
       libs.handlers.push({
         eventName: eventNames.routeChanged,
@@ -281,8 +292,36 @@
     }
   }
   /**
+   * 
+   * @param {string} sRoute Route string
+   * @param {function} callback Callback function
+   */
+
+
+  function _unroute(sRoute, callback) {
+    var args = arguments.length;
+
+    if (args.length === 0) {
+      libs.handlers.length = 0;
+    }
+
+    libs.handlers = libs.handlers.filter(function (routeOb) {
+      if (args.length === 1 && typeof args[0] === 'string') {
+        return routeOb.route !== sRoute;
+      } // Check for generic route
+
+
+      if (args.length === 1 && typeof args[0] === 'function') {
+        callback = args[0];
+        sRoute = '*'; // Generic route
+      }
+
+      return !(routeOb.route === sRoute && routeOb.handler === callback);
+    });
+  }
+  /**
    * Trims leading/trailing special characters
-   * @param {string} param 
+   * @param {string} param Parameters
    */
 
 
@@ -291,9 +330,9 @@
   }
   /**
    * Compares route with current URL
-   * @param {string} route 
-   * @param {string} url 
-   * @param {object} params 
+   * @param {string} route Route string
+   * @param {string} url Current url
+   * @param {object} params Parameters
    */
 
 
@@ -328,8 +367,8 @@
   }
   /**
    * Triggers a router event
-   * @param {string} eventName 
-   * @param {object} params 
+   * @param {string} eventName Name of route event
+   * @param {object} params Parameters
    */
 
 
@@ -369,38 +408,75 @@
   }
 
   var router = {
+    // Events object
     events: _objectSpread({}, eventNames, {
+      /**
+       * Triggers a custom route event
+       * @param {string} eventName Name of event
+       * @param {object} params Parameters object
+       */
       trigger: function trigger(eventName, params) {
         return _routeTrigger.apply(this, [eventName, params]);
       }
     }),
+
+    /**
+     * Initializes router
+     */
     init: function init() {
+      // Routing settings
       var settings = {
         eventType: isHistorySupported ? eventNames.popstate : eventNames.hashchange,
         hash: !isHistorySupported,
         route: isHistorySupported ? window.location.pathname : window.location.hash
-      };
+      }; // Triggers route change event on initialize
+
       this.events.trigger(eventNames.routeChanged, {
         data: settings
-      });
+      }); // Triggers a hashchange event on initialize if url hash is available
 
       if (window.location.hash) {
         $(window).trigger(eventNames.hashchange);
       }
     },
+
+    /**
+     * Sets a route url
+     * @param {string|object} route Route object or URL
+     * @param {boolean} replaceMode Flag to enable replace mode
+     * @param {boolean} noTrigger Flag to disable handler while changing route
+     */
     set: function set() {
       return _setRoute.apply(this, arguments);
     },
+    // Flag to check if history API is supported in current browser
     historySupported: isHistorySupported
+    /**
+     * Attaches a route handler
+     * @param {string|function} route Route string or handler function (in case of generic route)
+     * @param {function} handler Handler function
+     */
+
   };
 
   function route() {
     return _route.apply(this, arguments);
+  }
+  /**
+   * Detaches a route handler
+   * @param {string|function} route Route string or handler function (in case of generic route)
+   * @param {function} handler Handler function
+   */
+
+
+  function unroute() {
+    return _unroute.apply(this, arguments);
   } // Hooking route and router to jQuery
 
 
-  if ($ && $.fn) {
-    $.route = $.fn.route = route;
+  if (typeof $ === 'function') {
+    $.route = $.prototype.route = route;
+    $.unroute = $.prototype.unroute = unroute;
     $.router = router;
   }
 
@@ -411,5 +487,5 @@
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 //# sourceMappingURL=jquery.router.js.map

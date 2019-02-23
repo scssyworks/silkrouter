@@ -1,3 +1,99 @@
 <div class="c-demo-2 js-demo-2 js-demos <% if (!path.match(/\/demos\/demo2/)) { %>d-none<% } %>">
-    Modal page
+    <h2>Overlay wizards</h2>
+    <p>A lot of sites show an introductory overlay wizards where user can navigate through multiple steps.</p>
+    <p>Overlay wizards don't use routing particularly, but we'll make it cooler by adding routes.</p>
+    <p>This way a user will be able navigate back to previous step by using browser back button.</p>
+    <h3>Working demo</h3>
+    <br />
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary js-wizard-btn" data-target="#exampleModal">
+    Start Wizard
+    </button>
+    <br />
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Wizard</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="wizard-section-1 wizard-sections active" data-step="1">
+                        You are in step 1
+                    </div>
+                    <div class="wizard-section-2 wizard-sections d-none" data-step="2">
+                        You are in step 2
+                    </div>
+                    <div class="wizard-section-3 wizard-sections d-none" data-step="3">
+                        This is the final step
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary js-proceed-step">Go to next step</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <h3>Implementation</h3>
+    <p>Routing in modal windows is quite easy to implement. There are few things we need to keep in mind:</p>
+    <p><b>1. </b>If there is are no modal routes, modal window should be closed.</p>
+    <p><b>2. </b>If modal route is present, modal window should be open and display the view for given route.</p>
+    <p><b>3. </b>When modal is dismissed or closed, user should return to the original route.</p>
+    <p>This time we will implement normal url routes to demonstrate <code>pushState</code>. We will also use route parameters to track progress of modal.</code></p>
+    <b>Step 1:</b>
+    <b>Bind route handler for modal.</b>
+    <pre>
+        <code>
+    $.route('/demos/demo2/modalroute/:progress', function (data, params) {
+        var progress = +params.progress;
+        ...
+    });</code>
+    </pre>
+    <b>Step 2:</b>
+    <p>If modal is not open, open the modal and activate the wizard step based on current progress.</p>
+    <pre>
+        <code>
+    $.route('/demos/demo2/modalroute/:progress', function (data, params) {
+        var progress = +params.progress;
+        if (!$('.modal').hasClass('show')) {
+            $('.modal').modal('show');
+        }
+        $('.wizard-sections')
+            .addClass('d-none').removeClass('active')
+            .filter(`[data-step="${<b>progress</b>}"]`)
+            .removeClass('d-none').addClass('active');
+    });</code>
+    </pre>
+    <b>Step 3:</b>
+    <p>Bind click event to "Start Wizard" button to trigger modal route</p>
+    <pre>
+        <code>
+    $('.js-wizard-btn').on('click', function () {
+        $.router.set(<b>'/demos/demo2/modalroute/1'</b>);
+    });</code>
+    </pre>
+    <b>Step 4:</b>
+    <p>Handle step navigation on click of "Go to next step" button.</p>
+    <pre>
+        <code>
+    $('.js-proceed-step').on('click', function () {
+        var totalSteps = $('.wizard-sections').length;
+        var currentStep = +$('.wizard-sections').filter('.active').data('step');
+        if (currentStep === totalSteps) {
+            <span class="comment">// Close modal</span>
+            $('.modal').modal('hide');
+            <span class="comment">// Go back in history</span>
+            $.router.set('/demos/demo2'); <span class="comment">// Re-setting the original route</span>
+        } else {
+            <span class="comment">// Trigger route for next step</span>
+            $.router.set(`/demos/demo2/modalroute/${<b>++currentStep</b>}`);
+        }
+    });
+        </code>
+    </pre>
+    <p>There you go! You just implemented routing in overlay wizards. Try refreshing the page on any particular step.</p>
 </div>

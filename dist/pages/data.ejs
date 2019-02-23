@@ -1,3 +1,37 @@
 <div class="c-demo-3 js-demo-3 js-demos <% if (!path.match(/\/demos\/demo3/)) { %>d-none<% } %>">
-    Data testing
+    <h2>Persist Data</h2>
+    <p>As we saw in demo 2, we were able to persist progress of modal window in the route itself. That's one way of doing it. There are several other ways you can persist data while routing.</p>
+    <p>Some of those ways are mentioned below:</p>
+    <p>
+        <ol>
+            <li>Using route params</li>
+            <li>Using query strings</li>
+            <li>Using web storage</li>
+        </ol>
+    </p>
+    <p>We have already seen an example of route params. How do we use query string to persist data?</p>
+    <p>Well! you can use the syntax below:</p>
+    <pre>
+        <code>
+    $.router.set({
+        route: '/demos/demo3',
+        queryString: 'q=value&r=othervalue'
+    });</code>
+    </pre>
+    <p>Using this syntax you can append a query string to your route. Query string data is passed to handler as query object shown below:</p>
+    <pre>
+        <code>
+    $.route('/demos/demo3', function (data, params, <b>query</b>) {
+        console.log(query); <span class="comment">// Should print { q: 'value', r: 'othervalue' }</span>
+    });</code>
+    </pre>
+    <p>In order to make this example work, you need to have following peer dependency installed:</p>
+    <p><a href="https://www.npmjs.com/package/jquerydeparam">JQuery deparam</a></p>
+    <button class="btn btn-primary js-query">Try it!</button>
+    <br />
+    <br />
+    <p>Your data:</p>
+    <pre class="js-query-data">No data!</pre>
+    <p>Another way to persist data is to use web storage. How you persist data for a given route depends on your implementation. There is a neat plugin available called <code>LZ Storage</code>. It provide ways to compress data before storing it in local storage.</p>
+    <p>Check it out: <a href="https://www.npmjs.com/package/lzstorage">LZ Storage</a></p>
 </div>
