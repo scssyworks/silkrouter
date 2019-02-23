@@ -21,7 +21,7 @@ npm install --save jqueryrouter@1.3.0
 ```
 
 ### Note
-1. Library version 1.X is an IIFE build and does not support ES6 applications. To use the library in ES6 porjects please use version 2.X.
+1. Library version 1.X is an IIFE build and does not support ES6 applications. To use the library in ES6 projects please use version 2.X.
 2. For library version 2.X, you need to separately install ``jquery`` and ``jquerydeparam`` as peer dependencies.
 
 ```sh
