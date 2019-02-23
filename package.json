@@ -4,6 +4,7 @@
   "description": "JQuery router is a routing plugin for jQuery",
   "main": "dist/js/jquery.router.js",
   "module": "dist/js/jquery.router.js",
+  "typings": "src/typings/jquery.router.d.ts",
   "scripts": {
     "start": "npm run build && node server.js",
     "build": "rollup -c"
