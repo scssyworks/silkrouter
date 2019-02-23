@@ -6,7 +6,8 @@
   "module": "dist/js/jquery.router.js",
   "typings": "src/typings/jquery.router.d.ts",
   "scripts": {
-    "start": "npm run build && node server.js",
+    "start": "node server.js",
+    "buildAndStart": "npm run build && npm run start",
     "build": "rollup -c"
   },
   "repository": {
