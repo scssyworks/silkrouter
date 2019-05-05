@@ -12,20 +12,22 @@ npm install --save jqueryrouter
 Using CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@2.1.0/dist/js/jquery.router.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@3.0.0-beta.1/dist/js/jquery.router.min.js"></script>
 ```
 
 Previous version:
 ```sh
-npm install --save jqueryrouter@1.3.0
+npm install --save jqueryrouter@2.1.0
 ```
 
-### Note
-1. Library version 1.X is an IIFE build and does not support ES6 applications. To use the library in ES6 projects please use version 2.X.
-2. For library version 2.X, you need to separately install ``jquery`` and ``jquerydeparam`` as peer dependencies.
+### Notes
+1. Library version 1.X is an IIFE build and does not support ES6 applications. To use the library in ES6 projects please use version 2.X or above.
+2. This documentation is targeted for version 3.0.0 which is currently in ``beta``. Use it at your own risk!
+3. As of version 3, the ``init`` method has been removed. The library self initializes handlers for matching routes. This feature is still under testing!
+4. If you are using library version 2.X or above, you may need to install following dependencies.
 
 ```sh
-npm install --save jquery jquerydeparam
+npm install --save jquery jquerydeparam lzstorage
 ```
 
 # How to use?
@@ -63,18 +65,7 @@ $.route('/path/to/route3', function () { ... });
 ```js
 $.router.set('/path/to/route1');
 ```
-The method changes current route and call the appropriate method that matches it.<br/><br/>
-<b>3. Execute routes on page load. Call router's <code>init</code> method for that magic:</b><br/>
-```js
-$.router.init();
-```
-The method execute handler methods that matches the current route (without <code>$.router.set</code>). Alternatively, you can call <code>$.router.set(location.pathname);</code> on DOM ready.
-```js
-$(function () {
-    ...
-    $.router.set(location.pathname);
-});
-```
+
 <b>4. Pass data to route handler:</b><br/>
 ```js
 $.router.set({
@@ -85,7 +76,8 @@ $.router.set({
     }
 });
 ...
-$.route('/path/to/route', function (data) {
+$.route('/path/to/route', function (config) {
+    const { data } = config;
     console.log(data.key1); // 'value1'
     console.log(data.key2); // 'value2'
 });
@@ -94,19 +86,24 @@ $.route('/path/to/route', function (data) {
 ```js
 $.router.set('/path/to/route/hello/world');
 ...
-$.route('/path/to/route/:param1/:param2', function (data, params) {
+$.route('/path/to/route/:param1/:param2', function (config) {
+    const { params } = config;
     console.log(params.param1); // hello
     console.log(params.param2); // world
 });
 ```
 <b>6. Set query parameters:</b><br/>
 ```js
+// Approach 1
+$.router.set('/path/to/route?q=123&s=helloworld');
+// Approach 2
 $.router.set({
     route: '/path/to/route',
     queryString: 'q=123&s=helloworld'
 });
 ...
-$.route('/path/to/route', function (data, params, query) {
+$.route('/path/to/route', function (config) {
+    const { query } = config;
     console.log(query.q); // 123
     console.log(query.s); // 'helloworld'
 });
@@ -114,13 +111,25 @@ $.route('/path/to/route', function (data, params, query) {
 <b>7. Change current page path without updating history:</b><br/>
 ```js
 var replaceMode = true;
+// Approach 1
 $.router.set('/path/to/route', replaceMode);
+// Approach 2
+$.router.set({
+    route: '/path/to/route',
+    replaceMode
+});
 ```
 <b>8. Change current page path without calling handler function:</b><br/>
 ```js
 ...
-var doNotCallHandler = true;
-$.router.set('/path/to/route', replaceMode, doNotCallHandler);
+var noTrigger = true;
+// Approach 1
+$.router.set('/path/to/route', replaceMode, noTrigger);
+// Approach 2
+$.router.set({
+    route: '/path/to/route',
+    noTrigger
+});
 ```
 <b>9. Set \# routes:</b><br/>
 ```js
