@@ -47,8 +47,8 @@ const demo = {
                 }
             }
         });
-        route('/demos/demo2/modalroute/:progress', function (...args) {
-            const [, params] = args;
+        route('/demos/demo2/modalroute/:progress', function (config) {
+            const { params } = config;
             let progress = +params.progress;
             // If modal is not already open then open the modal
             if (!_cache.modalWindow.hasClass('bs-visible')) {
@@ -61,8 +61,8 @@ const demo = {
                 .filter(`[data-step="${progress}"]`)
                 .removeClass('d-none').addClass('active');
         });
-        route('/demos/demo3', function (...args) {
-            const [, , query] = args;
+        route('/demos/demo3', function (config) {
+            const { query } = config;
             if (!$.isEmptyObject(query)) {
                 $('.js-query-data').text(JSON.stringify(query, null, 2));
             } else {
@@ -112,7 +112,6 @@ const demo = {
         this.updateCache();
         this.bindEvents();
         console.log("Demo initialized");
-        router.init();
     }
 };
 demo.init();
