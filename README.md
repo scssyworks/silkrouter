@@ -6,7 +6,7 @@ JQuery router is a routing plugin for single page jquery applications.
 Using npm:
 
 ```sh
-npm install --save jqueryrouter
+npm install --save jqueryrouter@3.0.0-beta.1
 ```
 
 Using CDN:
