@@ -47,8 +47,8 @@ const demo = {
                 }
             }
         });
-        route('/demos/demo2/modalroute/:progress', function (...args) {
-            const [, params] = args;
+        route('/demos/demo2/modalroute/:progress', function (config) {
+            const { params } = config;
             let progress = +params.progress;
             // If modal is not already open then open the modal
             if (!_cache.modalWindow.hasClass('bs-visible')) {
@@ -61,16 +61,26 @@ const demo = {
                 .filter(`[data-step="${progress}"]`)
                 .removeClass('d-none').addClass('active');
         });
-        route('/demos/demo3', function (...args) {
-            const [, , query] = args;
+        route('/demos/demo3', function (config) {
+            const { data, query } = config;
             if (!$.isEmptyObject(query)) {
                 $('.js-query-data').text(JSON.stringify(query, null, 2));
             } else {
                 $('.js-query-data').text('No data!');
             }
+            $('.js-storage-data').text(JSON.stringify(data, null, 2));
         });
         _cache.homeLinks.find('.nav-link').on('click', function () {
-            router.set($(this).parent().data('route'));
+            if ($(this).parent().data('route') === '/demos/demo3') {
+                router.set({
+                    route: $(this).parent().data('route'),
+                    data: {
+                        sample: 'Hello World!'
+                    }
+                });
+            } else {
+                router.set($(this).parent().data('route'));
+            }
         });
         _cache.accordionBtns.on('click', function (e) {
             const self = $(this);
@@ -112,7 +122,6 @@ const demo = {
         this.updateCache();
         this.bindEvents();
         console.log("Demo initialized");
-        router.init();
     }
 };
 demo.init();
