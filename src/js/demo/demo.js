@@ -62,15 +62,25 @@ const demo = {
                 .removeClass('d-none').addClass('active');
         });
         route('/demos/demo3', function (config) {
-            const { query } = config;
+            const { data, query } = config;
             if (!$.isEmptyObject(query)) {
                 $('.js-query-data').text(JSON.stringify(query, null, 2));
             } else {
                 $('.js-query-data').text('No data!');
             }
+            $('.js-storage-data').text(JSON.stringify(data, null, 2));
         });
         _cache.homeLinks.find('.nav-link').on('click', function () {
-            router.set($(this).parent().data('route'));
+            if ($(this).parent().data('route') === '/demos/demo3') {
+                router.set({
+                    route: $(this).parent().data('route'),
+                    data: {
+                        sample: 'Hello World!'
+                    }
+                });
+            } else {
+                router.set($(this).parent().data('route'));
+            }
         });
         _cache.accordionBtns.on('click', function (e) {
             const self = $(this);

@@ -96,13 +96,13 @@
     compression: true
   });
   var libs = {
-    getDataFromStore: function getDataFromStore(path) {
+    getDataFromStore: function getDataFromStore(path, isHash) {
       var paths = $.extend({}, store.get('routeStore'));
-      return paths[path];
+      return paths["".concat(isHash ? '#' : '').concat(path)];
     },
-    setDataToStore: function setDataToStore(path, data) {
+    setDataToStore: function setDataToStore(path, isHash, data) {
       var paths = $.extend({}, store.get('routeStore'));
-      $.extend(paths, _defineProperty({}, path, data));
+      $.extend(paths, _defineProperty({}, "".concat(isHash ? '#' : '').concat(path), data));
       return store.set('routeStore', paths, true);
     },
     handlers: []
@@ -231,7 +231,7 @@
       pureRoute = pureRoute.substring(isHash);
 
       if (isValidRoute(pureRoute)) {
-        libs.setDataToStore(pureRoute, data);
+        libs.setDataToStore(pureRoute, isHash === 1, data);
 
         if (isHistorySupported && !isHash) {
           history[routeMethod]({
@@ -361,7 +361,9 @@
 
 
   function testRoute(route, url) {
-    if (url.charAt(0) === '#') {
+    var isHash = url.charAt(0) === '#';
+
+    if (isHash) {
       url = url.substring(1);
     }
 
@@ -369,7 +371,7 @@
         _url$split2 = _slicedToArray(_url$split, 1),
         path = _url$split2[0];
 
-    var data = $.extend({}, libs.getDataFromStore(path));
+    var data = $.extend({}, libs.getDataFromStore(path, isHash));
     var params = {};
     var hasMatch = false;
     REG_ROUTE_PARAMS.lastIndex = 0;

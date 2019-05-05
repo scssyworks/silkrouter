@@ -6,14 +6,14 @@ const store = new LZStorage({
     compression: true
 });
 export const libs = {
-    getDataFromStore(path) {
+    getDataFromStore(path, isHash) {
         const paths = $.extend({}, store.get('routeStore'));
-        return paths[path];
+        return paths[`${isHash ? '#' : ''}${path}`];
     },
-    setDataToStore(path, data) {
+    setDataToStore(path, isHash, data) {
         const paths = $.extend({}, store.get('routeStore'));
         $.extend(paths, {
-            [path]: data
+            [`${isHash ? '#' : ''}${path}`]: data
         });
         return store.set('routeStore', paths, true);
     },

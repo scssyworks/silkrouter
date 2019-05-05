@@ -109,7 +109,7 @@ function execRoute(route, replaceMode, noTrigger) {
         ignoreHashChange = nt;
         pureRoute = pureRoute.substring(isHash);
         if (isValidRoute(pureRoute)) {
-            libs.setDataToStore(pureRoute, data);
+            libs.setDataToStore(pureRoute, isHash === 1, data);
             if (isHistorySupported && !isHash) {
                 history[routeMethod]({ data }, title, resolveQuery(pureRoute, queryString, appendQuery));
                 if (!nt) {
@@ -214,11 +214,12 @@ function unbindRoute(route, handler) {
  * @param {object} params Parameters
  */
 function testRoute(route, url) {
-    if (url.charAt(0) === '#') {
+    const isHash = url.charAt(0) === '#';
+    if (isHash) {
         url = url.substring(1);
     }
     const [path] = url.split('?');
-    const data = $.extend({}, libs.getDataFromStore(path));
+    const data = $.extend({}, libs.getDataFromStore(path, isHash));
     const params = {};
     let hasMatch = false;
     REG_ROUTE_PARAMS.lastIndex = 0;

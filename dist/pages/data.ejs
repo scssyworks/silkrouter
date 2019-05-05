@@ -32,6 +32,19 @@
     <br />
     <p>Your data:</p>
     <pre class="js-query-data">No data!</pre>
-    <p>Another way to persist data is to use web storage. How you persist data for a given route depends on your implementation. There is a neat plugin available called <code>LZ Storage</code>. It provide ways to compress data before storing it in local storage.</p>
-    <p>Check it out: <a href="https://www.npmjs.com/package/lzstorage">LZ Storage</a></p>
+    <p>Another way to persist data is to use web storage. As of version 3.0.0-beta.0 jqueryrouter uses web storage internally to persist data.</p>
+    <p>As an example we have already passed <code>data</code> when calling <code>set</code> function on current route. You can see the sample data below:</p>
+    <pre>
+        <code>
+    $.router.set({
+        route: '/demos/demo3',
+        data: {
+            sample: 'Hello World!'
+        }
+    });</code>
+    </pre>
+    <p>Storage data:</p>
+    <pre class="js-storage-data"></pre>
+    <p>Use browser back or forward or try refreshing the page.</p>
+
 </div>
