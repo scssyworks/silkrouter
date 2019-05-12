@@ -289,7 +289,7 @@ function initRouterEvents() {
         }
         triggerRoute(pathname, e.type, false, originalData);
         if (hashstring) {
-            triggerRoute(`#${hashstring}`, 'hashchange', true, originalData);
+            triggerRoute(`#${hashstring}`, HASH_CHANGE, true, originalData);
         }
     });
 }

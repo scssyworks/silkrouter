@@ -476,7 +476,7 @@
       triggerRoute(pathname, e.type, false, originalData);
 
       if (hashstring) {
-        triggerRoute("#".concat(hashstring), 'hashchange', true, originalData);
+        triggerRoute("#".concat(hashstring), HASH_CHANGE, true, originalData);
       }
     });
   }
