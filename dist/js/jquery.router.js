@@ -127,6 +127,7 @@
   function triggerRoute(route, eventType) {
     var hash = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     var noTrigger = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+    var originalData = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : {};
 
     if (noTrigger) {
       ignoreHashChange = false;
@@ -135,7 +136,7 @@
         route: route,
         eventType: eventType,
         hash: hash
-      });
+      }, originalData);
     }
   }
   /**
@@ -361,6 +362,7 @@
 
 
   function testRoute(route, url) {
+    var originalData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     var isHash = url.charAt(0) === '#';
 
     if (isHash) {
@@ -370,6 +372,10 @@
     var _url$split = url.split('?'),
         _url$split2 = _slicedToArray(_url$split, 1),
         path = _url$split2[0];
+
+    if (!$.isEmptyObject(originalData)) {
+      libs.setDataToStore(path, isHash, originalData); // Sync store with event data.
+    }
 
     var data = $.extend({}, libs.getDataFromStore(path, isHash));
     var params = {};
@@ -410,13 +416,14 @@
 
 
   function execListeners(eventName, routeConfig) {
+    var originalData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     var isHash = routeConfig.hash;
     var _window$location2 = window.location,
         hash = _window$location2.hash,
         pathname = _window$location2.pathname;
     libs.handlers.forEach(function (ob) {
       if (ob.eventName === eventName) {
-        var _testRoute2 = testRoute(ob.route, isHistorySupported && !isHash ? pathname : hash || pathname),
+        var _testRoute2 = testRoute(ob.route, isHistorySupported && !isHash ? pathname : hash || pathname, originalData),
             hasMatch = _testRoute2.hasMatch,
             data = _testRoute2.data,
             params = _testRoute2.params;
@@ -443,7 +450,16 @@
     $(window).on("".concat(POP_STATE, " ").concat(HASH_CHANGE), function (e) {
       var isHash = e.type === 'hashchange';
       var noTrigger = ignoreHashChange;
-      return triggerRoute.apply(this, [window.location[isHash ? 'hash' : 'pathname'], e.type, isHash, noTrigger]);
+      var originalEvent = e.originalEvent;
+      var originalData = {};
+
+      if (originalEvent && originalEvent.state) {
+        var data = originalEvent.state.data;
+        $.extend(originalData, data);
+      }
+
+      console.log(e.originalEvent.state);
+      return triggerRoute.apply(this, [window.location[isHash ? 'hash' : 'pathname'], e.type, isHash, noTrigger, originalData]);
     });
   }
 
@@ -452,11 +468,9 @@
     api: {
       /**
        * Triggers a custom route event
-       * @param {string} eventName Name of event
-       * @param {object} params Parameters object
        */
-      trigger: function trigger(eventName, routeConfig) {
-        return execListeners.apply(this, [eventName, routeConfig]);
+      trigger: function trigger() {
+        return execListeners.apply(this, arguments);
       }
     },
 
@@ -502,8 +516,8 @@
 
   initRouterEvents();
 
-  exports.router = router;
   exports.route = route;
+  exports.router = router;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
