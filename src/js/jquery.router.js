@@ -31,15 +31,19 @@ function sanitize(str) {
 /**
  * Triggers "routeChanged" event unless "noTrigger" flag is true
  */
-function triggerRoute(route, eventType, hash = false, noTrigger = false) {
+function triggerRoute(route, eventType, hash = false, noTrigger = false, originalData = {}) {
     if (noTrigger) {
         ignoreHashChange = false;
     } else {
-        router.api.trigger(ROUTE_CHANGED, {
-            route,
-            eventType,
-            hash
-        });
+        router.api.trigger(
+            ROUTE_CHANGED,
+            {
+                route,
+                eventType,
+                hash
+            },
+            originalData
+        );
     }
 }
 
@@ -213,12 +217,15 @@ function unbindRoute(route, handler) {
  * @param {string} url Current url
  * @param {object} params Parameters
  */
-function testRoute(route, url) {
+function testRoute(route, url, originalData = {}) {
     const isHash = url.charAt(0) === '#';
     if (isHash) {
         url = url.substring(1);
     }
     const [path] = url.split('?');
+    if (!$.isEmptyObject(originalData)) {
+        libs.setDataToStore(path, isHash, originalData); // Sync store with event data.
+    }
     const data = $.extend({}, libs.getDataFromStore(path, isHash));
     const params = {};
     let hasMatch = false;
@@ -250,18 +257,22 @@ function testRoute(route, url) {
  * @param {string} eventName Name of route event
  * @param {object} params Parameters
  */
-function execListeners(eventName, routeConfig) {
+function execListeners(eventName, routeConfig, originalData = {}) {
     const { hash: isHash } = routeConfig;
     const { hash, pathname } = window.location;
     libs.handlers.forEach(ob => {
         if (ob.eventName === eventName) {
-            const { hasMatch, data, params } = testRoute(ob.route, (
-                (isHistorySupported && !isHash)
-                    ? pathname
-                    : (
-                        hash || pathname
-                    )
-            ));
+            const { hasMatch, data, params } = testRoute(
+                ob.route,
+                (
+                    (isHistorySupported && !isHash)
+                        ? pathname
+                        : (
+                            hash || pathname
+                        )
+                ),
+                originalData
+            );
             if (
                 !isHistorySupported
                 && !hash
@@ -286,11 +297,19 @@ function initRouterEvents() {
     $(window).on(`${POP_STATE} ${HASH_CHANGE}`, function (e) {
         const isHash = e.type === 'hashchange';
         const noTrigger = ignoreHashChange;
+        const { originalEvent } = e;
+        let originalData = {};
+        if (originalEvent && originalEvent.state) {
+            const { data } = originalEvent.state;
+            $.extend(originalData, data);
+        }
+        console.log(e.originalEvent.state);
         return triggerRoute.apply(this, [
             window.location[isHash ? 'hash' : 'pathname'],
             e.type,
             isHash,
-            noTrigger
+            noTrigger,
+            originalData
         ]);
     });
 }
@@ -300,11 +319,9 @@ const router = {
     api: {
         /**
          * Triggers a custom route event
-         * @param {string} eventName Name of event
-         * @param {object} params Parameters object
          */
-        trigger(eventName, routeConfig) {
-            return execListeners.apply(this, [eventName, routeConfig]);
+        trigger() {
+            return execListeners.apply(this, arguments);
         }
     },
     /**

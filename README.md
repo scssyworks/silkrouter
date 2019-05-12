@@ -6,7 +6,7 @@ JQuery router is a routing plugin for single page jquery applications.
 Using npm:
 
 ```sh
-npm install --save jqueryrouter@3.0.0-beta.2
+npm install --save jqueryrouter@3.0.0-beta.3
 ```
 
 Using CDN:
@@ -20,6 +20,9 @@ Previous version:
 npm install --save jqueryrouter@2.1.0
 ```
 (See <a href="https://github.com/scssyworks/jqueryrouter/tree/feature/ver2">documentation</a> for version 2.1.0)
+
+### Warning!
+We are about to retire IE9 in our supported list of browsers. If you still want IE9 support please download version 2.1.0.
 
 ### Notes
 1. Library version 1.X is an IIFE build and does not support ES6 applications. To use the library in ES6 projects please use version 2.X or above.
