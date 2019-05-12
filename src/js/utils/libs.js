@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import LZStorage from 'lzstorage';
 
 // Object containing a map of attached handlers
@@ -7,14 +6,15 @@ const store = new LZStorage({
 });
 export const libs = {
     getDataFromStore(path, isHash) {
-        const paths = $.extend({}, store.get('routeStore'));
+        const paths = store.get('routeStore') || {};
         return paths[`${isHash ? '#' : ''}${path}`];
     },
     setDataToStore(path, isHash, data) {
-        const paths = $.extend({}, store.get('routeStore'));
-        $.extend(paths, {
+        let paths = store.get('routeStore') || {};
+        paths = {
+            ...paths,
             [`${isHash ? '#' : ''}${path}`]: data
-        });
+        };
         return store.set('routeStore', paths, true);
     },
     handlers: []

@@ -7,17 +7,16 @@ import pkg from './package.json';
 
 export default [
     {
-        input: "src/js/jquery.router.js",
+        input: "src/js/silkrouter.js",
         external: Object.keys(pkg.peerDependencies),
         output: {
-            file: "dist/js/jquery.router.js",
+            file: "dist/js/silkrouter.js",
             format: "umd",
-            name: "jqueryrouter",
+            name: "silkrouter",
             sourcemap: true,
             globals: {
-                jquery: 'jQuery',
-                jquerydeparam: 'deparam',
-                lzstorage: 'LZStorage'
+                'deparam.js': 'deparam',
+                'lzstorage': 'LZStorage'
             }
         },
         plugins: [
@@ -33,16 +32,15 @@ export default [
         ]
     },
     {
-        input: "src/js/jquery.router.js",
+        input: "src/js/silkrouter.js",
         external: Object.keys(pkg.peerDependencies),
         output: {
-            file: "dist/js/jquery.router.min.js",
+            file: "dist/js/silkrouter.min.js",
             format: "umd",
-            name: "jqueryrouter",
+            name: "silkrouter",
             globals: {
-                jquery: 'jQuery',
-                jquerydeparam: 'deparam',
-                lzstorage: 'LZStorage'
+                'deparam.js': 'deparam',
+                'lzstorage': 'LZStorage'
             }
         },
         plugins: [

@@ -1,24 +1,17 @@
 /**!
- * jQuery router plugin
- * This file contains SPA router methods to handle routing mechanism in single page applications (SPA). Supported versions IE9+, Chrome, Safari, Firefox
+ * Silk router plugin
+ * This file contains SPA router methods to handle routing mechanism in single page applications (SPA). Supported versions IE10+, Chrome, Safari, Firefox
  *
- * @project      Jquery Routing Plugin
+ * @project      Silk Routing Plugin
  * @date         2019-05-05
  * @author       Sachin Singh <ssingh.300889@gmail.com>
- * @dependencies jQuery, jquerydeparam, lzstorage
- * @version      3.0.0-beta.0
+ * @dependencies deparam.js, lzstorage
+ * @version      3.0.0-beta.4
  */
 
-import $ from 'jquery';
-import deparam from 'jquerydeparam';
+import deparam from 'deparam.js';
 import { POP_STATE, HASH_CHANGE, ROUTE_CHANGED, REG_ROUTE_PARAMS, INVALID_ROUTE, REG_HASH_QUERY, REG_PATHNAME } from './utils/constants';
 import { libs } from './utils/libs';
-
-// Variable to check if browser supports history API properly    
-const isHistorySupported = !!(history && history.pushState);
-
-// Variable to ignore hashchange event
-let ignoreHashChange = false;
 
 /**
  * Trims leading/trailing special characters
@@ -29,22 +22,18 @@ function sanitize(str) {
 }
 
 /**
- * Triggers "routeChanged" event unless "noTrigger" flag is true
+ * Triggers "route.changed" event
  */
-function triggerRoute(route, eventType, hash = false, noTrigger = false, originalData = {}) {
-    if (noTrigger) {
-        ignoreHashChange = false;
-    } else {
-        router.api.trigger(
-            ROUTE_CHANGED,
-            {
-                route,
-                eventType,
-                hash
-            },
-            originalData
-        );
-    }
+function triggerRoute(route, eventType, hash = false, originalData = {}) {
+    router.api.trigger(
+        ROUTE_CHANGED,
+        {
+            route,
+            eventType,
+            hash
+        },
+        originalData
+    );
 }
 
 /**
@@ -64,20 +53,22 @@ function isValidRoute(route) {
  * @param {string} qString Query string
  * @param {boolean} appendQString Append query string flag
  */
-function resolveQuery(route, queryString, append) {
-    if (typeof queryString === 'string') {
-        queryString = queryString.trim();
-        if (queryString.charAt(0) === '?') {
-            queryString = queryString.substring(1);
-        }
-        if (append && queryString) {
-            return `${route}${window.location.search}&${queryString}`;
-        }
-        if (!append && queryString) {
+function resolveQuery(route = '', isHash = false, queryString = '', append = false) {
+    queryString = queryString.charAt(0) === '?' ? queryString.substring(1).trim() : queryString.trim();
+    if (!isHash) {
+        if (append) {
+            if (queryString) {
+                return `${route}${location.search}&${queryString}`;
+            }
+            return `${route}${location.search}`;
+        } else if (queryString) {
             return `${route}?${queryString}`;
         }
+        return route;
+    } else if (queryString) {
+        return `${location.pathname}${location.search}#${route}?${queryString}`;
     }
-    return route;
+    return `${location.pathname}${location.search}#${route}`;
 }
 
 /**
@@ -85,11 +76,17 @@ function resolveQuery(route, queryString, append) {
  */
 function getQueryParams() {
     const qsObject = deparam(window.location.search);
-    const hashStringParams = {};
+    let hashStringParams = {};
     if (window.location.hash.match(REG_HASH_QUERY)) {
-        $.extend(hashStringParams, deparam(window.location.hash.match(REG_HASH_QUERY)[0]));
+        hashStringParams = {
+            ...hashStringParams,
+            ...deparam(window.location.hash.match(REG_HASH_QUERY)[0])
+        };
     }
-    return $.extend(qsObject, hashStringParams);
+    return {
+        ...qsObject,
+        ...hashStringParams
+    };
 }
 
 /**
@@ -98,35 +95,32 @@ function getQueryParams() {
  * @param {boolean} replaceMode Replace mode
  * @param {boolean} noTrigger Do not trigger handler
  */
-function execRoute(route, replaceMode, noTrigger) {
-    const routeObject = typeof route === 'string' ? { route } : $.extend({}, route);
-    $.extend(routeObject, {
+function execRoute(route = {}, replaceMode = false, noTrigger = false) {
+    let routeObject = typeof route === 'string' ? { route } : {
+        ...route
+    };
+    routeObject = {
+        ...routeObject,
         replaceMode,
         noTrigger
-    });
-    const { route: sroute, replaceMode: rm, noTrigger: nt, queryString: qs, data, title = null, appendQuery } = routeObject;
+    };
+    const { route: sroute, replaceMode: rm, noTrigger: nt, queryString: qs = '', data, title = null, appendQuery } = routeObject;
     if (typeof sroute === 'string') {
         const isHash = sroute.charAt(0) === '#' ? 1 : 0;
-        let [pureRoute, queryString] = sroute.trim().split('?');
+        let [pureRoute, queryString = ''] = sroute.trim().split('?');
         const routeMethod = `${rm ? 'replace' : 'push'}State`;
         queryString = queryString || qs;
-        ignoreHashChange = nt;
         pureRoute = pureRoute.substring(isHash);
         if (isValidRoute(pureRoute)) {
             libs.setDataToStore(pureRoute, isHash === 1, data);
-            if (isHistorySupported && !isHash) {
-                history[routeMethod]({ data }, title, resolveQuery(pureRoute, queryString, appendQuery));
-                if (!nt) {
-                    router.api.trigger(ROUTE_CHANGED, {
-                        route: pureRoute,
-                        eventType: POP_STATE,
-                        hash: false
-                    });
-                }
-            } else if (rm) {
-                window.location.replace(`#${resolveQuery(pureRoute, queryString, appendQuery)}`);
-            } else {
-                window.location.hash = resolveQuery(pureRoute, queryString, appendQuery);
+            const completeRoute = resolveQuery(pureRoute, isHash === 1, queryString, appendQuery);
+            history[routeMethod]({ data }, title, completeRoute);
+            if (!nt) {
+                triggerRoute(
+                    `${isHash ? '#' : ''}${pureRoute}`,
+                    (isHash ? HASH_CHANGE : POP_STATE),
+                    (isHash === 1)
+                );
             }
         } else {
             throw new Error(INVALID_ROUTE);
@@ -223,10 +217,10 @@ function testRoute(route, url, originalData = {}) {
         url = url.substring(1);
     }
     const [path] = url.split('?');
-    if (!$.isEmptyObject(originalData)) {
+    if (!!Object.keys(originalData).length) {
         libs.setDataToStore(path, isHash, originalData); // Sync store with event data.
     }
-    const data = $.extend({}, libs.getDataFromStore(path, isHash));
+    const data = { ...libs.getDataFromStore(path, isHash) };
     const params = {};
     let hasMatch = false;
     REG_ROUTE_PARAMS.lastIndex = 0;
@@ -264,27 +258,16 @@ function execListeners(eventName, routeConfig, originalData = {}) {
         if (ob.eventName === eventName) {
             const { hasMatch, data, params } = testRoute(
                 ob.route,
-                (
-                    (isHistorySupported && !isHash)
-                        ? pathname
-                        : (
-                            hash || pathname
-                        )
-                ),
+                (isHash ? hash : pathname),
                 originalData
             );
-            if (
-                !isHistorySupported
-                && !hash
-            ) {
-                // Fallback to hash routes for older browsers
-                window.location.replace(`#${pathname}`);
-            } else if (hasMatch) {
-                ob.handler($.extend(routeConfig, {
+            if (hasMatch) {
+                ob.handler({
+                    ...routeConfig,
                     data,
                     params,
                     query: getQueryParams()
-                }));
+                });
             }
         }
     });
@@ -294,23 +277,20 @@ function execListeners(eventName, routeConfig, originalData = {}) {
  * Initializes router events
  */
 function initRouterEvents() {
-    $(window).on(`${POP_STATE} ${HASH_CHANGE}`, function (e) {
-        const isHash = e.type === 'hashchange';
-        const noTrigger = ignoreHashChange;
-        const { originalEvent } = e;
+    window.addEventListener(`${POP_STATE}`, function (e) {
+        const completePath = `${location.pathname}${location.hash}`;
+        const [pathname, hashstring] = completePath.split('#');
         let originalData = {};
-        if (originalEvent && originalEvent.state) {
-            const { data } = originalEvent.state;
-            $.extend(originalData, data);
+        if (e.state) {
+            const { data } = e.state;
+            if (data) {
+                originalData = data;
+            }
         }
-        console.log(e.originalEvent.state);
-        return triggerRoute.apply(this, [
-            window.location[isHash ? 'hash' : 'pathname'],
-            e.type,
-            isHash,
-            noTrigger,
-            originalData
-        ]);
+        triggerRoute(pathname, e.type, false, originalData);
+        if (hashstring) {
+            triggerRoute(`#${hashstring}`, 'hashchange', true, originalData);
+        }
     });
 }
 
@@ -332,9 +312,7 @@ const router = {
      */
     set() {
         return execRoute.apply(this, arguments);
-    },
-    // Flag to check if history API is supported in current browser
-    isHistorySupported
+    }
 }
 
 /**
@@ -355,13 +333,6 @@ function unroute() {
     return unbindRoute.apply(this, arguments);
 }
 
-// Hooking route and router to jQuery
-if (typeof $ === 'function') {
-    $.route = $.prototype.route = route;
-    $.unroute = $.prototype.unroute = unroute;
-    $.router = router;
-}
-
 initRouterEvents();
 
-export { router, route };
+export { router, route, unroute };
