@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import 'bootstrap';
-import { router, route } from "../jquery.router";
+import { router, route } from "../silkrouter";
 import 'bootstrap/dist/css/bootstrap.css';
 import './demo.css';
 

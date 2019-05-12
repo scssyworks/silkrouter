@@ -1,10 +1,10 @@
 {
-  "name": "jqueryrouter",
-  "version": "3.0.0-beta.2",
-  "description": "JQuery router is a routing plugin for jQuery",
-  "main": "dist/js/jquery.router.js",
-  "module": "dist/js/jquery.router.js",
-  "typings": "src/typings/jquery.router.d.ts",
+  "name": "silkrouter",
+  "version": "3.0.0-beta.4",
+  "description": "Silk router is a library for implementing single page applications",
+  "main": "dist/js/silkrouter.js",
+  "module": "src/js/silkrouter.js",
+  "typings": "src/typings/silkrouter.d.ts",
   "scripts": {
     "start": "node server.js",
     "buildAndStart": "npm run build && npm run start",
@@ -12,35 +12,33 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/scssyworks/jqueryrouter.git"
+    "url": "git+https://github.com/scssyworks/silkrouter.git"
   },
   "keywords": [
-    "jquery",
-    "jquery-plugin",
     "router",
     "routing",
+    "silk router",
     "SPA",
     "single page applications"
   ],
   "author": "Sachin Singh",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/scssyworks/jqueryrouter/issues"
+    "url": "https://github.com/scssyworks/silkrouter/issues"
   },
-  "homepage": "https://github.com/scssyworks/jqueryrouter#readme",
+  "homepage": "https://github.com/scssyworks/silkrouter#readme",
   "peerDependencies": {
-    "jquery": "^3.4.1",
-    "jquerydeparam": "^1.1.2",
+    "deparam.js": "^2.0.1",
     "lzstorage": "^1.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
     "bootstrap": "^4.3.1",
+    "deparam.js": "^2.0.1",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "jquery": "^3.4.1",
-    "jquerydeparam": "^1.1.5",
     "lzstorage": "^1.0.8",
     "popper.js": "^1.15.0",
     "rollup": "^1.11.3",

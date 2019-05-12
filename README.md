@@ -1,78 +1,75 @@
-# JQuery Routing Plugin
-JQuery router is a routing plugin for single page jquery applications.
+# Silk Router
+Silk router (formerly jqueryrouter) is a base library for implementing single page applications.
+
+### Announcement 
+<b>We have removed dependency on jQuery and ended support for IE9 in favour of history API. This library only works on browsers that have support for ``pushState``.</b>
 
 # Installation
 
 Using npm:
 
 ```sh
-npm install --save jqueryrouter@3.0.0-beta.3
+npm install --save silkrouter@3.0.0-beta.5
 ```
 
 Using CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@3.0.0-beta.1/dist/js/jquery.router.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/silkrouter@3.0.0-beta.4/dist/js/silkrouter.min.js"></script>
 ```
 
-Previous version:
+Previous versions:
+
+```sh
+npm install --save jqueryrouter@3.0.0-beta.3
+```
+
 ```sh
 npm install --save jqueryrouter@2.1.0
 ```
-(See <a href="https://github.com/scssyworks/jqueryrouter/tree/feature/ver2">documentation</a> for version 2.1.0)
+(See <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">documentation</a> for version 2.1.0)
 
-### Warning!
-We are about to retire IE9 in our supported list of browsers. If you still want IE9 support please download version 2.1.0.
 
 ### Notes
 1. Library version 1.X is an IIFE build and does not support ES6 applications. To use the library in ES6 projects please use version 2.X or above.
 2. This documentation is targeted for version 3.0.0 which is currently in ``beta``. Use it at your own risk!
-3. As of version 3, the ``init`` method has been removed. The library self initializes handlers for matching routes. This feature is still under testing!
-4. If you are using library version 2.X or above, you may need to install following dependencies.
+3. As of version 3, this library is now purely implemented in ES6 and vanilla JavaScript. We have also removed the ``init`` method as the library is now capable of initializing routes by itself.
+4. This version of library requires peer dependencies. Please install dependencies below:
 
 ```sh
-npm install --save jquery jquerydeparam lzstorage
+npm install --save deparam.js lzstorage
 ```
 
 # How to use?
 
 <b>Add a script tag</b><br/>
 ```html
-<script src="jquery.router.js"></script>
+<script src="silkrouter.js"></script>
 <script>
-    const { router, route } = jqueryrouter;
+    const { router, route } = silkrouter;
 </script>
 ```
 
 <b>Use ES6 import (Webpack or Rollup)</b><br/>
 ```js
-import { router, route } from 'jqueryrouter';
-```
-
-<b>Using jQuery</b>
-```js
-import $ from 'jquery';
-import 'jqueryrouter';
-
-$.route(...);
-$.router.set(...);
+import { router, route } from 'silkrouter';
 ```
 
 # How it works?
 <b>1. Create routes:</b><br/>
 ```js
-$.route('/path/to/route1', function () { ... });
-$.route('/path/to/route2', function () { ... });
-$.route('/path/to/route3', function () { ... });
+route('/path/to/route1', function () { ... });
+route('/path/to/route2', function () { ... });
+route('/path/to/route3', function () { ... });
 ```
-<b>2. Trigger a route by calling <code>$.router.set</code></b><br/>
+<b>2. Trigger a route by calling <code>router.set</code></b><br/>
 ```js
-$.router.set('/path/to/route1');
+router.set('/path/to/route1');
 ```
 
 <b>4. Pass data to route handler:</b><br/>
 ```js
-$.router.set({
+router.set({
     route: '/path/to/route',
     data: {
         key1: 'value1',
@@ -80,7 +77,7 @@ $.router.set({
     }
 });
 ...
-$.route('/path/to/route', function (config) {
+route('/path/to/route', function (config) {
     const { data } = config;
     console.log(data.key1); // 'value1'
     console.log(data.key2); // 'value2'
@@ -88,9 +85,9 @@ $.route('/path/to/route', function (config) {
 ```
 <b>5. Set route parameters:</b><br/>
 ```js
-$.router.set('/path/to/route/hello/world');
+router.set('/path/to/route/hello/world');
 ...
-$.route('/path/to/route/:param1/:param2', function (config) {
+route('/path/to/route/:param1/:param2', function (config) {
     const { params } = config;
     console.log(params.param1); // hello
     console.log(params.param2); // world
@@ -99,14 +96,14 @@ $.route('/path/to/route/:param1/:param2', function (config) {
 <b>6. Set query parameters:</b><br/>
 ```js
 // Approach 1
-$.router.set('/path/to/route?q=123&s=helloworld');
+router.set('/path/to/route?q=123&s=helloworld');
 // Approach 2
-$.router.set({
+router.set({
     route: '/path/to/route',
     queryString: 'q=123&s=helloworld'
 });
 ...
-$.route('/path/to/route', function (config) {
+route('/path/to/route', function (config) {
     const { query } = config;
     console.log(query.q); // 123
     console.log(query.s); // 'helloworld'
@@ -116,9 +113,9 @@ $.route('/path/to/route', function (config) {
 ```js
 var replaceMode = true;
 // Approach 1
-$.router.set('/path/to/route', replaceMode);
+router.set('/path/to/route', replaceMode);
 // Approach 2
-$.router.set({
+router.set({
     route: '/path/to/route',
     replaceMode
 });
@@ -128,18 +125,18 @@ $.router.set({
 ...
 var noTrigger = true;
 // Approach 1
-$.router.set('/path/to/route', replaceMode, noTrigger);
+router.set('/path/to/route', replaceMode, noTrigger);
 // Approach 2
-$.router.set({
+router.set({
     route: '/path/to/route',
     noTrigger
 });
 ```
 <b>9. Set \# routes:</b><br/>
 ```js
-$.router.set('#/path/to/route');
+router.set('#/path/to/route');
 ...
-$.route('/path/to/route', function () {
+route('/path/to/route', function () {
     console.log('Still works');
 });
 ```
@@ -149,18 +146,18 @@ This forces plugin to change URL hash instead of pathname.<br/>
 For performance reasons, it's a good idea to detach routes when your application unmounts. As of version 1.3.0 we have added ``unroute`` method which allows us to remove attached handlers.
 
 ```js
-$.unroute(); // Removes all routes
-$.unroute('/path/to/route'); // Removes all handlers attached to given route
-$.unroute('/path/to/route', handlerFn); // Removes handler function attached to the given route
+unroute(); // Removes all routes
+unroute('/path/to/route'); // Removes all handlers attached to given route
+unroute('/path/to/route', handlerFn); // Removes handler function attached to the given route
 ```
 
 # Browser support
-Jquery router has been tested in following browsers:
-<b>Desktop:</b> IE 9 - 11, Chrome, Firefox, Safari, Opera, Edge
+Silk router has been tested in following browsers:
+<b>Desktop:</b> IE 10+, Chrome, Firefox, Safari, Opera, Edge
 <b>Mobile:</b> Chrome, Safari, Firefox
 
 # Debugging
-<a href="https://github.com/scssyworks/jqueryrouter/blob/master/DEBUGGING.md">Debugging</a>
+<a href="https://github.com/scssyworks/silkrouter/blob/master/DEBUGGING.md">Debugging</a>
 
 # Demo
-https://jqueryrouter.herokuapp.com/
+https://silkrouter.herokuapp.com/
