@@ -1,6 +1,6 @@
 {
   "name": "jqueryrouter",
-  "version": "3.0.0-beta.2",
+  "version": "3.0.0-beta.3",
   "description": "JQuery router is a routing plugin for jQuery",
   "main": "dist/js/jquery.router.js",
   "module": "dist/js/jquery.router.js",
