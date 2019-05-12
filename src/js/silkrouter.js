@@ -1,12 +1,11 @@
-/**!
- * Silk router plugin
- * This file contains SPA router methods to handle routing mechanism in single page applications (SPA). Supported versions IE10+, Chrome, Safari, Firefox
+/**!Silk router plugin
+ * This file contains SPA router methods to handle route mechanism in single page applications (SPA). Supported versions IE10+, Chrome, Safari, Firefox
  *
- * @project      Silk Routing Plugin
- * @date         2019-05-05
+ * @project      Silk Router
+ * @date         2019-05-13
  * @author       Sachin Singh <ssingh.300889@gmail.com>
  * @dependencies deparam.js, lzstorage
- * @version      3.0.0-beta.4
+ * @version      3.0.0-beta.5
  */
 
 import deparam from 'deparam.js';
@@ -134,45 +133,37 @@ function execRoute(route = {}, replaceMode = false, noTrigger = false) {
  * @param {function} handler Callback function
  */
 function bindRoute(route, handler) {
-    let originalHandler = handler;
-    const element = this;
-    if (typeof handler === 'function') {
-        handler = handler.bind(this);
-    }
     // Resolve generic route
     if (typeof route === 'function') {
-        originalHandler = route;
-        handler = route.bind(this);
+        handler = route;
         route = '*';
     }
+    const startIndex = route.charAt(0) === '#' ? 1 : 0;
+    route = route.substring(startIndex);
     // Check existence
     const exists = libs.handlers.filter(ob => {
-        let test = (ob.originalHandler === originalHandler && ob.route === route);
-        if (this) {
-            test = test && ob.element === this;
-        }
-        return test;
+        return (ob.handler === handler && ob.route === route);
     }).length;
     // Attach handler
     if (!exists && typeof handler === 'function') {
         libs.handlers.push({
             eventName: ROUTE_CHANGED,
-            originalHandler,
             handler,
-            element,
-            route
+            route,
+            hash: startIndex === 1
         });
     }
     // Execute handler if matches current route (Replaces init method in version 2.0)
     const { pathname, hash } = window.location;
-    [pathname, hash].forEach(currentPath => {
-        const isHash = currentPath.charAt(0) === '#' ? 1 : 0;
+    const paths = startIndex === 1 ? [hash] : [pathname, hash];
+    paths.forEach(currentPath => {
+        const pathIndex = currentPath.charAt(0) === '#' ? 1 : 0;
         const { hasMatch, data, params } = testRoute(route, currentPath);
         if (hasMatch && typeof handler === 'function') {
             handler({
                 route: currentPath,
-                hash: isHash === 1,
-                eventName: isHash ? HASH_CHANGE : POP_STATE,
+                hash: pathIndex === 1,
+                eventName: pathIndex === 1 ? HASH_CHANGE : POP_STATE,
                 data,
                 params,
                 query: getQueryParams()
@@ -261,7 +252,7 @@ function execListeners(eventName, routeConfig, originalData = {}) {
                 (isHash ? hash : pathname),
                 originalData
             );
-            if (hasMatch) {
+            if (hasMatch && (!ob.hash || (ob.hash && isHash))) {
                 ob.handler({
                     ...routeConfig,
                     data,

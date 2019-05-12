@@ -274,40 +274,25 @@
 
 
   function bindRoute(route, handler) {
-    var _this = this;
-
-    var originalHandler = handler;
-    var element = this;
-
-    if (typeof handler === 'function') {
-      handler = handler.bind(this);
-    } // Resolve generic route
-
-
+    // Resolve generic route
     if (typeof route === 'function') {
-      originalHandler = route;
-      handler = route.bind(this);
+      handler = route;
       route = '*';
-    } // Check existence
+    }
 
+    var startIndex = route.charAt(0) === '#' ? 1 : 0;
+    route = route.substring(startIndex); // Check existence
 
     var exists = libs.handlers.filter(function (ob) {
-      var test = ob.originalHandler === originalHandler && ob.route === route;
-
-      if (_this) {
-        test = test && ob.element === _this;
-      }
-
-      return test;
+      return ob.handler === handler && ob.route === route;
     }).length; // Attach handler
 
     if (!exists && typeof handler === 'function') {
       libs.handlers.push({
         eventName: ROUTE_CHANGED,
-        originalHandler: originalHandler,
         handler: handler,
-        element: element,
-        route: route
+        route: route,
+        hash: startIndex === 1
       });
     } // Execute handler if matches current route (Replaces init method in version 2.0)
 
@@ -315,8 +300,9 @@
     var _window$location = window.location,
         pathname = _window$location.pathname,
         hash = _window$location.hash;
-    [pathname, hash].forEach(function (currentPath) {
-      var isHash = currentPath.charAt(0) === '#' ? 1 : 0;
+    var paths = startIndex === 1 ? [hash] : [pathname, hash];
+    paths.forEach(function (currentPath) {
+      var pathIndex = currentPath.charAt(0) === '#' ? 1 : 0;
 
       var _testRoute = testRoute(route, currentPath),
           hasMatch = _testRoute.hasMatch,
@@ -326,8 +312,8 @@
       if (hasMatch && typeof handler === 'function') {
         handler({
           route: currentPath,
-          hash: isHash === 1,
-          eventName: isHash ? HASH_CHANGE : POP_STATE,
+          hash: pathIndex === 1,
+          eventName: pathIndex === 1 ? HASH_CHANGE : POP_STATE,
           data: data,
           params: params,
           query: getQueryParams()
@@ -439,7 +425,7 @@
             data = _testRoute2.data,
             params = _testRoute2.params;
 
-        if (hasMatch) {
+        if (hasMatch && (!ob.hash || ob.hash && isHash)) {
           ob.handler(_objectSpread({}, routeConfig, {
             data: data,
             params: params,

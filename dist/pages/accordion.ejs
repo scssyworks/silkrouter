@@ -48,7 +48,7 @@
     <p>Activate an accordion tab and try refreshing the page.</p>
     <br/>
     <h3>Implementation:</h3>
-    <p>The implementation is fairly straight forward.</p>
+    <p>Implementation is fairly straight forward.</p>
     <b>Step 1:</b>
     <p>Set <code>data-route</code> attribute to button link and collapse section.</p>
     <p>We will use <code>data-route</code> to trigger route, as well as to filter sections for activation.</p>
@@ -66,7 +66,7 @@
         if ($(this).attr('aria-expanded') === 'true') {
             e.stopPropagation(); <span class="comment">// To register true accordion functionality</span>
         } else {
-            $.router.set($(this).data('route'), <b>false, true</b>);
+            router.set($(this).data('route'), <b>false, true</b>);
         }
     });</code>
     </pre>
@@ -75,7 +75,7 @@
     <p>Handle routing when user refreshes the page. Since the route is triggered by browser itself, the handler will be called anyway.</p>
     <pre>
         <code>
-    $.route(function (data) {
+    route(function (data) {
         if (<b>/accordion/</b>.test(data.route) && data.hash) {
             $('.btn-link')
                 .attr('aria-expanded', false)
@@ -89,6 +89,6 @@
     });</code>
     </pre>
     <p>We have registered a generic route because it makes it easier to handle multiple urls in a single handler. A generic route listens to all kinds of route changes.</p>
-    <p>A specific route is registered by passing a route string parameter: <code>$.route('&lt;route&gt;', handler);</code></p>
+    <p>A specific route is registered by passing a route string parameter: <code>route('&lt;route&gt;', handler);</code></p>
     <p>However, in cases where there are too many routes, registering individual handlers invite lots of issues especially related to performance.</p>
 </div>

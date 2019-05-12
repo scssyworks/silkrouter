@@ -9,7 +9,7 @@ Silk router (formerly jqueryrouter) is a base library for implementing single pa
 Using npm:
 
 ```sh
-npm install --save silkrouter@3.0.0-beta.4
+npm install --save silkrouter@3.0.0-beta.5
 ```
 
 Using CDN:
