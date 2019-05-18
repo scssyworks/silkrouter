@@ -1,3 +1,11 @@
+/**!
+ * Router plugin for single page applications with routes
+ * Release under the MIT license
+ * @name Silk router
+ * @author Sachin Singh <ssingh.300889@gmail.com>
+ * @version 3.0.0.beta.6
+ * @license MIT
+ */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('deparam.js'), require('lzstorage')) :
   typeof define === 'function' && define.amd ? define(['exports', 'deparam.js', 'lzstorage'], factory) :
@@ -150,6 +158,7 @@
 
   /**
    * Trims leading/trailing special characters
+   * @private
    * @param {string} param Parameters
    */
 
@@ -158,6 +167,7 @@
   }
   /**
    * Triggers "route.changed" event
+   * @private
    */
 
 
@@ -172,6 +182,7 @@
   }
   /**
    * Checks if given route is valid
+   * @private
    * @param {string} route Route string
    */
 
@@ -184,6 +195,7 @@
   }
   /**
    * Adds a query string
+   * @private
    * @param {string} route Route string
    * @param {string} qString Query string
    * @param {boolean} appendQString Append query string flag
@@ -217,6 +229,7 @@
   }
   /**
    * Converts current query string into an object
+   * @private
    */
 
 
@@ -232,6 +245,7 @@
   }
   /**
    * Set route for given view
+   * @private
    * @param {string|object} oRoute Route string or object
    * @param {boolean} replaceMode Replace mode
    * @param {boolean} noTrigger Do not trigger handler
@@ -290,6 +304,7 @@
   }
   /**
    * Attaches a route handler function
+   * @private
    * @param {string} route Route string
    * @param {function} handler Callback function
    */
@@ -347,6 +362,7 @@
   }
   /**
    * Unbinds route handlers
+   * @private
    * @param {string} route Route string
    * @param {function} handler Callback function
    */
@@ -375,6 +391,7 @@
   }
   /**
    * Compares route with current URL
+   * @private
    * @param {string} route Route string
    * @param {string} url Current url
    * @param {object} params Parameters
@@ -432,6 +449,7 @@
   }
   /**
    * Triggers a router event
+   * @private
    * @param {string} eventName Name of route event
    * @param {object} params Parameters
    */
@@ -462,6 +480,7 @@
   }
   /**
    * Initializes router events
+   * @private
    */
 
 
@@ -491,12 +510,23 @@
       }
     });
   }
+  /**
+   * @namespace router
+   * @type {object}
+   */
+
 
   var router = {
-    // Events object
+    /**
+     * @namespace api
+     * @memberof router
+     * @type {object}
+     */
     api: {
       /**
        * Triggers a custom route event
+       * @method trigger
+       * @memberof router.api
        */
       trigger: function trigger() {
         return execListeners.apply(this, arguments);
@@ -505,6 +535,7 @@
 
     /**
      * Sets a route url
+     * @public
      * @param {string|object} route Route object or URL
      * @param {boolean} replaceMode Flag to enable replace mode
      * @param {boolean} noTrigger Flag to disable handler while changing route
@@ -515,6 +546,7 @@
   };
   /**
    * Attaches a route handler
+   * @public
    * @param {string|function} route Route string or handler function (in case of generic route)
    * @param {function} handler Handler function
    */
@@ -524,6 +556,7 @@
   }
   /**
    * Detaches a route handler
+   * @public
    * @param {string|function} route Route string or handler function (in case of generic route)
    * @param {function} handler Handler function
    */

@@ -8,19 +8,22 @@ route('/path/to/route', function () {
    console.log('Executed twice');
 });
 ```
-To prevent double execution, implement following check:
+To prevent double execution use hash route or implement following check:
 ```js
+route('#/path/to/route', function () {
+    console.log('Executes only for hash changes');
+});
 route('/path/to/route', function (e) {
     if (e.hash) {
-        console.log('Executes for hash route');
+        console.log('Executes for hash changes');
     } else {
-        console.log('Executes for a normal route');
+        console.log('Executes for normal route changes');
     }
 });
 ```
 
 <b>2. Silk router throws an "invalid route" error</b><br/>
-Silk router checks for valid paths and a valid path always starts with a ``/``.
+Silk router checks for valid paths. A valid path starts with a ``/``
 ```js
 route('/path/to/route', function () { ... }); // Correct
 route('path/to/route', function () { ... }); // Incorrect
