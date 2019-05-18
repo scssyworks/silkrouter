@@ -156,7 +156,7 @@ function bindRoute(route, handler) {
     // Execute handler if matches current route (Replaces init method in version 2.0)
     const { pathname, hash } = window.location;
     const paths = startIndex === 1 ? [hash] : [pathname, hash];
-    paths.forEach(currentPath => {
+    paths.filter(path => path.trim()).forEach(currentPath => {
         const pathIndex = currentPath.charAt(0) === '#' ? 1 : 0;
         const { hasMatch, data, params } = testRoute(route, currentPath);
         if (hasMatch && typeof handler === 'function') {
@@ -203,6 +203,7 @@ function unbindRoute(route, handler) {
  * @param {object} params Parameters
  */
 function testRoute(route, url, originalData = {}) {
+    console.log(route);
     const isHash = url.charAt(0) === '#';
     if (isHash) {
         url = url.substring(1);

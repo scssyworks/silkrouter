@@ -323,7 +323,9 @@
         pathname = _window$location.pathname,
         hash = _window$location.hash;
     var paths = startIndex === 1 ? [hash] : [pathname, hash];
-    paths.forEach(function (currentPath) {
+    paths.filter(function (path) {
+      return path.trim();
+    }).forEach(function (currentPath) {
       var pathIndex = currentPath.charAt(0) === '#' ? 1 : 0;
 
       var _testRoute = testRoute(route, currentPath),
@@ -381,6 +383,7 @@
 
   function testRoute(route, url) {
     var originalData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    console.log(route);
     var isHash = url.charAt(0) === '#';
 
     if (isHash) {
