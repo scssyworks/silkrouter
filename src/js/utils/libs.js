@@ -11,6 +11,18 @@ export const libs = {
     },
     setDataToStore(path, isHash, data) {
         let paths = store.get('routeStore') || {};
+        if (paths[path]) {
+            if (
+                !data
+                || (
+                    typeof data === 'object'
+                    && Object.keys(data).length === 0
+                )
+            ) {
+                // Don't change existing data
+                return false;
+            }
+        }
         paths = {
             ...paths,
             [`${isHash ? '#' : ''}${path}`]: data

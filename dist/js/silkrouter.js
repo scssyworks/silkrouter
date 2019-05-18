@@ -7,6 +7,20 @@
   deparam = deparam && deparam.hasOwnProperty('default') ? deparam['default'] : deparam;
   LZStorage = LZStorage && LZStorage.hasOwnProperty('default') ? LZStorage['default'] : LZStorage;
 
+  function _typeof(obj) {
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
   function _defineProperty(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {
@@ -120,6 +134,14 @@
     },
     setDataToStore: function setDataToStore(path, isHash, data) {
       var paths = store.get('routeStore') || {};
+
+      if (paths[path]) {
+        if (!data || _typeof(data) === 'object' && Object.keys(data).length === 0) {
+          // Don't change existing data
+          return false;
+        }
+      }
+
       paths = _objectSpread({}, paths, _defineProperty({}, "".concat(isHash ? '#' : '').concat(path), data));
       return store.set('routeStore', paths, true);
     },
