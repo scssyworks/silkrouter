@@ -1,41 +1,35 @@
 # Silk Router
-Silk router (formerly jqueryrouter) is a base library for implementing single page applications.
-
-### Announcement 
-<b>We have removed dependency on jQuery and ended support for IE9 in favour of history API. This library only works on browsers that have support for ``pushState``.</b>
+Silk router (formerly <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">jqueryrouter</a>) is an JavaScript library for single page applications with routing.
 
 # Installation
 
-Using npm:
-
+### NPM
+<b>Unstable release</b>
 ```sh
-npm install --save silkrouter@3.0.0-beta.5
+npm install --save silkrouter@3.0.0-beta.6
 ```
 
-Using CDN:
-
+### CDN
 ```html
-<script src="https://cdn.jsdelivr.net/npm/silkrouter@3.0.0-beta.4/dist/js/silkrouter.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/silkrouter@3.0.0-beta.6/dist/js/silkrouter.min.js"></script>
 ```
 
-Previous versions:
-
+### Previous versions
+<b>Unstable release</b>
 ```sh
 npm install --save jqueryrouter@3.0.0-beta.3
 ```
 
+<b>Stable release</b>
 ```sh
 npm install --save jqueryrouter@2.1.0
 ```
-(See <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">documentation</a> for version 2.1.0)
-
 
 ### Notes
-1. Library version 1.X is an IIFE build and does not support ES6 applications. To use the library in ES6 projects please use version 2.X or above.
-2. This documentation is targeted for version 3.0.0 which is currently in ``beta``. Use it at your own risk!
-3. As of version 3, this library is now purely implemented in ES6 and vanilla JavaScript. We have also removed the ``init`` method as the library is now capable of initializing routes by itself.
-4. This version of library requires peer dependencies. Please install dependencies below:
+1. Version 3 router (beta 4 and above) is implemented in ES6 and Vanilla JS. If you are looking for jQuery version please download version 2.
+2. Version 3 does not support legacy browsers such as IE9. For IE9 support, please download version 2.
 
+### Peer dependencies
 ```sh
 npm install --save deparam.js lzstorage
 ```
@@ -55,12 +49,12 @@ npm install --save deparam.js lzstorage
 import { router, route } from 'silkrouter';
 ```
 
-# How it works?
+# How does it works?
 <b>1. Create routes:</b><br/>
 ```js
 route('/path/to/route1', function () { ... });
 route('/path/to/route2', function () { ... });
-route('/path/to/route3', function () { ... });
+route('#/path/to/route3', function () { ... }); // Hash route (added in v3.0.0-beta.5)
 ```
 <b>2. Trigger a route by calling <code>router.set</code></b><br/>
 ```js
@@ -83,7 +77,7 @@ route('/path/to/route', function (config) {
     console.log(data.key2); // 'value2'
 });
 ```
-<b>5. Set route parameters:</b><br/>
+<b>5. Route parameters:</b><br/>
 ```js
 router.set('/path/to/route/hello/world');
 ...
@@ -93,11 +87,10 @@ route('/path/to/route/:param1/:param2', function (config) {
     console.log(params.param2); // world
 });
 ```
-<b>6. Set query parameters:</b><br/>
+<b>6. Query parameters:</b><br/>
 ```js
-// Approach 1
 router.set('/path/to/route?q=123&s=helloworld');
-// Approach 2
+// OR
 router.set({
     route: '/path/to/route',
     queryString: 'q=123&s=helloworld'
@@ -112,9 +105,8 @@ route('/path/to/route', function (config) {
 <b>7. Change current page path without updating history:</b><br/>
 ```js
 var replaceMode = true;
-// Approach 1
 router.set('/path/to/route', replaceMode);
-// Approach 2
+// OR
 router.set({
     route: '/path/to/route',
     replaceMode
@@ -124,9 +116,8 @@ router.set({
 ```js
 ...
 var noTrigger = true;
-// Approach 1
 router.set('/path/to/route', replaceMode, noTrigger);
-// Approach 2
+// OR
 router.set({
     route: '/path/to/route',
     noTrigger
@@ -136,14 +127,19 @@ router.set({
 ```js
 router.set('#/path/to/route');
 ...
+// Handler called for both pathname and hash changes
 route('/path/to/route', function () {
     console.log('Still works');
+});
+// Handler called only for hash changes
+route('#/path/to/route', function () {
+    console.log('Also works');
 });
 ```
 This forces plugin to change URL hash instead of pathname.<br/>
 
 <b>10. Detach routes:</b><br/>
-For performance reasons, it's a good idea to detach routes when your application unmounts. As of version 1.3.0 we have added ``unroute`` method which allows us to remove attached handlers.
+You can remove routes on application unmount using ``unroute`` method. (Added in v1.3.0)
 
 ```js
 unroute(); // Removes all routes
@@ -159,5 +155,12 @@ Silk router has been tested in following browsers:
 # Debugging
 <a href="https://github.com/scssyworks/silkrouter/blob/master/DEBUGGING.md">Debugging</a>
 
-# Demo
+# Demos
+
+### Old version
+https://jqueryrouter.herokuapp.com/
+
+### Current version
 https://silkrouter.herokuapp.com/
+
+Spot the difference ;)

@@ -1,8 +1,36 @@
-/**!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: silkrouter.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: silkrouter.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**!
  * Router plugin for single page applications with routes
  * Release under the MIT license
  * @name Silk router
- * @author Sachin Singh <ssingh.300889@gmail.com>
+ * @author Sachin Singh &lt;ssingh.300889@gmail.com>
  * @version 3.0.0.beta.6
  * @license MIT
  */
@@ -60,7 +88,7 @@ function resolveQuery(route = '', isHash = false, queryString = '', append = fal
     if (!isHash) {
         if (append) {
             if (queryString) {
-                return `${route}${location.search}&${queryString}`;
+                return `${route}${location.search}&amp;${queryString}`;
             }
             return `${route}${location.search}`;
         } else if (queryString) {
@@ -148,10 +176,10 @@ function bindRoute(route, handler) {
     route = route.substring(startIndex);
     // Check existence
     const exists = libs.handlers.filter(ob => {
-        return (ob.handler === handler && ob.route === route);
+        return (ob.handler === handler &amp;&amp; ob.route === route);
     }).length;
     // Attach handler
-    if (!exists && typeof handler === 'function') {
+    if (!exists &amp;&amp; typeof handler === 'function') {
         libs.handlers.push({
             eventName: ROUTE_CHANGED,
             handler,
@@ -165,7 +193,7 @@ function bindRoute(route, handler) {
     paths.filter(path => path.trim()).forEach(currentPath => {
         const pathIndex = currentPath.charAt(0) === '#' ? 1 : 0;
         const { hasMatch, data, params } = testRoute(route, currentPath);
-        if (hasMatch && typeof handler === 'function') {
+        if (hasMatch &amp;&amp; typeof handler === 'function') {
             handler({
                 route: currentPath,
                 hash: pathIndex === 1,
@@ -190,15 +218,15 @@ function unbindRoute(route, handler) {
         libs.handlers.length = 0;
     }
     libs.handlers = libs.handlers.filter(ob => {
-        if (args.length === 1 && typeof args[0] === 'string') {
+        if (args.length === 1 &amp;&amp; typeof args[0] === 'string') {
             return ob.route !== route;
         }
         // Check for generic route
-        if (args.length === 1 && typeof args[0] === 'function') {
+        if (args.length === 1 &amp;&amp; typeof args[0] === 'function') {
             handler = args[0];
             route = '*'; // Generic route
         }
-        return !(ob.route === route && ob.handler === handler);
+        return !(ob.route === route &amp;&amp; ob.handler === handler);
     });
 }
 
@@ -237,7 +265,7 @@ function testRoute(route, url, originalData = {}) {
             });
         }
     } else {
-        hasMatch = isValidRoute(url) && ((route === url) || (route === '*'));
+        hasMatch = isValidRoute(url) &amp;&amp; ((route === url) || (route === '*'));
     }
     return {
         hasMatch,
@@ -262,7 +290,7 @@ function execListeners(eventName, routeConfig, originalData = {}) {
                 (isHash ? hash : pathname),
                 originalData
             );
-            if (hasMatch && (!ob.hash || (ob.hash && isHash))) {
+            if (hasMatch &amp;&amp; (!ob.hash || (ob.hash &amp;&amp; isHash))) {
                 ob.handler({
                     ...routeConfig,
                     data,
@@ -350,4 +378,26 @@ function unroute() {
 
 initRouterEvents();
 
-export { router, route, unroute };
+export { router, route, unroute };</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="router.html">router</a></li><li><a href="router.api.html">api</a></li></ul><h3>Global</h3><ul><li><a href="global.html#bindRoute">bindRoute</a></li><li><a href="global.html#execListeners">execListeners</a></li><li><a href="global.html#execRoute">execRoute</a></li><li><a href="global.html#getQueryParams">getQueryParams</a></li><li><a href="global.html#initRouterEvents">initRouterEvents</a></li><li><a href="global.html#isValidRoute">isValidRoute</a></li><li><a href="global.html#resolveQuery">resolveQuery</a></li><li><a href="global.html#route">route</a></li><li><a href="global.html#sanitize">sanitize</a></li><li><a href="global.html#Silkrouter">Silk router</a></li><li><a href="global.html#testRoute">testRoute</a></li><li><a href="global.html#triggerRoute">triggerRoute</a></li><li><a href="global.html#unbindRoute">unbindRoute</a></li><li><a href="global.html#unroute">unroute</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Sun May 19 2019 00:07:17 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -8,7 +8,8 @@
   "scripts": {
     "start": "node server.js",
     "buildAndStart": "npm run build && npm run start",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "jsdoc": "jsdoc ./src/js/silkrouter.js -p -d docs"
   },
   "repository": {
     "type": "git",
@@ -39,6 +40,7 @@
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "jquery": "^3.4.1",
+    "jsdoc": "^3.6.2",
     "lzstorage": "^1.0.8",
     "popper.js": "^1.15.0",
     "rollup": "^1.11.3",

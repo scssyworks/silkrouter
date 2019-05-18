@@ -5,6 +5,15 @@ import babel from "rollup-plugin-babel";
 import { uglify } from "rollup-plugin-uglify";
 import pkg from './package.json';
 
+const banner = `/**!
+ * Router plugin for single page applications with routes
+ * Release under the MIT license
+ * @name Silk router
+ * @author Sachin Singh <ssingh.300889@gmail.com>
+ * @version 3.0.0.beta.6
+ * @license MIT
+ */`;
+
 export default [
     {
         input: "src/js/silkrouter.js",
@@ -17,7 +26,8 @@ export default [
             globals: {
                 'deparam.js': 'deparam',
                 'lzstorage': 'LZStorage'
-            }
+            },
+            banner
         },
         plugins: [
             resolve({
@@ -41,7 +51,8 @@ export default [
             globals: {
                 'deparam.js': 'deparam',
                 'lzstorage': 'LZStorage'
-            }
+            },
+            banner
         },
         plugins: [
             resolve({
@@ -53,7 +64,17 @@ export default [
             babel({
                 exclude: "node_modules/**"
             }),
-            uglify()
+            uglify({
+                output: {
+                    comments: function () {
+                        const [, comment] = arguments;
+                        if (comment.type === "comment2") {
+                            return /@preserve|@license|@cc_on/i.test(comment.value);
+                        }
+                        return false;
+                    }
+                }
+            })
         ]
     },
     {
