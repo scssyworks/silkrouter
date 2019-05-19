@@ -1,12 +1,12 @@
 # Silk Router
-Silk router (formerly <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">jqueryrouter</a>) is an JavaScript library for single page applications with routing.
+Silk router (formerly <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">jqueryrouter</a>) is a JavaScript library for single page applications with routing.
 
 # Installation
 
 ### NPM
 <b>Unstable release</b>
 ```sh
-npm install --save silkrouter@3.0.0-beta.6
+npm install --save silkrouter@3.0.0-beta.9
 ```
 
 ### CDN
