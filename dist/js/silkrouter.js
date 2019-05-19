@@ -415,8 +415,7 @@
       libs.setDataToStore(path, isHash, originalData); // Sync store with event data.
     }
 
-    var data = _objectSpread({}, libs.getDataFromStore(path, isHash));
-
+    var data = libs.getDataFromStore(path, isHash);
     var params = {};
     var hasMatch = false;
     REG_ROUTE_PARAMS.lastIndex = 0;

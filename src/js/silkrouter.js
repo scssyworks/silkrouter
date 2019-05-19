@@ -220,7 +220,7 @@ function testRoute(route, url, originalData = {}) {
     if (!!Object.keys(originalData).length) {
         libs.setDataToStore(path, isHash, originalData); // Sync store with event data.
     }
-    const data = { ...libs.getDataFromStore(path, isHash) };
+    const data = libs.getDataFromStore(path, isHash);
     const params = {};
     let hasMatch = false;
     REG_ROUTE_PARAMS.lastIndex = 0;
