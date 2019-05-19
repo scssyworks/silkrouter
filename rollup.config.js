@@ -7,7 +7,7 @@ import pkg from './package.json';
 
 const banner = `/**!
  * Router plugin for single page applications with routes
- * Release under the MIT license
+ * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <ssingh.300889@gmail.com>
  * @version ${pkg.version}
