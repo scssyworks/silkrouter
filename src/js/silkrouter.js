@@ -211,7 +211,6 @@ function unbindRoute(route, handler) {
  * @param {object} params Parameters
  */
 function testRoute(route, url, originalData = {}) {
-    console.log(route);
     const isHash = url.charAt(0) === '#';
     if (isHash) {
         url = url.substring(1);

@@ -400,7 +400,6 @@
 
   function testRoute(route, url) {
     var originalData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-    console.log(route);
     var isHash = url.charAt(0) === '#';
 
     if (isHash) {
