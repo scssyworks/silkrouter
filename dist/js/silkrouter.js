@@ -1,9 +1,9 @@
 /**!
  * Router plugin for single page applications with routes
- * Release under the MIT license
+ * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <ssingh.300889@gmail.com>
- * @version 3.0.0-beta.8
+ * @version 3.0.0-beta.9
  * @license MIT
  */
 (function (global, factory) {
@@ -150,6 +150,7 @@
      * @memberof libs
      * @param {string} path URL path
      * @param {boolean} isHash Flag to determine if it's a pathname or hash
+     * @returns {*}
      */
     getDataFromStore: function getDataFromStore(path, isHash) {
       var paths = store.get('routeStore') || {};
@@ -163,6 +164,7 @@
      * @param {string} path URL path
      * @param {boolean} isHash Flag to determine if it's a pathname or hash
      * @param {any} data Data
+     * @returns {boolean}
      */
     setDataToStore: function setDataToStore(path, isHash, data) {
       var paths = store.get('routeStore') || {};
