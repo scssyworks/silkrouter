@@ -10,7 +10,7 @@ const banner = `/**!
  * Release under the MIT license
  * @name Silk router
  * @author Sachin Singh <ssingh.300889@gmail.com>
- * @version 3.0.0.beta.6
+ * @version ${pkg.version}
  * @license MIT
  */`;
 
