@@ -1,6 +1,6 @@
 {
   "name": "silkrouter",
-  "version": "3.0.0-beta.7",
+  "version": "3.0.0-beta.8",
   "description": "Silk router is a library for implementing single page applications",
   "main": "dist/js/silkrouter.js",
   "module": "src/js/silkrouter.js",
@@ -9,7 +9,7 @@
     "start": "node server.js",
     "buildAndStart": "npm run build && npm run start",
     "build": "rollup -c",
-    "jsdoc": "jsdoc ./src/js/silkrouter.js -p -d docs"
+    "jsdoc": "jsdoc ./src/js/silkrouter.js -p -d docs && jsdoc ./src/js/utils/constants.js -p -d docs && jsdoc ./src/js/utils/helpers.js -p -d docs && jsdoc ./src/js/utils/libs.js -p -d docs"
   },
   "repository": {
     "type": "git",

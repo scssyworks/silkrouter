@@ -3,7 +3,7 @@
  * Release under the MIT license
  * @name Silk router
  * @author Sachin Singh <ssingh.300889@gmail.com>
- * @version 3.0.0-beta.7
+ * @version 3.0.0-beta.8
  * @license MIT
  */
 (function (global, factory) {
@@ -135,11 +135,35 @@
   var store = new LZStorage({
     compression: true
   });
+  /**
+   * Store library
+   * @namespace libs
+   * @type {object}
+   * @private
+   */
+
   var libs = {
+    /**
+     * Get's decompressed data from store
+     * @private
+     * @method getDataFromStore
+     * @memberof libs
+     * @param {string} path URL path
+     * @param {boolean} isHash Flag to determine if it's a pathname or hash
+     */
     getDataFromStore: function getDataFromStore(path, isHash) {
       var paths = store.get('routeStore') || {};
       return paths["".concat(isHash ? '#' : '').concat(path)];
     },
+
+    /**
+     * @private
+     * @method setDataToStore
+     * @memberof libs
+     * @param {string} path URL path
+     * @param {boolean} isHash Flag to determine if it's a pathname or hash
+     * @param {any} data Data
+     */
     setDataToStore: function setDataToStore(path, isHash, data) {
       var paths = store.get('routeStore') || {};
 
@@ -153,6 +177,12 @@
       paths = _objectSpread({}, paths, _defineProperty({}, "".concat(isHash ? '#' : '').concat(path), data));
       return store.set('routeStore', paths, true);
     },
+
+    /**
+     * @namespace handlers
+     * @type {object[]}
+     * @private
+     */
     handlers: []
   };
 
