@@ -9,7 +9,7 @@
     "start": "node server.js",
     "buildAndStart": "npm run build && npm run start",
     "build": "rollup -c",
-    "jsdoc": "jsdoc ./src/js/silkrouter.js -p -d docs"
+    "jsdoc": "jsdoc ./src/js/silkrouter.js -p -d docs && jsdoc ./src/js/utils/constants.js -p -d docs && jsdoc ./src/js/utils/helpers.js -p -d docs && jsdoc ./src/js/utils/libs.js -p -d docs"
   },
   "repository": {
     "type": "git",
