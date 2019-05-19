@@ -122,6 +122,8 @@ const demo = {
         this.updateCache();
         this.bindEvents();
         console.log("Demo initialized");
+        window.router = router;
+        window.route = route;
     }
 };
 demo.init();

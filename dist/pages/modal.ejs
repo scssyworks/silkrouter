@@ -1,7 +1,8 @@
 <div class="c-demo-2 js-demo-2 js-demos <% if (!path.match(/\/demos\/demo2/)) { %>d-none<% } %>">
     <h2>Overlay wizards</h2>
     <p>A lot of sites show an introductory overlay wizards where user can navigate through multiple steps.</p>
-    <p>In this demo we'll use routes to maintain state of overlay wizards.</p>
+    <p>Overlay wizards don't use routing particularly, but we'll make it cooler by adding routes.</p>
+    <p>This way a user will be able navigate back to previous step by using browser back button.</p>
     <h3>Working demo</h3>
     <br />
     <!-- Button trigger modal -->
@@ -38,17 +39,17 @@
     </div>
     <br />
     <h3>Implementation</h3>
-    <p>There are few things we need to keep in mind:</p>
+    <p>Routing in modal windows is quite easy to implement. There are few things we need to keep in mind:</p>
     <p><b>1. </b>If there is are no modal routes, modal window should be closed.</p>
     <p><b>2. </b>If modal route is present, modal window should be open and display the view for given route.</p>
     <p><b>3. </b>When modal is dismissed or closed, user should return to the original route.</p>
-    <p>In this demo we will use route parameters to track progress of modal.</p>
+    <p>This time we will implement normal url routes to demonstrate <code>pushState</code>. We will also use route parameters to track progress of modal.</code></p>
     <b>Step 1:</b>
     <b>Bind route handler for modal.</b>
     <pre>
         <code>
-    route('/demos/demo2/modalroute/:progress', function (e) {
-        const { params } = e;
+    route('/demos/demo2/modalroute/:progress', function (data) {
+        const { params } = data;
         let progress = +params.progress;
         ...
     });</code>
@@ -57,8 +58,8 @@
     <p>If modal is not open, open the modal and activate the wizard step based on current progress.</p>
     <pre>
         <code>
-    route('/demos/demo2/modalroute/:progress', function (e) {
-        const { params } = e;
+    route('/demos/demo2/modalroute/:progress', function (data) {
+        const { params } = data;
         let progress = +params.progress;
         if (!$('.modal').hasClass('show')) {
             $('.modal').modal('show');
@@ -78,17 +79,17 @@
     });</code>
     </pre>
     <b>Step 4:</b>
-    <p>Handle step navigation on "Go to next step" CTA.</p>
+    <p>Handle step navigation on click of "Go to next step" button.</p>
     <pre>
         <code>
     $('.js-proceed-step').on('click', function () {
-        const totalSteps = $('.wizard-sections').length;
+        let totalSteps = $('.wizard-sections').length;
         let currentStep = +$('.wizard-sections').filter('.active').data('step');
         if (currentStep === totalSteps) {
             <span class="comment">// Close modal</span>
             $('.modal').modal('hide');
             <span class="comment">// Go back in history</span>
-            router.set('/demos/demo2'); <span class="comment">// Re-setting original route</span>
+            router.set('/demos/demo2'); <span class="comment">// Re-setting the original route</span>
         } else {
             <span class="comment">// Trigger route for next step</span>
             router.set(`/demos/demo2/modalroute/${<b>++currentStep</b>}`);
@@ -96,5 +97,5 @@
     });
         </code>
     </pre>
-    <p>Et voila! We just implemented routing in overlay wizards. Try refreshing the page on particular step.</p>
+    <p>There! We just implemented routing in overlay wizards. Try refreshing the page on any particular step.</p>
 </div>

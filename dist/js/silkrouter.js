@@ -3,7 +3,7 @@
  * Release under the MIT license
  * @name Silk router
  * @author Sachin Singh <ssingh.300889@gmail.com>
- * @version 3.0.0.beta.6
+ * @version 3.0.0-beta.7
  * @license MIT
  */
 (function (global, factory) {
@@ -168,15 +168,28 @@
   /**
    * Triggers "route.changed" event
    * @private
+   * @param {object} config Route event configuration
+   * @param {object} config.originalEvent Original "popstate" event object
+   * @param {string} config.route route string
+   * @param {string} config.type Type of event
+   * @param {boolean} config.hash Flag that determines type of event expected
+   * @param {object} config.originalData Original data persisted by history API
    */
 
 
-  function triggerRoute(route, eventType) {
-    var hash = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    var originalData = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+  function triggerRoute(_ref) {
+    var _ref$originalEvent = _ref.originalEvent,
+        originalEvent = _ref$originalEvent === void 0 ? {} : _ref$originalEvent,
+        route = _ref.route,
+        type = _ref.type,
+        _ref$hash = _ref.hash,
+        hash = _ref$hash === void 0 ? false : _ref$hash,
+        _ref$originalData = _ref.originalData,
+        originalData = _ref$originalData === void 0 ? {} : _ref$originalData;
     router.api.trigger(ROUTE_CHANGED, {
+      originalEvent: originalEvent,
       route: route,
-      eventType: eventType,
+      type: type,
       hash: hash
     }, originalData);
   }
@@ -295,7 +308,11 @@
         }, title, completeRoute);
 
         if (!nt) {
-          triggerRoute("".concat(isHash ? '#' : '').concat(pureRoute), isHash ? HASH_CHANGE : POP_STATE, isHash === 1);
+          triggerRoute({
+            route: "".concat(isHash ? '#' : '').concat(pureRoute),
+            type: isHash ? HASH_CHANGE : POP_STATE,
+            hash: isHash === 1
+          });
         }
       } else {
         throw new Error(INVALID_ROUTE);
@@ -308,7 +325,6 @@
    * @param {string} route Route string
    * @param {function} handler Callback function
    */
-
 
   function bindRoute(route, handler) {
     // Resolve generic route
@@ -367,7 +383,6 @@
    * @param {function} handler Callback function
    */
 
-
   function unbindRoute(route, handler) {
     var args = arguments;
 
@@ -397,10 +412,8 @@
    * @param {object} params Parameters
    */
 
-
   function testRoute(route, url) {
     var originalData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-    console.log(route);
     var isHash = url.charAt(0) === '#';
 
     if (isHash) {
@@ -415,8 +428,7 @@
       libs.setDataToStore(path, isHash, originalData); // Sync store with event data.
     }
 
-    var data = _objectSpread({}, libs.getDataFromStore(path, isHash));
-
+    var data = libs.getDataFromStore(path, isHash);
     var params = {};
     var hasMatch = false;
     REG_ROUTE_PARAMS.lastIndex = 0;
@@ -483,7 +495,6 @@
    * @private
    */
 
-
   function initRouterEvents() {
     window.addEventListener("".concat(POP_STATE), function (e) {
       var completePath = "".concat(location.pathname).concat(location.hash);
@@ -503,20 +514,32 @@
         }
       }
 
-      triggerRoute(pathname, e.type, false, originalData);
+      triggerRoute({
+        originalEvent: e,
+        route: pathname,
+        type: e.type,
+        hash: false,
+        originalData: originalData
+      });
 
       if (hashstring) {
-        triggerRoute("#".concat(hashstring), HASH_CHANGE, true, originalData);
+        triggerRoute({
+          originalEvent: e,
+          route: "#".concat(hashstring),
+          type: HASH_CHANGE,
+          hash: true,
+          originalData: originalData
+        });
       }
     });
   }
+
   /**
    * @namespace router
    * @type {object}
    */
 
-
-  var router = {
+  var router$1 = {
     /**
      * @namespace api
      * @memberof router
@@ -527,6 +550,7 @@
        * Triggers a custom route event
        * @method trigger
        * @memberof router.api
+       * @param {...*} arguments
        */
       trigger: function trigger() {
         return execListeners.apply(this, arguments);
@@ -569,7 +593,7 @@
   initRouterEvents();
 
   exports.route = route;
-  exports.router = router;
+  exports.router = router$1;
   exports.unroute = unroute;
 
   Object.defineProperty(exports, '__esModule', { value: true });

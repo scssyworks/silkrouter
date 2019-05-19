@@ -1,6 +1,6 @@
 <div class="c-home-section js-home-section js-demos <% if (!path.match(/^\/$/)) { %>d-none<% } %>">
     <h2>Welcome to Silk router Home Page</h2>
-    <p>Silk router is a library for implementing single page applications like this one.</p>
+    <p>Silk router is a routing plugin written for creating single page application with routing support.</p>
     <p>
         <pre>
             <code>
@@ -10,54 +10,63 @@
     <p>
         <pre>
             <code>
+    import {router, route} from 'jqueryrouter';
     route(...);
     router.set(...);</code>
         </pre>
     </p>
     <h3>Installation</h3>
     <p>
-        Using <b>node package manager (npm)</b> as follows:
+        <b>NPM</b>
         <pre>
             <code>
-    npm install --save silkrouter deparam.js lzstorage</code>
+    npm install --save silkrouter</code>
         </pre>
     </p>
     <p>
-        Using <b>CDN</b> as follows:
+        <b>CDN</b>
         <pre>
             <code>
     https://cdn.jsdelivr.net/npm/silkrouter@<%=version%>/dist/js/silkrouter.min.js</code>
         </pre>
-        Or simply:
+        OR
         <pre>
             <code>
     https://cdn.jsdelivr.net/npm/silkrouter@<%=version%></code>
         </pre>
     </p>
+    <p>
+        <b>Please note: </b> Silk router is dependent on <code>deparam.js</code> and <code>lzstorage</code>. You can install these dependencies as shown below:
+        <pre>
+            <code>
+    npm install --save deparam.js lzstorage</code>
+        </pre>
+    </p>
     <h3>How does it work?</h3>
-    <p>Silk router is quite simple to use. It is similar to JavaScript events.</p>
+    <p>Silk router is very simple to use. It is similar to JavaScript events.</p>
     <p><b>Events:</b></p>
     <pre>
         <code>
-    document.querySelector('selector').addEventListener('eventName', handler);</code>
+    $('selector').on('eventName', handler);</code>
     </pre>
     <p><b>Router:</b></p>
     <pre>
         <code>
     route('path', handler);</code>
     </pre>
-    <p><b>Trigger event:</b></p>
+    <p><b>Triggering events:</b></p>
     <pre>
         <code>
-    document.querySelector('selector').dispatchEvent(new Event('event'));</code>
+    $('selector').trigger('event');</code>
     </pre>
-    <p><b>Trigger route:</b></p>
+    <p><b>Triggering routes:</b></p>
      <pre>
         <code>
     router.set('path');</code>
     </pre>
+    <p>This project is a live example of <b>silk router</b> in action.</p>
     <p></p>
-    <p>Silk router uses history push API to update browser history.</p>
+    <p>Silk router uses history API and adds additional support for page load events.</p>
     <p>Silk router supports following browsers:</p>
-    <p><b>IE10+, Edge, Opera, Safari, Chrome, Firefox</b></p>
+    <p><b>IE10+, Edge, Opera, Safari, Chrome, Firefox, Mobile browsers</b></p>
 </div>
