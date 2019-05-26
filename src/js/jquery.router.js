@@ -3,10 +3,10 @@
  * This file contains SPA router methods to handle routing mechanism in single page applications (SPA). Supported versions IE9+, Chrome, Safari, Firefox
  *
  * @project      Jquery Routing Plugin
- * @date         2019-02-21
+ * @date         2019-05-27
  * @author       Sachin Singh <ssingh.300889@gmail.com>
  * @dependencies jQuery
- * @version      2.1.0
+ * @version      2.2.0
  */
 
 import $ from 'jquery';
