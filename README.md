@@ -6,7 +6,7 @@ Silk router (formerly <a href="https://github.com/scssyworks/silkrouter/tree/fea
 ### NPM
 <b>Unstable release</b>
 ```sh
-npm install --save silkrouter@3.0.0-beta.10
+npm install --save silkrouter@3.0.0-beta.11
 ```
 
 ### CDN
