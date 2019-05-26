@@ -12,7 +12,7 @@ npm install --save jqueryrouter
 Using CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@2.1.0/dist/js/jquery.router.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@2.2.0/dist/js/jquery.router.min.js"></script>
 ```
 
 Previous version:
