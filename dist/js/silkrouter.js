@@ -3,7 +3,7 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <ssingh.300889@gmail.com>
- * @version 3.0.0-beta.9
+ * @version 3.0.0-beta.11
  * @license MIT
  */
 (function (global, factory) {
@@ -218,7 +218,7 @@
         hash = _ref$hash === void 0 ? false : _ref$hash,
         _ref$originalData = _ref.originalData,
         originalData = _ref$originalData === void 0 ? {} : _ref$originalData;
-    router.api.trigger(ROUTE_CHANGED, {
+    trigger(ROUTE_CHANGED, {
       originalEvent: originalEvent,
       route: route,
       type: type,
@@ -523,6 +523,15 @@
     });
   }
   /**
+   * Internal method to trigger a routing event
+   * @private
+   */
+
+
+  function trigger() {
+    return execListeners.apply(this, arguments);
+  }
+  /**
    * Initializes router events
    * @private
    */
@@ -568,10 +577,11 @@
 
   /**
    * @namespace router
+   * @public
    * @type {object}
    */
 
-  var router$1 = {
+  var router = {
     /**
      * @namespace api
      * @memberof router
@@ -581,11 +591,12 @@
       /**
        * Triggers a custom route event
        * @method trigger
+       * @public
        * @memberof router.api
        * @param {...*} arguments
        */
-      trigger: function trigger() {
-        return execListeners.apply(this, arguments);
+      trigger: function trigger$1() {
+        return trigger.apply(this, arguments);
       }
     },
 
@@ -625,7 +636,7 @@
   initRouterEvents();
 
   exports.route = route;
-  exports.router = router$1;
+  exports.router = router;
   exports.unroute = unroute;
 
   Object.defineProperty(exports, '__esModule', { value: true });
