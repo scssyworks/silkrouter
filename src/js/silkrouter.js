@@ -1,7 +1,8 @@
-import { execListeners, execRoute, bindRoute, unbindRoute, initRouterEvents } from './utils/helpers';
+import { execRoute, bindRoute, unbindRoute, initRouterEvents, trigger } from './utils/helpers';
 
 /**
  * @namespace router
+ * @public
  * @type {object}
  */
 const router = {
@@ -14,11 +15,12 @@ const router = {
         /**
          * Triggers a custom route event
          * @method trigger
+         * @public
          * @memberof router.api
          * @param {...*} arguments
          */
         trigger() {
-            return execListeners.apply(this, arguments);
+            return trigger.apply(this, arguments);
         }
     },
     /**

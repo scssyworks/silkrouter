@@ -22,7 +22,7 @@ function sanitize(str) {
  * @param {object} config.originalData Original data persisted by history API
  */
 function triggerRoute({ originalEvent = {}, route, type, hash = false, originalData = {} }) {
-    router.api.trigger(
+    trigger(
         ROUTE_CHANGED,
         {
             originalEvent,
@@ -251,7 +251,7 @@ function testRoute(route, url, originalData = {}) {
  * @param {string} eventName Name of route event
  * @param {object} params Parameters
  */
-export function execListeners(eventName, routeConfig, originalData = {}) {
+function execListeners(eventName, routeConfig, originalData = {}) {
     const { hash: isHash } = routeConfig;
     const { hash, pathname } = window.location;
     libs.handlers.forEach(ob => {
@@ -271,6 +271,14 @@ export function execListeners(eventName, routeConfig, originalData = {}) {
             }
         }
     });
+}
+
+/**
+ * Internal method to trigger a routing event
+ * @private
+ */
+export function trigger() {
+    return execListeners.apply(this, arguments);
 }
 
 /**
