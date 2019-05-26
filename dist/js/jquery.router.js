@@ -108,6 +108,7 @@
 
   function _triggerRoute(route, eventType) {
     var isHashRoute = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    var isInit = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
     if (cache.noTrigger && eventType === eventNames.hashchange) {
       cache.noTrigger = false;
@@ -121,7 +122,8 @@
     var routeOb = {
       eventType: eventType,
       hash: !!isHashRoute,
-      route: route
+      route: route,
+      isInit: isInit
     };
     cache.data.data = _objectSpread({}, ref, routeOb);
     router.events.trigger(eventNames.routeChanged, cache.data);
@@ -376,16 +378,20 @@
     // Ensures that params is always an object
     params = _resolveObject(params);
     params.data = _resolveObject(params.data);
-    var isHashRoute = params.data.hash;
+    var _params$data = params.data,
+        isHashRoute = _params$data.hash,
+        isInit = _params$data.isInit;
     libs.handlers.forEach(function (eventObject) {
       if (eventObject.eventName === eventName) {
-        if (isHistorySupported && !isHashRoute && _matched(eventObject.route, window.location.pathname, params)) {
+        if (isHistorySupported && !isHashRoute && _matched(eventObject.route, window.location.pathname, params) && !(isInit && eventObject.called)) {
+          eventObject.called = true;
           eventObject.handler(params.data, params.params, _getQueryParams());
         } else if (isHashRoute) {
           if (!window.location.hash && !isHistorySupported && _matched(eventObject.route, window.location.pathname, params)) {
             cache.data = params.data;
             window.location.replace("#" + window.location.pathname); // <-- This will trigger router handler automatically
-          } else if (_matched(eventObject.route, window.location.hash.substring(1), params)) {
+          } else if (_matched(eventObject.route, window.location.hash.substring(1), params) && !(isInit && eventObject.hashCalled)) {
+            eventObject.hashCalled = true;
             eventObject.handler(params.data, params.params, _getQueryParams());
           }
         }
@@ -402,8 +408,8 @@
     $win.on(eventNames.popstate, function (e) {
       _triggerRoute.apply(this, [window.location.pathname, e.type]);
     });
-    $win.on(eventNames.hashchange, function (e) {
-      _triggerRoute.apply(this, [window.location.hash, e.type, true]);
+    $win.on(eventNames.hashchange, function (e, isInit) {
+      _triggerRoute.apply(this, [window.location.hash, e.type, true, isInit]);
     });
   }
 
@@ -428,7 +434,8 @@
       var settings = {
         eventType: isHistorySupported ? eventNames.popstate : eventNames.hashchange,
         hash: !isHistorySupported,
-        route: isHistorySupported ? window.location.pathname : window.location.hash
+        route: isHistorySupported ? window.location.pathname : window.location.hash,
+        isInit: true
       }; // Triggers route change event on initialize
 
       this.events.trigger(eventNames.routeChanged, {
@@ -436,7 +443,7 @@
       }); // Triggers a hashchange event on initialize if url hash is available
 
       if (window.location.hash) {
-        $(window).trigger(eventNames.hashchange);
+        $(window).trigger(eventNames.hashchange, [true]);
       }
     },
 
@@ -484,6 +491,7 @@
 
   exports.router = router;
   exports.route = route;
+  exports.unroute = unroute;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

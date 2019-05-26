@@ -65,7 +65,7 @@ function _resolveObject(testObject) {
 /**
  * Triggers "routeChanged" event unless "noTrigger" flag is true
  */
-function _triggerRoute(route, eventType, isHashRoute = false) {
+function _triggerRoute(route, eventType, isHashRoute = false, isInit = false) {
     if (
         cache.noTrigger
         && eventType === eventNames.hashchange
@@ -78,7 +78,8 @@ function _triggerRoute(route, eventType, isHashRoute = false) {
     let routeOb = {
         eventType: eventType,
         hash: !!isHashRoute,
-        route: route
+        route: route,
+        isInit
     };
     cache.data.data = {
         ...ref,
@@ -308,16 +309,32 @@ function _routeTrigger(eventName, params) {
     // Ensures that params is always an object
     params = _resolveObject(params);
     params.data = _resolveObject(params.data);
-    const isHashRoute = params.data.hash;
+    const { hash: isHashRoute, isInit } = params.data;
     libs.handlers.forEach(function (eventObject) {
         if (eventObject.eventName === eventName) {
-            if (isHistorySupported && !isHashRoute && _matched(eventObject.route, window.location.pathname, params)) {
+            if (
+                isHistorySupported
+                && !isHashRoute
+                && _matched(eventObject.route, window.location.pathname, params)
+                && !(
+                    isInit
+                    && eventObject.called
+                )
+            ) {
+                eventObject.called = true;
                 eventObject.handler(params.data, params.params, _getQueryParams());
             } else if (isHashRoute) {
                 if (!window.location.hash && !isHistorySupported && _matched(eventObject.route, window.location.pathname, params)) {
                     cache.data = params.data;
                     window.location.replace("#" + window.location.pathname); // <-- This will trigger router handler automatically
-                } else if (_matched(eventObject.route, window.location.hash.substring(1), params)) {
+                } else if (
+                    _matched(eventObject.route, window.location.hash.substring(1), params)
+                    && !(
+                        isInit
+                        && eventObject.hashCalled
+                    )
+                ) {
+                    eventObject.hashCalled = true;
                     eventObject.handler(params.data, params.params, _getQueryParams());
                 }
             }
@@ -333,8 +350,8 @@ function _bindRouterEvents() {
     $win.on(eventNames.popstate, function (e) {
         _triggerRoute.apply(this, [window.location.pathname, e.type]);
     });
-    $win.on(eventNames.hashchange, function (e) {
-        _triggerRoute.apply(this, [window.location.hash, e.type, true]);
+    $win.on(eventNames.hashchange, function (e, isInit) {
+        _triggerRoute.apply(this, [window.location.hash, e.type, true, isInit]);
     });
 }
 
@@ -360,7 +377,8 @@ const router = {
         let settings = {
             eventType: (isHistorySupported ? eventNames.popstate : eventNames.hashchange),
             hash: !isHistorySupported,
-            route: (isHistorySupported ? window.location.pathname : window.location.hash)
+            route: (isHistorySupported ? window.location.pathname : window.location.hash),
+            isInit: true
         };
         // Triggers route change event on initialize
         this.events.trigger(eventNames.routeChanged, {
@@ -368,7 +386,7 @@ const router = {
         });
         // Triggers a hashchange event on initialize if url hash is available
         if (window.location.hash) {
-            $(window).trigger(eventNames.hashchange);
+            $(window).trigger(eventNames.hashchange, [true]);
         }
     },
     /**
@@ -411,4 +429,4 @@ if (typeof $ === 'function') {
 
 _bindRouterEvents();
 
-export { router, route };
+export { router, route, unroute };
