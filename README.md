@@ -1,12 +1,12 @@
 # Silk Router
-Silk router (formerly <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">jqueryrouter</a>) is a JavaScript library for single page applications with routing.
+Silk router (formerly <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">jqueryrouter</a>) is a JavaScript library for single page application routing.
 
 # Installation
 
 ### NPM
 <b>Unstable release</b>
 ```sh
-npm install --save silkrouter@3.0.0-beta.9
+npm install --save silkrouter@3.0.0-beta.10
 ```
 
 ### CDN
@@ -17,7 +17,7 @@ npm install --save silkrouter@3.0.0-beta.9
 ### Previous versions
 <b>Unstable release</b>
 ```sh
-npm install --save jqueryrouter@3.0.0-beta.3
+npm install --save jqueryrouter@3.0.0-beta.3 deparam.js lzstorage
 ```
 
 <b>Stable release</b>
@@ -26,15 +26,14 @@ npm install --save jqueryrouter@2.1.0
 ```
 
 ### Notes
-1. Version 3 router (beta 4 and above) is implemented in ES6 and Vanilla JS. If you are looking for jQuery version please download version 2.
-2. Version 3 does not support legacy browsers such as IE9. For IE9 support, please download version 2.
+1. Version 3 (beta.4 and above) is implemented in ES6. For jQuery version please download version 2 above.
+2. Version 3 has ended support for IE9 in favour of history API.
 
 ### Peer dependencies
-```sh
-npm install --save deparam.js lzstorage
-```
+<a href="https://www.npmjs.com/package/deparam.js">Deparam.js</a>
+<a href="https://www.npmjs.com/package/lzstorage">LZ Storage</a>
 
-# How to use?
+# Using silk router
 
 <b>Add a script tag</b><br/>
 ```html
