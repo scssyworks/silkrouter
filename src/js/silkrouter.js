@@ -1,4 +1,4 @@
-import { execRoute, bindRoute, unbindRoute, initRouterEvents, trigger } from './utils/helpers';
+import { execRoute, bindRoute, unbindRoute, initRouterEvents, trigger, onHandler } from './utils/helpers';
 
 /**
  * @namespace router
@@ -21,6 +21,16 @@ const router = {
          */
         trigger() {
             return trigger.apply(this, arguments);
+        },
+        /**
+         * Attaches a listener for success or failure
+         * @method on
+         * @public
+         * @memberof router.api
+         * @param {...*} arguments
+         */
+        on() {
+            return onHandler.apply(this, arguments);
         }
     },
     /**
