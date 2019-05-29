@@ -4,14 +4,14 @@ Silk router (formerly <a href="https://github.com/scssyworks/silkrouter/tree/fea
 # Installation
 
 ### NPM
-<b>Unstable release</b>
+<b>Stable release</b>
 ```sh
-npm install --save silkrouter@3.0.0-beta.12 deparam.js lzstorage
+npm install --save silkrouter deparam.js lzstorage
 ```
 
 ### CDN
 ```html
-<script src="https://cdn.jsdelivr.net/npm/silkrouter@3.0.0-beta.6/dist/js/silkrouter.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/silkrouter@3.0.1/dist/js/silkrouter.min.js"></script>
 ```
 
 ### Previous versions
@@ -26,8 +26,8 @@ npm install --save jqueryrouter@2.1.0
 ```
 
 ### Notes
-1. Version 3 (beta.4 and above) is implemented in ES6. For jQuery version please download version 2 above.
-2. Version 3 has ended support for IE9 in favour of history API.
+1. Version 3 (beta.4 and above) is implemented in ES6. For jQuery version please download version 2 or above.
+2. Version 3 has ended support for IE9.
 
 ### Peer dependencies
 <a href="https://www.npmjs.com/package/deparam.js">Deparam.js</a><br>
