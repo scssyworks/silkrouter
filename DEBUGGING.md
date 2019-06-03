@@ -29,7 +29,7 @@ route('/path/to/route', function () { ... }); // Correct
 route('path/to/route', function () { ... }); // Incorrect
 ```
 
-<b>3. How to handle error scenarios such as missing routes?</b>
+<b>3. How to handle error scenarios such as missing routes?</b><br/>
 This is a common use case where you want to render an error page if the route doesn't exist. You can use generic route handler to handle this scenario.
 
 ```js
