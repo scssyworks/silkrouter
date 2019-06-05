@@ -1,32 +1,24 @@
 # JQuery Routing Plugin
-JQuery router is a routing plugin for single page jquery applications.
+JQuery router (now <a href="https://www.npmjs.com/package/silkrouter">Silk router</a>) is a plugin created for for single page application routing.
 
 # Installation
 
 Using npm:
 
 ```sh
-npm install --save jqueryrouter
+npm install --save jqueryrouter jquerydeparam
 ```
 
 Using CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@2.2.0/dist/js/jquery.router.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@2.2.1/dist/js/jquery.router.min.js"></script>
 ```
 
-Previous version:
-```sh
-npm install --save jqueryrouter@1.3.0
-```
-
-### Note
-1. Library version 1.X is an IIFE build and does not support ES6 applications. To use the library in ES6 porjects please use version 2.X.
-2. For library version 2.X, you need to separately install ``jquery`` and ``jquerydeparam`` as peer dependencies.
-
-```sh
-npm install --save jquery jquerydeparam
-```
+### Notes
+1. JQuery router version 1 is now deprecated.
+2. JQuery router version 2 requires jQuery and <a href="https://www.npmjs.com/package/jquerydeparam">jquerydeparam</a>.
+3. If you are looking for non-jquery version, please use <a href="https://www.npmjs.com/package/silkrouter">silkrouter</a>.
 
 # How to use?
 
