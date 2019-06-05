@@ -314,9 +314,3 @@ export function initRouterEvents() {
         }
     });
 }
-
-export function onHandler(event, fn) {
-    if (typeof fn === 'function') {
-        libs.onHandler = fn;
-    }
-}
