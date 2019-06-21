@@ -1,6 +1,6 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('jquery'), require('jquerydeparam')) :
-  typeof define === 'function' && define.amd ? define(['exports', 'jquery', 'jquerydeparam'], factory) :
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('jquery'), require('deparam.js')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'jquery', 'deparam.js'], factory) :
   (global = global || self, factory(global.jqueryrouter = {}, global.jQuery, global.deparam));
 }(this, function (exports, $, deparam) { 'use strict';
 
@@ -176,11 +176,12 @@
 
 
   function _getQueryParams() {
-    var qsObject = deparam(window.location.search),
+    var coerce = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+    var qsObject = deparam(window.location.search, coerce),
         hashStringParams = {};
 
     if (window.location.hash.match(regex.hashQuery)) {
-      hashStringParams = deparam(window.location.hash.match(regex.hashQuery)[0]);
+      hashStringParams = deparam(window.location.hash.match(regex.hashQuery)[0], coerce);
     }
 
     return _objectSpread({}, qsObject, hashStringParams);
@@ -385,14 +386,14 @@
       if (eventObject.eventName === eventName) {
         if (isHistorySupported && !isHashRoute && _matched(eventObject.route, window.location.pathname, params) && !(isInit && eventObject.called)) {
           eventObject.called = true;
-          eventObject.handler(params.data, params.params, _getQueryParams());
+          eventObject.handler(params.data, params.params, _getQueryParams(false));
         } else if (isHashRoute) {
           if (!window.location.hash && !isHistorySupported && _matched(eventObject.route, window.location.pathname, params)) {
             cache.data = params.data;
             window.location.replace("#" + window.location.pathname); // <-- This will trigger router handler automatically
           } else if (_matched(eventObject.route, window.location.hash.substring(1), params) && !(isInit && eventObject.hashCalled)) {
             eventObject.hashCalled = true;
-            eventObject.handler(params.data, params.params, _getQueryParams());
+            eventObject.handler(params.data, params.params, _getQueryParams(false));
           }
         }
       }

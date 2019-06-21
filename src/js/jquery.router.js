@@ -6,11 +6,11 @@
  * @date         2019-05-27
  * @author       Sachin Singh <ssingh.300889@gmail.com>
  * @dependencies jQuery
- * @version      2.2.0
+ * @version      2.2.2
  */
 
 import $ from 'jquery';
-import deparam from 'jquerydeparam';
+import deparam from 'deparam.js';
 
 // Object containing a map of attached handlers
 const libs = {
@@ -129,11 +129,11 @@ function _resolveQueryString(sRoute, qString, appendQString) {
 /**
  * Converts current query string into an object
  */
-function _getQueryParams() {
-    let qsObject = deparam(window.location.search),
+function _getQueryParams(coerce = true) {
+    let qsObject = deparam(window.location.search, coerce),
         hashStringParams = {};
     if (window.location.hash.match(regex.hashQuery)) {
-        hashStringParams = deparam(window.location.hash.match(regex.hashQuery)[0]);
+        hashStringParams = deparam(window.location.hash.match(regex.hashQuery)[0], coerce);
     }
     return {
         ...qsObject,
@@ -322,7 +322,7 @@ function _routeTrigger(eventName, params) {
                 )
             ) {
                 eventObject.called = true;
-                eventObject.handler(params.data, params.params, _getQueryParams());
+                eventObject.handler(params.data, params.params, _getQueryParams(false));
             } else if (isHashRoute) {
                 if (!window.location.hash && !isHistorySupported && _matched(eventObject.route, window.location.pathname, params)) {
                     cache.data = params.data;
@@ -335,7 +335,7 @@ function _routeTrigger(eventName, params) {
                     )
                 ) {
                     eventObject.hashCalled = true;
-                    eventObject.handler(params.data, params.params, _getQueryParams());
+                    eventObject.handler(params.data, params.params, _getQueryParams(false));
                 }
             }
         }

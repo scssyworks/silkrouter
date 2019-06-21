@@ -16,7 +16,7 @@ export default [
             sourcemap: true,
             globals: {
                 jquery: 'jQuery',
-                jquerydeparam: 'deparam'
+                'deparam.js': 'deparam'
             }
         },
         plugins: [
@@ -40,7 +40,7 @@ export default [
             name: "jqueryrouter",
             globals: {
                 jquery: 'jQuery',
-                jquerydeparam: 'deparam'
+                'deparam.js': 'deparam'
             }
         },
         plugins: [
