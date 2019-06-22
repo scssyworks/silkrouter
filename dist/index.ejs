@@ -4,6 +4,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Demo</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/demo/demo.css" />
 </head>
 
@@ -12,7 +13,7 @@
         <header>
             <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
                 <div class="container">
-                    <h1 class="navbar-brand c-navbar-brand"><a href="/">Silk Router v<%=version%></a></h1>
+                    <h1 class="navbar-brand c-navbar-brand"><a href="/">SILK Router v<%=version%></a></h1>
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent"
                         aria-expanded="false" aria-label="Toggle Navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -42,6 +43,9 @@
             <% include pages/modal.ejs %>
             <% include pages/data.ejs %>
         </section>
+        <footer class="footer">
+            <div class="container">This demo does not work in IE9</div>
+        </footer>
         <script type="text/javascript" src="/demo/demo.js"></script>
     </div>
 </body>

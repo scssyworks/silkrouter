@@ -1,5 +1,5 @@
-# Silk Router
-Silk router (formerly <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">jqueryrouter</a>) is a JavaScript library for single page application routing.
+# SILK Router
+SILK router (formerly <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">jqueryrouter</a>) is a JavaScript library for single page application routing.
 
 # Installation
 
@@ -33,7 +33,7 @@ npm install --save jqueryrouter@2.1.0
 <a href="https://www.npmjs.com/package/deparam.js">Deparam.js</a><br>
 <a href="https://www.npmjs.com/package/lzstorage">LZ Storage</a>
 
-# Using silk router
+# Using SILK router
 
 <b>Add a script tag</b><br/>
 ```html
@@ -147,7 +147,7 @@ unroute('/path/to/route', handlerFn); // Removes handler function attached to th
 ```
 
 # Browser support
-Silk router has been tested in following browsers:
+SILK router has been tested in following browsers:
 <b>Desktop:</b> IE 10+, Chrome, Firefox, Safari, Opera, Edge
 <b>Mobile:</b> Chrome, Safari, Firefox
 
