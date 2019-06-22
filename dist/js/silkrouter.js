@@ -279,11 +279,12 @@
 
 
   function getQueryParams() {
-    var qsObject = deparam(window.location.search);
+    var coerce = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    var qsObject = deparam(window.location.search, coerce);
     var hashStringParams = {};
 
     if (window.location.hash.match(REG_HASH_QUERY)) {
-      hashStringParams = _objectSpread({}, hashStringParams, deparam(window.location.hash.match(REG_HASH_QUERY)[0]));
+      hashStringParams = _objectSpread({}, hashStringParams, deparam(window.location.hash.match(REG_HASH_QUERY)[0], coerce));
     }
 
     return _objectSpread({}, qsObject, hashStringParams);
