@@ -75,13 +75,13 @@ function resolveQuery(route = '', isHash = false, queryString = '', append = fal
  * Converts current query string into an object
  * @private
  */
-function getQueryParams() {
-    const qsObject = deparam(window.location.search);
+function getQueryParams(coerce = false) {
+    const qsObject = deparam(window.location.search, coerce);
     let hashStringParams = {};
     if (window.location.hash.match(REG_HASH_QUERY)) {
         hashStringParams = {
             ...hashStringParams,
-            ...deparam(window.location.hash.match(REG_HASH_QUERY)[0])
+            ...deparam(window.location.hash.match(REG_HASH_QUERY)[0], coerce)
         };
     }
     return {

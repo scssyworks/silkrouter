@@ -1,9 +1,8 @@
 <div class="c-demo-2 js-demo-2 js-demos <% if (!path.match(/\/demos\/demo2/)) { %>d-none<% } %>">
-    <h2>Overlay wizards</h2>
-    <p>A lot of sites show an introductory overlay wizards where user can navigate through multiple steps.</p>
-    <p>Overlay wizards don't use routing particularly, but we'll make it cooler by adding routes.</p>
-    <p>This way a user will be able navigate back to previous step by using browser back button.</p>
-    <h3>Working demo</h3>
+    <h2>Overlay</h2>
+    <p>A lot of sites show an introductory overlays with wizard like behaviour.</p>
+    <p>We can use SILK router to implement routing in overlays.</p>
+    <h3>DEMO</h3>
     <br />
     <!-- Button trigger modal -->
     <button type="button" class="btn btn-primary js-wizard-btn" data-target="#exampleModal">
@@ -39,13 +38,8 @@
     </div>
     <br />
     <h3>Implementation</h3>
-    <p>Routing in modal windows is quite easy to implement. There are few things we need to keep in mind:</p>
-    <p><b>1. </b>If there is are no modal routes, modal window should be closed.</p>
-    <p><b>2. </b>If modal route is present, modal window should be open and display the view for given route.</p>
-    <p><b>3. </b>When modal is dismissed or closed, user should return to the original route.</p>
-    <p>This time we will implement normal url routes to demonstrate <code>pushState</code>. We will also use route parameters to track progress of modal.</code></p>
     <b>Step 1:</b>
-    <b>Bind route handler for modal.</b>
+    <b>Bind route handler for modal. We will use route parameters to keep track of progress.</b>
     <pre>
         <code>
     route('/demos/demo2/modalroute/:progress', function (data) {
@@ -55,7 +49,7 @@
     });</code>
     </pre>
     <b>Step 2:</b>
-    <p>If modal is not open, open the modal and activate the wizard step based on current progress.</p>
+    <p>If modal is not open, open modal and activate wizard step based on current progress.</p>
     <pre>
         <code>
     route('/demos/demo2/modalroute/:progress', function (data) {
@@ -71,7 +65,7 @@
     });</code>
     </pre>
     <b>Step 3:</b>
-    <p>Bind click event to "Start Wizard" button to trigger modal route</p>
+    <p>Bind click event to "Start Wizard" button to trigger router event.</p>
     <pre>
         <code>
     $('.js-wizard-btn').on('click', function () {
@@ -79,7 +73,7 @@
     });</code>
     </pre>
     <b>Step 4:</b>
-    <p>Handle step navigation on click of "Go to next step" button.</p>
+    <p>Handle step navigation when "Go to next step" button is clicked.</p>
     <pre>
         <code>
     $('.js-proceed-step').on('click', function () {

@@ -1,3 +1,7 @@
+body {
+    font-family: 'Roboto', 'Open Sans', sans-serif;
+}
+
 a {
     cursor: pointer;
 }
@@ -8,7 +12,7 @@ a {
 }
 
 nav {
-    box-shadow: 0 0 6px 2px #dadada;
+    box-shadow: 0 0 9px -3px #6e6e6e;
 }
 
 .c-navbar-brand>a {
@@ -54,9 +58,11 @@ img {
         background-color: #eee;
         border-radius: .25rem;
     }
+
     .c-nav-item+.c-nav-item {
         margin-left: 5px;
     }
+
     .c-nav-item.active>a {
         background-color: #dadada;
     }
@@ -65,4 +71,8 @@ img {
 .comment {
     color: #999;
     font-style: italic;
+}
+
+.footer {
+    padding: 2rem 0;
 }

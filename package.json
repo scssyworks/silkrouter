@@ -1,6 +1,6 @@
 {
   "name": "silkrouter",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Silk router is a library for implementing single page applications",
   "main": "dist/js/silkrouter.js",
   "module": "src/js/silkrouter.js",
@@ -29,14 +29,14 @@
   },
   "homepage": "https://github.com/scssyworks/silkrouter#readme",
   "peerDependencies": {
-    "deparam.js": "^2.0.1",
+    "deparam.js": "^2.0.2",
     "lzstorage": "^1.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
     "bootstrap": "^4.3.1",
-    "deparam.js": "^2.0.1",
+    "deparam.js": "^2.0.2",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "jquery": "^3.4.1",

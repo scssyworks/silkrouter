@@ -1,7 +1,7 @@
 # Debugging
 
 <b>1. Differentiating between \# and pathname if both are same:</b><br/>
-Silk router will execute route handler twice if both ``pathname`` and ``hash`` are same.
+SILK router will execute route handler twice if both ``pathname`` and ``hash`` are same.
 Example: http://example.com/path/to/route#/path/to/route
 ```js
 route('/path/to/route', function () {
@@ -22,8 +22,8 @@ route('/path/to/route', function (e) {
 });
 ```
 
-<b>2. Silk router throws an "invalid route" error</b><br/>
-Silk router checks for valid paths. A valid path starts with a ``/``
+<b>2. SILK router throws an "invalid route" error</b><br/>
+SILK router checks for valid paths. A valid path starts with a ``/``
 ```js
 route('/path/to/route', function () { ... }); // Correct
 route('path/to/route', function () { ... }); // Incorrect
