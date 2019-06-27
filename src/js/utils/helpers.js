@@ -139,12 +139,16 @@ export function execRoute(route = {}, replaceMode = false, noTrigger = false) {
  */
 function bindGenericRoute(route, handler) {
     bindRoute((...args) => {
-        const [e] = args;
-        if (
-            route.indexOf(e.route) > -1
-            && typeof handler === 'function'
-        ) {
-            handler.apply(this, args);
+        if (typeof handler === 'function') {
+            const [e] = args;
+            if (route.indexOf(e.route) > -1) {
+                handler.apply(this, args);
+            } else if (
+                route.indexOf(`#${e.route}`) > -1
+                && e.hash
+            ) {
+                handler.apply(this, args);
+            }
         }
     });
 }

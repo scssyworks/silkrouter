@@ -353,7 +353,7 @@
     }
   }
   /**
-   * Binds generic route if route is passed as an array
+   * Binds generic route if route is passed as a list of URLs
    * @param {string[]} route Array of routes
    * @param {*} handler Handler function
    */
@@ -362,14 +362,18 @@
     var _this = this;
 
     bindRoute(function () {
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
+      if (typeof handler === 'function') {
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
 
-      var e = args[0];
+        var e = args[0];
 
-      if (route.indexOf(e.route) > -1 && typeof handler === 'function') {
-        handler.apply(_this, args);
+        if (route.indexOf(e.route) > -1) {
+          handler.apply(_this, args);
+        } else if (route.indexOf("#".concat(e.route)) > -1 && e.hash) {
+          handler.apply(_this, args);
+        }
       }
     });
   }
