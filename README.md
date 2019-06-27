@@ -11,7 +11,7 @@ npm install --save silkrouter deparam.js lzstorage
 
 ### CDN
 ```html
-<script src="https://cdn.jsdelivr.net/npm/silkrouter@3.1.0/dist/js/silkrouter.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/silkrouter@3.1.1/dist/js/silkrouter.min.js"></script>
 ```
 
 ### JQuery version
@@ -56,7 +56,7 @@ route([
     '/path/to/route/2',
     '#/path/to/route/3'
 ], function (e) {
-    console.log(e.route); // Prints the route that matches
+    console.log(e.route); // Prints route that matches
     ... 
 });
 ```
