@@ -133,7 +133,7 @@ export function execRoute(route = {}, replaceMode = false, noTrigger = false) {
 }
 
 /**
- * Binds generic route if route is passed as an array
+ * Binds generic route if route is passed as a list of URLs
  * @param {string[]} route Array of routes
  * @param {*} handler Handler function
  */
