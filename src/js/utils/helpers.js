@@ -133,6 +133,23 @@ export function execRoute(route = {}, replaceMode = false, noTrigger = false) {
 }
 
 /**
+ * Binds generic route if route is passed as an array
+ * @param {string[]} route Array of routes
+ * @param {*} handler Handler function
+ */
+function bindGenericRoute(route, handler) {
+    bindRoute((...args) => {
+        const [e] = args;
+        if (
+            route.indexOf(e.route) > -1
+            && typeof handler === 'function'
+        ) {
+            handler.apply(this, args);
+        }
+    });
+}
+
+/**
  * Attaches a route handler function
  * @private
  * @param {string} route Route string
@@ -143,6 +160,10 @@ export function bindRoute(route, handler) {
     if (typeof route === 'function') {
         handler = route;
         route = '*';
+    }
+    if (Array.isArray(route)) {
+        bindGenericRoute(route, handler);
+        return;
     }
     const startIndex = route.charAt(0) === '#' ? 1 : 0;
     route = route.substring(startIndex);
