@@ -70,6 +70,9 @@ const demo = {
             }
             $('.js-storage-data').text(JSON.stringify(data, null, 2));
         });
+        route(['/test/route', '#/test/route'], function (e) {
+            console.log(e.route, e.hash);
+        });
         _cache.homeLinks.find('.nav-link').on('click', function () {
             if ($(this).parent().data('route') === '/demos/demo3') {
                 router.set({
