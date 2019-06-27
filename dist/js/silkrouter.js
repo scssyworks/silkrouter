@@ -368,10 +368,15 @@
         }
 
         var e = args[0];
+        var compareRoute = e.route;
 
-        if (route.indexOf(e.route) > -1) {
+        if (compareRoute.charAt(0) === '#') {
+          compareRoute = compareRoute.substring(1);
+        }
+
+        if (route.indexOf(compareRoute) > -1) {
           handler.apply(_this, args);
-        } else if (route.indexOf("#".concat(e.route)) > -1 && e.hash) {
+        } else if (route.indexOf("#".concat(compareRoute)) > -1 && e.hash) {
           handler.apply(_this, args);
         }
       }

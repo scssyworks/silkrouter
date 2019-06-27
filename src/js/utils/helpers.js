@@ -141,10 +141,14 @@ function bindGenericRoute(route, handler) {
     bindRoute((...args) => {
         if (typeof handler === 'function') {
             const [e] = args;
-            if (route.indexOf(e.route) > -1) {
+            let compareRoute = e.route;
+            if (compareRoute.charAt(0) === '#') {
+                compareRoute = compareRoute.substring(1);
+            }
+            if (route.indexOf(compareRoute) > -1) {
                 handler.apply(this, args);
             } else if (
-                route.indexOf(`#${e.route}`) > -1
+                route.indexOf(`#${compareRoute}`) > -1
                 && e.hash
             ) {
                 handler.apply(this, args);
