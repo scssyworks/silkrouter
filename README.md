@@ -49,7 +49,7 @@ route('/path/to/route2', function () { ... });
 route('#/path/to/route3', function () { ... }); // Hash route (added in v3)
 ```
 
-<b>2. Create multiple routes:</b><br/>
+<b>2. Create multiple routes [Experimental]:</b><br/>
 ```js
 route([
     '/path/to/route/1',
