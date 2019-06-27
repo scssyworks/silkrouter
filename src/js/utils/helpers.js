@@ -133,6 +133,27 @@ export function execRoute(route = {}, replaceMode = false, noTrigger = false) {
 }
 
 /**
+ * Binds generic route if route is passed as a list of URLs
+ * @param {string[]} route Array of routes
+ * @param {*} handler Handler function
+ */
+function bindGenericRoute(route, handler) {
+    bindRoute((...args) => {
+        if (typeof handler === 'function') {
+            const [e] = args;
+            if (route.indexOf(e.route) > -1) {
+                handler.apply(this, args);
+            } else if (
+                route.indexOf(`#${e.route}`) > -1
+                && e.hash
+            ) {
+                handler.apply(this, args);
+            }
+        }
+    });
+}
+
+/**
  * Attaches a route handler function
  * @private
  * @param {string} route Route string
@@ -143,6 +164,10 @@ export function bindRoute(route, handler) {
     if (typeof route === 'function') {
         handler = route;
         route = '*';
+    }
+    if (Array.isArray(route)) {
+        bindGenericRoute(route, handler);
+        return;
     }
     const startIndex = route.charAt(0) === '#' ? 1 : 0;
     route = route.substring(startIndex);

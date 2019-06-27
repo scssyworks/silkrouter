@@ -3,7 +3,7 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <ssingh.300889@gmail.com>
- * @version 3.0.2
+ * @version 3.1.0
  * @license MIT
  */
 (function (global, factory) {
@@ -353,17 +353,48 @@
     }
   }
   /**
+   * Binds generic route if route is passed as a list of URLs
+   * @param {string[]} route Array of routes
+   * @param {*} handler Handler function
+   */
+
+  function bindGenericRoute(route, handler) {
+    var _this = this;
+
+    bindRoute(function () {
+      if (typeof handler === 'function') {
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+
+        var e = args[0];
+
+        if (route.indexOf(e.route) > -1) {
+          handler.apply(_this, args);
+        } else if (route.indexOf("#".concat(e.route)) > -1 && e.hash) {
+          handler.apply(_this, args);
+        }
+      }
+    });
+  }
+  /**
    * Attaches a route handler function
    * @private
    * @param {string} route Route string
    * @param {function} handler Callback function
    */
 
+
   function bindRoute(route, handler) {
     // Resolve generic route
     if (typeof route === 'function') {
       handler = route;
       route = '*';
+    }
+
+    if (Array.isArray(route)) {
+      bindGenericRoute(route, handler);
+      return;
     }
 
     var startIndex = route.charAt(0) === '#' ? 1 : 0;

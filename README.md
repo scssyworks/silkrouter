@@ -11,23 +11,16 @@ npm install --save silkrouter deparam.js lzstorage
 
 ### CDN
 ```html
-<script src="https://cdn.jsdelivr.net/npm/silkrouter@3.0.1/dist/js/silkrouter.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/silkrouter@3.1.0/dist/js/silkrouter.min.js"></script>
 ```
 
-### Previous versions
-<b>Unstable release</b>
+### JQuery version
 ```sh
-npm install --save jqueryrouter@3.0.0-beta.3
-```
-
-<b>Stable release</b>
-```sh
-npm install --save jqueryrouter@2.1.0
+npm install --save jqueryrouter@2.2.2
 ```
 
 ### Notes
-1. Version 3 (beta.4 and above) is implemented in ES6. For jQuery version please download version 2 or above.
-2. Version 3 has ended support for IE9.
+1. This version does not support IE9 or any other legacy browsers. Please use jQuery version (2.2.2) if you want IE9 support.
 
 ### Peer dependencies
 <a href="https://www.npmjs.com/package/deparam.js">Deparam.js</a><br>
@@ -53,14 +46,27 @@ import { router, route } from 'silkrouter';
 ```js
 route('/path/to/route1', function () { ... });
 route('/path/to/route2', function () { ... });
-route('#/path/to/route3', function () { ... }); // Hash route (added in v3.0.0-beta.5)
+route('#/path/to/route3', function () { ... }); // Hash route (added in v3)
 ```
-<b>2. Trigger a route by calling <code>router.set</code></b><br/>
+
+<b>2. Create multiple routes:</b><br/>
+```js
+route([
+    '/path/to/route/1',
+    '/path/to/route/2',
+    '#/path/to/route/3'
+], function (e) {
+    console.log(e.route); // Prints the route that matches
+    ... 
+});
+```
+
+<b>3. Trigger a route by calling <code>router.set</code></b><br/>
 ```js
 router.set('/path/to/route1');
 ```
 
-<b>4. Pass data to route handler:</b><br/>
+<b>4. Pass data:</b><br/>
 ```js
 router.set({
     route: '/path/to/route',
