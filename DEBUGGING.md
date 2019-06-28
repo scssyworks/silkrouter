@@ -44,10 +44,12 @@ route(function (e) {
 ```
 
 <b>4. How to ``unroute`` a list route?</b><br/>
-This is a problem you are going to face if you are using a list route. Currently SILK router uses generic route under the hood to handle route lists. This is what happens:
+Currently SILK router uses generic route under the hood to handle route lists. This is what happens:<br/>
 ```js
 route(['/', '/testroute'], function () { ... });
+
 // Is equivalent to
+
 route(function (e) {
     switch(e.route) {
         case '/': ...
@@ -56,13 +58,14 @@ route(function (e) {
     }
 });
 ```
-Therefore the route that is attached is generic route ("*") instead of a list. This is done to achieve better performance.<br/>
-This doesn't mean that you can't ``unroute`` a list route. One way is to call ``unroute`` without any parameters which basically unroutes everything (not recommended). A better way is to pass the original handler function:
+This is done to achieve better performance.<br/>
+It doesn't mean you can't ``unroute`` a list route. One way is to call ``unroute`` without any parameters which basically unroutes everything (not recommended).<br/> 
+A better way is to pass the original handler function:
 ```js
 function handler() { ... }
 route(['/', '/testroute'], handler);
 ...
 unroute(handler); // Works
 ```
-Note that you need to store the reference of your handler function somewhere in order to make it work.<br/>
+Note that you would need to store the reference of your handler somewhere in order to make this work.<br/>
 <b>Disclaimer:</b> List routing is still experimental.
