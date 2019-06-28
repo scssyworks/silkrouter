@@ -1,15 +1,7 @@
 import deparam from 'deparam.js';
-import { POP_STATE, HASH_CHANGE, ROUTE_CHANGED, REG_ROUTE_PARAMS, INVALID_ROUTE, REG_HASH_QUERY, REG_PATHNAME } from './constants';
+import { POP_STATE, HASH_CHANGE, ROUTE_CHANGED, INVALID_ROUTE, REG_HASH_QUERY, REG_PATHNAME } from './constants';
 import { libs } from './libs';
-
-/**
- * Trims leading/trailing special characters
- * @private
- * @param {string} param Parameters
- */
-function sanitize(str) {
-    return str.replace(/^([^a-zA-Z0-9]+)|([^a-zA-Z0-9]+)$/g, "");
-}
+import { extractParams } from './params';
 
 /**
  * Triggers "route.changed" event
@@ -40,10 +32,10 @@ function triggerRoute({ originalEvent = {}, route, type, hash = false, originalD
  * @param {string} route Route string
  */
 function isValidRoute(route) {
-    if (typeof route !== "string") {
-        return false;
+    if (typeof route === "string") {
+        return REG_PATHNAME.test(route);
     };
-    return REG_PATHNAME.test(route);
+    return false;
 }
 
 /**
@@ -138,6 +130,9 @@ export function execRoute(route = {}, replaceMode = false, noTrigger = false) {
  * @param {*} handler Handler function
  */
 function bindGenericRoute(route, handler) {
+    if (libs.handlers.filter(ob => (ob.prevHandler === handler)).length) {
+        return;
+    }
     bindRoute((...args) => {
         if (typeof handler === 'function') {
             const [e] = args;
@@ -154,7 +149,7 @@ function bindGenericRoute(route, handler) {
                 handler.apply(this, args);
             }
         }
-    });
+    }, handler);
 }
 
 /**
@@ -163,9 +158,10 @@ function bindGenericRoute(route, handler) {
  * @param {string} route Route string
  * @param {function} handler Callback function
  */
-export function bindRoute(route, handler) {
+export function bindRoute(route, handler, prevHandler) {
     // Resolve generic route
     if (typeof route === 'function') {
+        prevHandler = handler;
         handler = route;
         route = '*';
     }
@@ -176,14 +172,13 @@ export function bindRoute(route, handler) {
     const startIndex = route.charAt(0) === '#' ? 1 : 0;
     route = route.substring(startIndex);
     // Check existence
-    const exists = libs.handlers.filter(ob => {
-        return (ob.handler === handler && ob.route === route);
-    }).length;
+    const exists = libs.handlers.filter(ob => (ob.handler === handler && ob.route === route)).length;
     // Attach handler
     if (!exists && typeof handler === 'function') {
         libs.handlers.push({
             eventName: ROUTE_CHANGED,
             handler,
+            prevHandler,
             route,
             hash: startIndex === 1
         });
@@ -215,11 +210,17 @@ export function bindRoute(route, handler) {
  */
 export function unbindRoute(route, handler) {
     const args = arguments;
+    const prevLength = libs.handlers.length;
+    let isRouteList = false;
     if (args.length === 0) {
         libs.handlers.length = 0;
     }
+    if (Array.isArray(route)) {
+        route = '*';
+        isRouteList = true;
+    }
     libs.handlers = libs.handlers.filter(ob => {
-        if (args.length === 1 && typeof args[0] === 'string') {
+        if (args.length === 1 && typeof args[0] === 'string' && !isRouteList) {
             return ob.route !== route;
         }
         // Check for generic route
@@ -227,8 +228,12 @@ export function unbindRoute(route, handler) {
             handler = args[0];
             route = '*'; // Generic route
         }
-        return !(ob.route === route && ob.handler === handler);
+        return !(ob.route === route && (
+            ob.handler === handler
+            || ob.prevHandler === handler
+        ));
     });
+    return (prevLength > libs.handlers.length);
 }
 
 
@@ -249,24 +254,10 @@ function testRoute(route, url, originalData = {}) {
         libs.setDataToStore(path, isHash, originalData); // Sync store with event data.
     }
     const data = libs.getDataFromStore(path, isHash);
-    const params = {};
-    let hasMatch = false;
-    REG_ROUTE_PARAMS.lastIndex = 0;
-    if (REG_ROUTE_PARAMS.test(route)) {
-        const pathRegex = new RegExp(route.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
-        if (pathRegex.test(url)) {
-            hasMatch = true;
-            REG_ROUTE_PARAMS.lastIndex = 0;
-            const keys = [...route.match(REG_ROUTE_PARAMS)].map(sanitize);
-            const values = [...url.match(pathRegex)];
-            values.shift();
-            keys.forEach((key, index) => {
-                params[key] = values[index];
-            });
-        }
-    } else {
-        hasMatch = isValidRoute(url) && ((route === url) || (route === '*'));
-    }
+    const params = extractParams(route, url);
+    let hasMatch = Object.keys(params).length > 0 || (
+        isValidRoute(url) && ((route === url) || (route === '*'))
+    );
     return {
         hasMatch,
         data,

@@ -1,4 +1,5 @@
 import { execRoute, bindRoute, unbindRoute, initRouterEvents, trigger } from './utils/helpers';
+import { extractParams, hasParams } from './utils/params';
 
 /**
  * @namespace router
@@ -21,6 +22,26 @@ const router = {
          */
         trigger() {
             return trigger.apply(this, arguments);
+        },
+        /**
+         * Checks if a route has parameters
+         * @method hasParams
+         * @public
+         * @memberof router.api
+         * @params {...*} arguments
+         */
+        hasParams() {
+            return hasParams.apply(this, arguments);
+        },
+        /**
+         * Extract parameters as an object if route has parameters
+         * @method extractParams
+         * @public
+         * @memberof router.api
+         * @params {...*} arguments
+         */
+        extractParams() {
+            return extractParams.apply(this, arguments);
         }
     },
     /**
