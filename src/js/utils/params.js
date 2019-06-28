@@ -6,18 +6,22 @@ import { REG_ROUTE_PARAMS, REG_TRIM_SPECIALCHARS } from './constants';
 
 /**
  * Tests if route has parameters
+ * @private
  * @param {string} expr Route expression
+ * @returns {boolean}
  */
-export const hasParams = (expr) => {
+export function hasParams(expr) {
     return REG_ROUTE_PARAMS.test(expr);
 };
 
 /**
- * Parses current path and returns 
+ * Parses current path and returns params object
+ * @private
  * @param {string} expr Route expression
  * @param {string} path URL path
+ * @returns {object}
  */
-export const extractParams = (expr, path = window.location.pathname) => {
+export function extractParams(expr, path = window.location.pathname) {
     if (hasParams(expr)) {
         const pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
         const params = {};

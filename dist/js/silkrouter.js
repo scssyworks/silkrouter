@@ -195,19 +195,23 @@
 
   /**
    * Tests if route has parameters
+   * @private
    * @param {string} expr Route expression
+   * @returns {boolean}
    */
 
-  var hasParams = function hasParams(expr) {
+  function hasParams(expr) {
     return REG_ROUTE_PARAMS.test(expr);
-  };
+  }
   /**
-   * Parses current path and returns 
+   * Parses current path and returns params object
+   * @private
    * @param {string} expr Route expression
    * @param {string} path URL path
+   * @returns {object}
    */
 
-  var extractParams = function extractParams(expr) {
+  function extractParams(expr) {
     var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window.location.pathname;
 
     if (hasParams(expr)) {
@@ -233,7 +237,7 @@
     }
 
     return {};
-  };
+  }
 
   /**
    * Triggers "route.changed" event
