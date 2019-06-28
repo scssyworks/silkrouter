@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import 'bootstrap';
-import { router, route } from "../silkrouter";
+import { router, route, unroute } from "../silkrouter";
 import 'bootstrap/dist/css/bootstrap.css';
 import './demo.css';
 
@@ -127,6 +127,7 @@ const demo = {
         console.log("Demo initialized");
         window.router = router;
         window.route = route;
+        window.unroute = unroute;
     }
 };
 demo.init();

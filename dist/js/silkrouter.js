@@ -3,7 +3,7 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <ssingh.300889@gmail.com>
- * @version 3.1.1
+ * @version 3.1.2
  * @license MIT
  */
 (function (global, factory) {
@@ -130,6 +130,7 @@
   var REG_ROUTE_PARAMS = /:[^\/]+/g;
   var REG_PATHNAME = /^\/(?=[^?]*)/;
   var REG_HASH_QUERY = /\?.+/;
+  var REG_TRIM_SPECIALCHARS = /^([^a-zA-Z0-9]+)|([^a-zA-Z0-9]+)$/g;
   var INVALID_ROUTE = 'Route string is not a pure route';
 
   var store = new LZStorage({
@@ -189,14 +190,55 @@
   };
 
   /**
-   * Trims leading/trailing special characters
-   * @private
-   * @param {string} param Parameters
+   * Helper functions to test and extract params
    */
 
-  function sanitize(str) {
-    return str.replace(/^([^a-zA-Z0-9]+)|([^a-zA-Z0-9]+)$/g, "");
+  /**
+   * Tests if route has parameters
+   * @private
+   * @param {string} expr Route expression
+   * @returns {boolean}
+   */
+
+  function hasParams(expr) {
+    return REG_ROUTE_PARAMS.test(expr);
   }
+  /**
+   * Parses current path and returns params object
+   * @private
+   * @param {string} expr Route expression
+   * @param {string} path URL path
+   * @returns {object}
+   */
+
+  function extractParams(expr) {
+    var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window.location.pathname;
+
+    if (hasParams(expr)) {
+      var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
+      var params = {};
+
+      if (pathRegex.test(path)) {
+        REG_ROUTE_PARAMS.lastIndex = 0;
+
+        var keys = _toConsumableArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
+          return key.replace(REG_TRIM_SPECIALCHARS, '');
+        });
+
+        var values = _toConsumableArray(path.match(pathRegex));
+
+        values.shift();
+        keys.forEach(function (key, index) {
+          params[key] = values[index];
+        });
+      }
+
+      return params;
+    }
+
+    return {};
+  }
+
   /**
    * Triggers "route.changed" event
    * @private
@@ -207,7 +249,6 @@
    * @param {boolean} config.hash Flag that determines type of event expected
    * @param {object} config.originalData Original data persisted by history API
    */
-
 
   function triggerRoute(_ref) {
     var _ref$originalEvent = _ref.originalEvent,
@@ -233,10 +274,10 @@
 
 
   function isValidRoute(route) {
-    if (typeof route !== "string") {
-      return false;
+    if (typeof route === "string") {
+      return REG_PATHNAME.test(route);
     }
-    return REG_PATHNAME.test(route);
+    return false;
   }
   /**
    * Adds a query string
@@ -361,6 +402,12 @@
   function bindGenericRoute(route, handler) {
     var _this = this;
 
+    if (libs.handlers.filter(function (ob) {
+      return ob.prevHandler === handler;
+    }).length) {
+      return;
+    }
+
     bindRoute(function () {
       if (typeof handler === 'function') {
         for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
@@ -380,7 +427,7 @@
           handler.apply(_this, args);
         }
       }
-    });
+    }, handler);
   }
   /**
    * Attaches a route handler function
@@ -390,9 +437,10 @@
    */
 
 
-  function bindRoute(route, handler) {
+  function bindRoute(route, handler, prevHandler) {
     // Resolve generic route
     if (typeof route === 'function') {
+      prevHandler = handler;
       handler = route;
       route = '*';
     }
@@ -413,6 +461,7 @@
       libs.handlers.push({
         eventName: ROUTE_CHANGED,
         handler: handler,
+        prevHandler: prevHandler,
         route: route,
         hash: startIndex === 1
       });
@@ -454,13 +503,20 @@
 
   function unbindRoute(route, handler) {
     var args = arguments;
+    var prevLength = libs.handlers.length;
+    var isRouteList = false;
 
     if (args.length === 0) {
       libs.handlers.length = 0;
     }
 
+    if (Array.isArray(route)) {
+      route = '*';
+      isRouteList = true;
+    }
+
     libs.handlers = libs.handlers.filter(function (ob) {
-      if (args.length === 1 && typeof args[0] === 'string') {
+      if (args.length === 1 && typeof args[0] === 'string' && !isRouteList) {
         return ob.route !== route;
       } // Check for generic route
 
@@ -470,8 +526,9 @@
         route = '*'; // Generic route
       }
 
-      return !(ob.route === route && ob.handler === handler);
+      return !(ob.route === route && (ob.handler === handler || ob.prevHandler === handler));
     });
+    return prevLength > libs.handlers.length;
   }
   /**
    * Compares route with current URL
@@ -498,30 +555,8 @@
     }
 
     var data = libs.getDataFromStore(path, isHash);
-    var params = {};
-    var hasMatch = false;
-    REG_ROUTE_PARAMS.lastIndex = 0;
-
-    if (REG_ROUTE_PARAMS.test(route)) {
-      var pathRegex = new RegExp(route.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
-
-      if (pathRegex.test(url)) {
-        hasMatch = true;
-        REG_ROUTE_PARAMS.lastIndex = 0;
-
-        var keys = _toConsumableArray(route.match(REG_ROUTE_PARAMS)).map(sanitize);
-
-        var values = _toConsumableArray(url.match(pathRegex));
-
-        values.shift();
-        keys.forEach(function (key, index) {
-          params[key] = values[index];
-        });
-      }
-    } else {
-      hasMatch = isValidRoute(url) && (route === url || route === '*');
-    }
-
+    var params = extractParams(route, url);
+    var hasMatch = Object.keys(params).length > 0 || isValidRoute(url) && (route === url || route === '*');
     return {
       hasMatch: hasMatch,
       data: data,
@@ -634,6 +669,28 @@
        */
       trigger: function trigger$1() {
         return trigger.apply(this, arguments);
+      },
+
+      /**
+       * Checks if a route has parameters
+       * @method hasParams
+       * @public
+       * @memberof router.api
+       * @params {...*} arguments
+       */
+      hasParams: function hasParams$1() {
+        return hasParams.apply(this, arguments);
+      },
+
+      /**
+       * Extract parameters as an object if route has parameters
+       * @method extractParams
+       * @public
+       * @memberof router.api
+       * @params {...*} arguments
+       */
+      extractParams: function extractParams$1() {
+        return extractParams.apply(this, arguments);
       }
     },
 
