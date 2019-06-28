@@ -23,7 +23,7 @@ route('/path/to/route', function (e) {
 ```
 
 <b>2. SILK router throws an "invalid route" error</b><br/>
-SILK router checks for valid paths. A valid path starts with a ``/``
+SILK router validates the path. A valid path starts with a ``/``
 ```js
 route('/path/to/route', function () { ... }); // Correct
 route('path/to/route', function () { ... }); // Incorrect
@@ -42,3 +42,27 @@ route(function (e) {
     }
 });
 ```
+
+<b>4. How to ``unroute`` a list route?</b><br/>
+This is a problem you are going to face if you are using a list route. Currently SILK router uses generic route under the hood to handle route lists. This is what happens:
+```js
+route(['/', '/testroute'], function () { ... });
+// Is equivalent to
+route(function (e) {
+    switch(e.route) {
+        case '/': ...
+        case '/testroute': ...
+        default: ...
+    }
+});
+```
+Therefore the route that is attached is generic route ("*") instead of a list. This is done to achieve better performance.<br/>
+This doesn't mean that you can't ``unroute`` a list route. One way is to call ``unroute`` without any parameters which basically unroutes everything (not recommended). A better way is to pass the original handler function:
+```js
+function handler() { ... }
+route(['/', '/testroute'], handler);
+...
+unroute(handler); // Works
+```
+Note that you need to store the reference of your handler function somewhere in order to make it work.<br/>
+<b>Disclaimer:</b> List routing is still experimental.

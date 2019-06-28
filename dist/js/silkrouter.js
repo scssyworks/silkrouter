@@ -3,7 +3,7 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <ssingh.300889@gmail.com>
- * @version 3.1.1
+ * @version 3.1.2
  * @license MIT
  */
 (function (global, factory) {
@@ -499,6 +499,7 @@
 
   function unbindRoute(route, handler) {
     var args = arguments;
+    var prevLength = libs.handlers.length;
     var isRouteList = false;
 
     if (args.length === 0) {
@@ -523,6 +524,7 @@
 
       return !(ob.route === route && (ob.handler === handler || ob.prevHandler === handler));
     });
+    return prevLength > libs.handlers.length;
   }
   /**
    * Compares route with current URL
