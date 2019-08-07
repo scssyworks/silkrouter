@@ -1,7 +1,8 @@
 import deparam from 'deparam.js';
-import { POP_STATE, HASH_CHANGE, ROUTE_CHANGED, INVALID_ROUTE, REG_HASH_QUERY, REG_PATHNAME } from './constants';
+import { POP_STATE, HASH_CHANGE, ROUTE_CHANGED, INVALID_ROUTE, REG_HASH_QUERY, REG_PATHNAME, CASE_INSENSITIVE_FLAG } from './constants';
 import { libs } from './libs';
 import { extractParams } from './params';
+import { toQueryString } from './query';
 
 /**
  * Triggers "route.changed" event
@@ -98,12 +99,20 @@ export function execRoute(route = {}, replaceMode = false, noTrigger = false) {
         replaceMode,
         noTrigger
     };
-    const { route: sroute, replaceMode: rm, noTrigger: nt, queryString: qs = '', data, title = null, appendQuery } = routeObject;
+    const {
+        route: sroute,
+        replaceMode: rm,
+        noTrigger: nt,
+        queryString: qs = '',
+        data,
+        title = null,
+        appendQuery
+    } = routeObject;
     if (typeof sroute === 'string') {
         const isHash = sroute.charAt(0) === '#' ? 1 : 0;
         let [pureRoute, queryString = ''] = sroute.trim().split('?');
         const routeMethod = `${rm ? 'replace' : 'push'}State`;
-        queryString = queryString || qs;
+        queryString = toQueryString(queryString || qs);
         pureRoute = pureRoute.substring(isHash);
         if (isValidRoute(pureRoute)) {
             libs.setDataToStore(pureRoute, isHash === 1, data);
@@ -160,6 +169,7 @@ function bindGenericRoute(route, handler) {
  */
 export function bindRoute(route, handler, prevHandler) {
     // Resolve generic route
+    let isCaseInsensitive = false;
     if (typeof route === 'function') {
         prevHandler = handler;
         handler = route;
@@ -168,6 +178,10 @@ export function bindRoute(route, handler, prevHandler) {
     if (Array.isArray(route)) {
         bindGenericRoute(route, handler);
         return;
+    }
+    if (route.indexOf(CASE_INSENSITIVE_FLAG) === 0) {
+        isCaseInsensitive = true;
+        route = route.substring(CASE_INSENSITIVE_FLAG.length);
     }
     const startIndex = route.charAt(0) === '#' ? 1 : 0;
     route = route.substring(startIndex);
@@ -180,15 +194,22 @@ export function bindRoute(route, handler, prevHandler) {
             handler,
             prevHandler,
             route,
-            hash: startIndex === 1
+            hash: startIndex === 1,
+            isCaseInsensitive
         });
     }
     // Execute handler if matches current route (Replaces init method in version 2.0)
     const { pathname, hash } = window.location;
     const paths = startIndex === 1 ? [hash] : [pathname, hash];
     paths.filter(path => path.trim()).forEach(currentPath => {
+        let cRoute = route;
+        let cCurrentPath = currentPath;
+        if (isCaseInsensitive) {
+            cRoute = cRoute.toLowerCase();
+            cCurrentPath = cCurrentPath.toLowerCase();
+        }
         const pathIndex = currentPath.charAt(0) === '#' ? 1 : 0;
-        const { hasMatch, data, params } = testRoute(route, currentPath);
+        const { hasMatch, data, params } = testRoute(cRoute, cCurrentPath);
         if (hasMatch && typeof handler === 'function') {
             handler({
                 route: currentPath,
@@ -196,7 +217,8 @@ export function bindRoute(route, handler, prevHandler) {
                 eventName: pathIndex === 1 ? HASH_CHANGE : POP_STATE,
                 data,
                 params,
-                query: getQueryParams()
+                query: getQueryParams(),
+                isCaseInsensitive
             });
         }
     });
@@ -208,8 +230,8 @@ export function bindRoute(route, handler, prevHandler) {
  * @param {string} route Route string
  * @param {function} handler Callback function
  */
-export function unbindRoute(route, handler) {
-    const args = arguments;
+export function unbindRoute(...args) {
+    let [route, handler] = args;
     const prevLength = libs.handlers.length;
     let isRouteList = false;
     if (args.length === 0) {
@@ -276,9 +298,15 @@ function execListeners(eventName, routeConfig, originalData = {}) {
     const { hash, pathname } = window.location;
     libs.handlers.forEach(ob => {
         if (ob.eventName === eventName) {
+            let cRoute = ob.route;
+            let cCurrentPath = (isHash ? hash : pathname);
+            if (ob.isCaseInsensitive) {
+                cRoute = cRoute.toLowerCase();
+                cCurrentPath = cCurrentPath.toLowerCase();
+            }
             const { hasMatch, data, params } = testRoute(
-                ob.route,
-                (isHash ? hash : pathname),
+                cRoute,
+                cCurrentPath,
                 originalData
             );
             if (hasMatch && (!ob.hash || (ob.hash && isHash))) {
@@ -297,8 +325,8 @@ function execListeners(eventName, routeConfig, originalData = {}) {
  * Internal method to trigger a routing event
  * @private
  */
-export function trigger() {
-    return execListeners.apply(this, arguments);
+export function trigger(...args) {
+    return execListeners.apply(this, args);
 }
 
 /**

@@ -9,7 +9,7 @@ const banner = `/**!
  * Router plugin for single page applications with routes
  * Released under MIT license
  * @name Silk router
- * @author Sachin Singh <ssingh.300889@gmail.com>
+ * @author Sachin Singh <contactsachinsingh@gmail.com>
  * @version ${pkg.version}
  * @license MIT
  */`;

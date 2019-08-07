@@ -9,3 +9,4 @@ export const REG_PATHNAME = /^\/(?=[^?]*)/;
 export const REG_HASH_QUERY = /\?.+/;
 export const REG_TRIM_SPECIALCHARS = /^([^a-zA-Z0-9]+)|([^a-zA-Z0-9]+)$/g;
 export const INVALID_ROUTE = 'Route string is not a pure route';
+export const CASE_INSENSITIVE_FLAG = '$$';

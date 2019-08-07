@@ -1,5 +1,5 @@
-# SILK Router
-SILK router (formerly <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">jqueryrouter</a>) is a JavaScript library for single page application routing.
+# Silkrouter
+Silkrouter (formerly <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">jqueryrouter</a>) is a JavaScript library for single page application routing.
 
 # Installation
 
@@ -26,7 +26,7 @@ npm install --save jqueryrouter@2.2.2
 <a href="https://www.npmjs.com/package/deparam.js">Deparam.js</a><br>
 <a href="https://www.npmjs.com/package/lzstorage">LZ Storage</a>
 
-# Using SILK router
+# Using Silkrouter
 
 <b>Add a script tag</b><br/>
 ```html
@@ -61,12 +61,23 @@ route([
 });
 ```
 
-<b>3. Trigger a route by calling <code>router.set</code></b><br/>
+<b>3. Create case-insensitive routes [Experimental]: </b><br/>
+```js
+routeIgnoreCase('/path/to/route', function (e) {
+    console.log(e.route, e.isCaseInsensitive);
+    ...
+});
+```
+<b>Notes:</b><br/>
+1. Case insensitive routes work for route strings only. Generic and list routes does not support case insensitivity. If you think about it, it doesn't make any sense either.<br/>
+2. Function ``routeIgnoreCase`` does not support generic and list routes. Please use ``route`` function instead.<br/>
+
+<b>4. Trigger a route by calling <code>router.set</code></b><br/>
 ```js
 router.set('/path/to/route1');
 ```
 
-<b>4. Pass data:</b><br/>
+<b>5. Pass data:</b><br/>
 ```js
 router.set({
     route: '/path/to/route',
@@ -82,7 +93,7 @@ route('/path/to/route', function (config) {
     console.log(data.key2); // 'value2'
 });
 ```
-<b>5. Route parameters:</b><br/>
+<b>6. Route parameters:</b><br/>
 ```js
 router.set('/path/to/route/hello/world');
 ...
@@ -92,7 +103,7 @@ route('/path/to/route/:param1/:param2', function (config) {
     console.log(params.param2); // world
 });
 ```
-<b>6. Query parameters:</b><br/>
+<b>7. Query parameters:</b><br/>
 ```js
 router.set('/path/to/route?q=123&s=helloworld');
 // OR
@@ -107,7 +118,7 @@ route('/path/to/route', function (config) {
     console.log(query.s); // 'helloworld'
 });
 ```
-<b>7. Change current page path without updating history:</b><br/>
+<b>8. Change current page path without updating history:</b><br/>
 ```js
 var replaceMode = true;
 router.set('/path/to/route', replaceMode);
@@ -117,7 +128,7 @@ router.set({
     replaceMode
 });
 ```
-<b>8. Change current page path without calling handler function:</b><br/>
+<b>9. Change current page path without calling handler function:</b><br/>
 ```js
 ...
 var noTrigger = true;
@@ -128,7 +139,7 @@ router.set({
     noTrigger
 });
 ```
-<b>9. Set \# routes:</b><br/>
+<b>10. Set \# routes:</b><br/>
 ```js
 router.set('#/path/to/route');
 ...
@@ -143,7 +154,7 @@ route('#/path/to/route', function () {
 ```
 This forces plugin to change URL hash instead of pathname.<br/>
 
-<b>10. Detach routes:</b><br/>
+<b>11. Detach routes:</b><br/>
 You can remove routes on application unmount using ``unroute`` method. (Added in v1.3.0)
 
 ```js
@@ -153,7 +164,7 @@ unroute('/path/to/route', handlerFn); // Removes handler function attached to th
 ```
 
 # Browser support
-SILK router has been tested in following browsers:
+Silkrouter has been tested in following browsers:
 <b>Desktop:</b> IE 10+, Chrome, Firefox, Safari, Opera, Edge
 <b>Mobile:</b> Chrome, Safari, Firefox
 
