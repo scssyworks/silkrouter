@@ -2,8 +2,8 @@
  * Router plugin for single page applications with routes
  * Released under MIT license
  * @name Silk router
- * @author Sachin Singh <ssingh.300889@gmail.com>
- * @version 3.1.2
+ * @author Sachin Singh <contactsachinsingh@gmail.com>
+ * @version 3.2.0
  * @license MIT
  */
 (function (global, factory) {
@@ -132,6 +132,7 @@
   var REG_HASH_QUERY = /\?.+/;
   var REG_TRIM_SPECIALCHARS = /^([^a-zA-Z0-9]+)|([^a-zA-Z0-9]+)$/g;
   var INVALID_ROUTE = 'Route string is not a pure route';
+  var CASE_INSENSITIVE_FLAG = '$$';
 
   var store = new LZStorage({
     compression: true
@@ -237,6 +238,45 @@
     }
 
     return {};
+  }
+
+  /**
+   * Builds query string recursively
+   * @private
+   * @param {string[]} queryStringParts List of query string key value pairs
+   * @param {*} key Key
+   * @param {*} obj Value
+   */
+  function buildQueryString(queryStringParts, key, obj) {
+    if (obj && _typeof(obj) === 'object') {
+      Object.keys(obj).forEach(function (obKey) {
+        buildQueryString(queryStringParts, "".concat(key, "[").concat(obKey, "]"), obj[obKey]);
+      });
+    } else if (['string', 'number', 'boolean', 'undefined', 'object'].indexOf(_typeof(obj)) > -1) {
+      queryStringParts.push("".concat(key, "=").concat(obj));
+    }
+  }
+  /**
+   * Converts an object to a query string
+   * @private
+   * @param {object} obj Object which should be converted to a string
+   * @returns {string}
+   */
+
+
+  function toQueryString(obj) {
+    var queryStringParts = [];
+
+    if (obj && _typeof(obj) === 'object') {
+      Object.keys(obj).forEach(function (key) {
+        buildQueryString(queryStringParts, key, obj[key]);
+      });
+      return queryStringParts.join('&');
+    } else if (typeof obj === 'string') {
+      return obj;
+    }
+
+    return '';
   }
 
   /**
@@ -371,7 +411,7 @@
           queryString = _sroute$trim$split2$ === void 0 ? '' : _sroute$trim$split2$;
 
       var routeMethod = "".concat(rm ? 'replace' : 'push', "State");
-      queryString = queryString || qs;
+      queryString = toQueryString(queryString || qs);
       pureRoute = pureRoute.substring(isHash);
 
       if (isValidRoute(pureRoute)) {
@@ -439,6 +479,8 @@
 
   function bindRoute(route, handler, prevHandler) {
     // Resolve generic route
+    var isCaseInsensitive = false;
+
     if (typeof route === 'function') {
       prevHandler = handler;
       handler = route;
@@ -448,6 +490,11 @@
     if (Array.isArray(route)) {
       bindGenericRoute(route, handler);
       return;
+    }
+
+    if (route.indexOf(CASE_INSENSITIVE_FLAG) === 0) {
+      isCaseInsensitive = true;
+      route = route.substring(CASE_INSENSITIVE_FLAG.length);
     }
 
     var startIndex = route.charAt(0) === '#' ? 1 : 0;
@@ -463,7 +510,8 @@
         handler: handler,
         prevHandler: prevHandler,
         route: route,
-        hash: startIndex === 1
+        hash: startIndex === 1,
+        isCaseInsensitive: isCaseInsensitive
       });
     } // Execute handler if matches current route (Replaces init method in version 2.0)
 
@@ -475,9 +523,17 @@
     paths.filter(function (path) {
       return path.trim();
     }).forEach(function (currentPath) {
+      var cRoute = route;
+      var cCurrentPath = currentPath;
+
+      if (isCaseInsensitive) {
+        cRoute = cRoute.toLowerCase();
+        cCurrentPath = cCurrentPath.toLowerCase();
+      }
+
       var pathIndex = currentPath.charAt(0) === '#' ? 1 : 0;
 
-      var _testRoute = testRoute(route, currentPath),
+      var _testRoute = testRoute(cRoute, cCurrentPath),
           hasMatch = _testRoute.hasMatch,
           data = _testRoute.data,
           params = _testRoute.params;
@@ -489,7 +545,8 @@
           eventName: pathIndex === 1 ? HASH_CHANGE : POP_STATE,
           data: data,
           params: params,
-          query: getQueryParams()
+          query: getQueryParams(),
+          isCaseInsensitive: isCaseInsensitive
         });
       }
     });
@@ -501,8 +558,13 @@
    * @param {function} handler Callback function
    */
 
-  function unbindRoute(route, handler) {
-    var args = arguments;
+  function unbindRoute() {
+    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    var route = args[0],
+        handler = args[1];
     var prevLength = libs.handlers.length;
     var isRouteList = false;
 
@@ -579,7 +641,15 @@
         pathname = _window$location2.pathname;
     libs.handlers.forEach(function (ob) {
       if (ob.eventName === eventName) {
-        var _testRoute2 = testRoute(ob.route, isHash ? hash : pathname, originalData),
+        var cRoute = ob.route;
+        var cCurrentPath = isHash ? hash : pathname;
+
+        if (ob.isCaseInsensitive) {
+          cRoute = cRoute.toLowerCase();
+          cCurrentPath = cCurrentPath.toLowerCase();
+        }
+
+        var _testRoute2 = testRoute(cRoute, cCurrentPath, originalData),
             hasMatch = _testRoute2.hasMatch,
             data = _testRoute2.data,
             params = _testRoute2.params;
@@ -601,7 +671,11 @@
 
 
   function trigger() {
-    return execListeners.apply(this, arguments);
+    for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+      args[_key3] = arguments[_key3];
+    }
+
+    return execListeners.apply(this, args);
   }
   /**
    * Initializes router events
@@ -668,7 +742,11 @@
        * @param {...*} arguments
        */
       trigger: function trigger$1() {
-        return trigger.apply(this, arguments);
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+
+        return trigger.apply(this, args);
       },
 
       /**
@@ -679,7 +757,11 @@
        * @params {...*} arguments
        */
       hasParams: function hasParams$1() {
-        return hasParams.apply(this, arguments);
+        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+
+        return hasParams.apply(this, args);
       },
 
       /**
@@ -690,7 +772,26 @@
        * @params {...*} arguments
        */
       extractParams: function extractParams$1() {
-        return extractParams.apply(this, arguments);
+        for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+          args[_key3] = arguments[_key3];
+        }
+
+        return extractParams.apply(this, args);
+      },
+
+      /**
+       * Converts object to query string
+       * @method toQueryString
+       * @public
+       * @memberof router.api
+       * @params {...*} arguments
+       */
+      toQueryString: function toQueryString$1() {
+        for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+          args[_key4] = arguments[_key4];
+        }
+
+        return toQueryString.apply(this, args);
       }
     },
 
@@ -702,7 +803,11 @@
      * @param {boolean} noTrigger Flag to disable handler while changing route
      */
     set: function set() {
-      return execRoute.apply(this, arguments);
+      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+        args[_key5] = arguments[_key5];
+      }
+
+      return execRoute.apply(this, args);
     }
   };
   /**
@@ -713,7 +818,28 @@
    */
 
   function route() {
-    return bindRoute.apply(this, arguments);
+    for (var _len6 = arguments.length, args = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
+      args[_key6] = arguments[_key6];
+    }
+
+    return bindRoute.apply(this, args);
+  }
+  /**
+   * Attaches case insensitive route handler
+   * @public
+   * @param {string|function} route Route string or handler function (in case of generic route)
+   * @param {function} handler Handler function
+   */
+
+
+  function routeIgnoreCase(firstArg) {
+    if (typeof firstArg === 'string') {
+      for (var _len7 = arguments.length, args = new Array(_len7 > 1 ? _len7 - 1 : 0), _key7 = 1; _key7 < _len7; _key7++) {
+        args[_key7 - 1] = arguments[_key7];
+      }
+
+      route.apply(this, ["".concat(CASE_INSENSITIVE_FLAG).concat(firstArg)].concat(args));
+    }
   }
   /**
    * Detaches a route handler
@@ -724,12 +850,17 @@
 
 
   function unroute() {
-    return unbindRoute.apply(this, arguments);
+    for (var _len8 = arguments.length, args = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
+      args[_key8] = arguments[_key8];
+    }
+
+    return unbindRoute.apply(this, args);
   }
 
   initRouterEvents();
 
   exports.route = route;
+  exports.routeIgnoreCase = routeIgnoreCase;
   exports.router = router;
   exports.unroute = unroute;
 
