@@ -11,7 +11,7 @@ npm install --save silkrouter deparam.js lzstorage
 
 ### CDN
 ```html
-<script src="https://cdn.jsdelivr.net/npm/silkrouter@3.1.2/dist/js/silkrouter.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/silkrouter@3.2.0/dist/js/silkrouter.min.js"></script>
 ```
 
 ### JQuery version
