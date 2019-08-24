@@ -1,20 +1,11 @@
-import deparam from 'deparam.js';
 import { POP_STATE, HASH_CHANGE, ROUTE_CHANGED, INVALID_ROUTE, REG_HASH_QUERY, REG_PATHNAME, CASE_INSENSITIVE_FLAG } from './constants';
 import { libs } from './libs';
 import { extractParams } from './params';
 import { toQueryString } from './query';
 import { assign } from './assign';
-
-// Abbreviated variables
-const loc = window.location;
-
-/**
- * Safely trims string
- * @param {string} str String
- */
-function trim(str) {
-    return ((typeof str === 'string') ? str.trim() : '');
-}
+import deparam from './deparam';
+import { loc } from './vars';
+import { isArr, trim } from './utils';
 
 /**
  * Triggers "route.changed" event
@@ -174,7 +165,7 @@ export function bindRoute(route, handler, prevHandler) {
         handler = route;
         route = '*';
     }
-    if (Array.isArray(route)) {
+    if (isArr(route)) {
         bindGenericRoute(route, handler);
         return;
     }
@@ -236,7 +227,7 @@ export function unbindRoute(...args) {
     if (args.length === 0) {
         libs.handlers.length = 0;
     }
-    if (Array.isArray(route)) {
+    if (isArr(route)) {
         route = '*';
         isRouteList = true;
     }

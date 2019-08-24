@@ -2,6 +2,7 @@ import { execRoute, bindRoute, unbindRoute, initRouterEvents, trigger } from './
 import { extractParams } from './utils/params';
 import { CASE_INSENSITIVE_FLAG } from './utils/constants';
 import { toQueryString } from './utils/query';
+import deparam from './utils/deparam';
 
 /**
  * @namespace router
@@ -44,6 +45,16 @@ const router = {
          */
         toQueryString(...args) {
             return toQueryString.apply(this, args);
+        },
+        /**
+         * Converts object to query string
+         * @method fromQueryString
+         * @public
+         * @memberof router.api
+         * @params {...*} arguments
+         */
+        fromQueryString(...args) {
+            return deparam.apply(this, args);
         }
     },
     /**
@@ -92,4 +103,11 @@ function unroute(...args) {
 
 initRouterEvents();
 
-export { router, route, routeIgnoreCase, unroute };
+export {
+    router,
+    route,
+    routeIgnoreCase,
+    unroute,
+    deparam,
+    toQueryString as param
+};

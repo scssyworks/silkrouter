@@ -7,12 +7,11 @@
  * @license MIT
  */
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('deparam.js'), require('lzstorage')) :
-  typeof define === 'function' && define.amd ? define(['exports', 'deparam.js', 'lzstorage'], factory) :
-  (global = global || self, factory(global.silkrouter = {}, global.deparam, global.LZStorage));
-}(this, function (exports, deparam, LZStorage) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('lzstorage')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'lzstorage'], factory) :
+  (global = global || self, factory(global.silkrouter = {}, global.LZStorage));
+}(this, function (exports, LZStorage) { 'use strict';
 
-  deparam = deparam && deparam.hasOwnProperty('default') ? deparam['default'] : deparam;
   LZStorage = LZStorage && LZStorage.hasOwnProperty('default') ? LZStorage['default'] : LZStorage;
 
   var HASH_CHANGE = 'hashchange';
@@ -144,8 +143,171 @@
 
   var loc = window.location;
 
+  var isArr = Array.isArray;
+
   function trim(str) {
     return typeof str === 'string' ? str.trim() : '';
+  }
+
+  function isNumber(key) {
+    key = trim("".concat(key));
+    if (['null', 'undefined', ''].indexOf(key) > -1) return false;
+    return !isNaN(Number(key));
+  }
+
+  function isObject(key) {
+    return key != null && !isArr(key) && key.toString() === "[object Object]";
+  }
+
+  function setDefault(value, defaultValue) {
+    return typeof value === 'undefined' ? defaultValue : value;
+  }
+
+  function ifComplex(q) {
+    return /\[/.test(q);
+  }
+
+  function deparam(qs, coerce) {
+    var _this = this;
+
+    qs = trim(setDefault(qs, loc.search));
+    coerce = setDefault(coerce, true);
+
+    if (qs.charAt(0) === "?") {
+      qs = qs.replace("?", "");
+    }
+
+    var queryParamList = qs.split("&");
+    var queryObject = {};
+
+    if (qs) {
+      queryParamList.forEach(function (qq) {
+        var qArr = qq.split("=");
+
+        if (qArr[1]) {
+          qArr[1] = decodeURIComponent(qArr[1]);
+        }
+
+        if (ifComplex(qArr[0])) {
+          complex.apply(_this, [].concat(qArr).concat([queryObject, coerce]));
+        } else {
+          simple.apply(_this, [qArr, queryObject, false, coerce]);
+        }
+      });
+    }
+
+    return queryObject;
+  }
+
+  function toObject(arr) {
+    var convertedObj = {};
+
+    if (isArr(arr)) {
+      arr.forEach(function (value, index) {
+        convertedObj[index] = value;
+      });
+    }
+
+    return convertedObj;
+  }
+
+  function resolve(ob, isNextNumber) {
+    if (typeof ob === "undefined") return isNextNumber ? [] : {};
+    return isNextNumber ? ob : toObject(ob);
+  }
+
+  function resolveObj(ob, nextProp) {
+    if (isObject(ob)) return {
+      ob: ob
+    };
+    if (isArr(ob) || typeof ob === "undefined") return {
+      ob: resolve(ob, isNumber(nextProp))
+    };
+    return {
+      ob: [ob],
+      push: ob !== null
+    };
+  }
+
+  function complex(key, value, obj, doCoerce) {
+    doCoerce = setDefault(doCoerce, true);
+    var match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
+
+    if (match.length === 3) {
+      var prop = match[1];
+      var nextProp = match[2];
+      key = key.replace(/\[([^\[]*)\]/, "");
+
+      if (ifComplex(key)) {
+        if (nextProp === "") nextProp = "0";
+        key = key.replace(/[^\[]+/, nextProp);
+        complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, doCoerce);
+      } else if (nextProp) {
+        var _resolveObj = resolveObj(obj[prop], nextProp),
+            ob = _resolveObj.ob,
+            push = _resolveObj.push;
+
+        obj[prop] = ob;
+
+        if (push) {
+          var tempObj = {};
+          tempObj[nextProp] = doCoerce ? coerce(value) : value;
+          obj[prop].push(tempObj);
+        } else {
+          obj[prop][nextProp] = doCoerce ? coerce(value) : value;
+        }
+      } else {
+        simple([match[1], value], obj, true);
+      }
+    }
+  }
+
+  function simple(qArr, queryObject, toArray, doCoerce) {
+    doCoerce = setDefault(doCoerce, true);
+    var key = qArr[0];
+    var value = qArr[1];
+
+    if (doCoerce) {
+      value = coerce(value);
+    }
+
+    if (key in queryObject) {
+      queryObject[key] = isArr(queryObject[key]) ? queryObject[key] : [queryObject[key]];
+      queryObject[key].push(value);
+    } else {
+      queryObject[key] = toArray ? [value] : value;
+    }
+  }
+
+  function coerce(value) {
+    if (value == null) return "";
+    if (typeof value !== "string") return value;
+    value = trim(value);
+    if (isNumber(value)) return +value;
+
+    switch (value) {
+      case "null":
+        return null;
+
+      case "undefined":
+        return undefined;
+
+      case "true":
+        return true;
+
+      case "false":
+        return false;
+
+      case "NaN":
+        return NaN;
+
+      default:
+        return value;
+    }
+  }
+
+  function lib() {
+    return deparam.apply(this, arguments);
   }
 
   function triggerRoute(_ref) {
@@ -181,12 +343,12 @@
   }
 
   function getQueryParams() {
-    var qsObject = deparam(loc.search, false);
+    var qsObject = lib(loc.search, false);
     var hashStringParams = {};
     var hashQuery = loc.hash.match(REG_HASH_QUERY);
 
     if (hashQuery) {
-      hashStringParams = assign({}, hashStringParams, deparam(hashQuery[0], false));
+      hashStringParams = assign({}, hashStringParams, lib(hashQuery[0], false));
     }
 
     return assign({}, qsObject, hashStringParams);
@@ -283,7 +445,7 @@
       route = '*';
     }
 
-    if (Array.isArray(route)) {
+    if (isArr(route)) {
       bindGenericRoute(route, handler);
       return;
     }
@@ -360,7 +522,7 @@
       libs.handlers.length = 0;
     }
 
-    if (Array.isArray(route)) {
+    if (isArr(route)) {
       route = '*';
       isRouteList = true;
     }
@@ -505,12 +667,20 @@
         }
 
         return toQueryString.apply(this, args);
+      },
+
+      fromQueryString: function fromQueryString() {
+        for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+          args[_key4] = arguments[_key4];
+        }
+
+        return lib.apply(this, args);
       }
     },
 
     set: function set() {
-      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-        args[_key4] = arguments[_key4];
+      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+        args[_key5] = arguments[_key5];
       }
 
       return execRoute.apply(this, args);
@@ -518,8 +688,8 @@
   };
 
   function route() {
-    for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-      args[_key5] = arguments[_key5];
+    for (var _len6 = arguments.length, args = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
+      args[_key6] = arguments[_key6];
     }
 
     return bindRoute.apply(this, args);
@@ -527,8 +697,8 @@
 
   function routeIgnoreCase(firstArg) {
     if (typeof firstArg === 'string') {
-      for (var _len6 = arguments.length, args = new Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
-        args[_key6 - 1] = arguments[_key6];
+      for (var _len7 = arguments.length, args = new Array(_len7 > 1 ? _len7 - 1 : 0), _key7 = 1; _key7 < _len7; _key7++) {
+        args[_key7 - 1] = arguments[_key7];
       }
 
       route.apply(this, ["".concat(CASE_INSENSITIVE_FLAG).concat(firstArg)].concat(args));
@@ -536,8 +706,8 @@
   }
 
   function unroute() {
-    for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
-      args[_key7] = arguments[_key7];
+    for (var _len8 = arguments.length, args = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
+      args[_key8] = arguments[_key8];
     }
 
     return unbindRoute.apply(this, args);
@@ -545,6 +715,8 @@
 
   initRouterEvents();
 
+  exports.deparam = lib;
+  exports.param = toQueryString;
   exports.route = route;
   exports.routeIgnoreCase = routeIgnoreCase;
   exports.router = router;

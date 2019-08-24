@@ -25,7 +25,6 @@ export default [
             name: "silkrouter",
             sourcemap: true,
             globals: {
-                'deparam.js': 'deparam',
                 'lzstorage': 'LZStorage'
             },
             banner
@@ -53,7 +52,6 @@ export default [
             format: "umd",
             name: "silkrouter",
             globals: {
-                'deparam.js': 'deparam',
                 'lzstorage': 'LZStorage'
             },
             banner

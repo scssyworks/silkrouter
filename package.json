@@ -8,8 +8,7 @@
   "scripts": {
     "start": "node server.js",
     "buildAndStart": "npm run build && npm run start",
-    "build": "rollup -c",
-    "jsdoc": "jsdoc ./src/js/silkrouter.js -p -d docs && jsdoc ./src/js/utils/constants.js -p -d docs && jsdoc ./src/js/utils/helpers.js -p -d docs && jsdoc ./src/js/utils/libs.js -p -d docs && jsdoc ./src/js/utils/params.js -p -d docs"
+    "build": "rollup -c"
   },
   "repository": {
     "type": "git",
@@ -29,14 +28,12 @@
   },
   "homepage": "https://github.com/scssyworks/silkrouter#readme",
   "peerDependencies": {
-    "deparam.js": "^2.0.2",
     "lzstorage": "^1.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
     "bootstrap": "^4.3.1",
-    "deparam.js": "^2.0.2",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "jquery": "^3.4.1",
@@ -49,5 +46,6 @@
     "rollup-plugin-node-resolve": "^4.2.4",
     "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-uglify": "^6.0.2"
-  }
+  },
+  "dependencies": {}
 }
