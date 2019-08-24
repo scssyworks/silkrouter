@@ -1,5 +1,5 @@
 import { execRoute, bindRoute, unbindRoute, initRouterEvents, trigger } from './utils/helpers';
-import { extractParams, hasParams } from './utils/params';
+import { extractParams } from './utils/params';
 import { CASE_INSENSITIVE_FLAG } from './utils/constants';
 import { toQueryString } from './utils/query';
 
@@ -24,16 +24,6 @@ const router = {
          */
         trigger(...args) {
             return trigger.apply(this, args);
-        },
-        /**
-         * Checks if a route has parameters
-         * @method hasParams
-         * @public
-         * @memberof router.api
-         * @params {...*} arguments
-         */
-        hasParams(...args) {
-            return hasParams.apply(this, args);
         },
         /**
          * Extract parameters as an object if route has parameters

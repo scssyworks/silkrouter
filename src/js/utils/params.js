@@ -1,18 +1,12 @@
 import { REG_ROUTE_PARAMS, REG_TRIM_SPECIALCHARS } from './constants';
 
 /**
- * Helper functions to test and extract params
+ * Converts array like object to array
+ * @param {any[]} arr Arraylike object
  */
-
-/**
- * Tests if route has parameters
- * @private
- * @param {string} expr Route expression
- * @returns {boolean}
- */
-export function hasParams(expr) {
-    return REG_ROUTE_PARAMS.test(expr);
-};
+function toArray(arr) {
+    return Array.prototype.slice.call(arr);
+}
 
 /**
  * Parses current path and returns params object
@@ -22,13 +16,13 @@ export function hasParams(expr) {
  * @returns {object}
  */
 export function extractParams(expr, path = window.location.pathname) {
-    if (hasParams(expr)) {
+    if (REG_ROUTE_PARAMS.test(expr)) {
         const pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
         const params = {};
         if (pathRegex.test(path)) {
             REG_ROUTE_PARAMS.lastIndex = 0;
-            const keys = [...expr.match(REG_ROUTE_PARAMS)].map(key => key.replace(REG_TRIM_SPECIALCHARS, ''));
-            const values = [...path.match(pathRegex)];
+            const keys = [].concat(toArray(expr.match(REG_ROUTE_PARAMS))).map(key => key.replace(REG_TRIM_SPECIALCHARS, ''));
+            const values = [].concat(toArray(path.match(pathRegex)));
             values.shift();
             keys.forEach((key, index) => {
                 params[key] = values[index];

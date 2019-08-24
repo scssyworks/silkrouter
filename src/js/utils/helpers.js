@@ -3,6 +3,18 @@ import { POP_STATE, HASH_CHANGE, ROUTE_CHANGED, INVALID_ROUTE, REG_HASH_QUERY, R
 import { libs } from './libs';
 import { extractParams } from './params';
 import { toQueryString } from './query';
+import { assign } from './assign';
+
+// Abbreviated variables
+const loc = window.location;
+
+/**
+ * Safely trims string
+ * @param {string} str String
+ */
+function trim(str) {
+    return ((typeof str === 'string') ? str.trim() : '');
+}
 
 /**
  * Triggers "route.changed" event
@@ -14,7 +26,7 @@ import { toQueryString } from './query';
  * @param {boolean} config.hash Flag that determines type of event expected
  * @param {object} config.originalData Original data persisted by history API
  */
-function triggerRoute({ originalEvent = {}, route, type, hash = false, originalData = {} }) {
+function triggerRoute({ originalEvent, route, type, hash, originalData }) {
     trigger(
         ROUTE_CHANGED,
         {
@@ -33,10 +45,7 @@ function triggerRoute({ originalEvent = {}, route, type, hash = false, originalD
  * @param {string} route Route string
  */
 function isValidRoute(route) {
-    if (typeof route === "string") {
-        return REG_PATHNAME.test(route);
-    };
-    return false;
+    return ((typeof route === 'string') ? REG_PATHNAME.test(route) : false);
 }
 
 /**
@@ -46,41 +55,29 @@ function isValidRoute(route) {
  * @param {string} qString Query string
  * @param {boolean} appendQString Append query string flag
  */
-function resolveQuery(route = '', isHash = false, queryString = '', append = false) {
-    queryString = queryString.charAt(0) === '?' ? queryString.substring(1).trim() : queryString.trim();
+function resolveQuery(route, isHash, queryString, append) {
+    queryString = trim(queryString.substring((queryString.charAt(0) === '?' ? 1 : 0)));
     if (!isHash) {
         if (append) {
-            if (queryString) {
-                return `${route}${location.search}&${queryString}`;
-            }
-            return `${route}${location.search}`;
-        } else if (queryString) {
-            return `${route}?${queryString}`;
+            return `${route}${loc.search}${(queryString ? `&${queryString}` : '')}`;
         }
-        return route;
-    } else if (queryString) {
-        return `${location.pathname}${location.search}#${route}?${queryString}`;
+        return `${route}${(queryString ? `?${queryString}` : '')}`;
     }
-    return `${location.pathname}${location.search}#${route}`;
+    return `${loc.pathname}${loc.search}#${route}${queryString ? `?${queryString}` : ''}`;
 }
 
 /**
  * Converts current query string into an object
  * @private
  */
-function getQueryParams(coerce = false) {
-    const qsObject = deparam(window.location.search, coerce);
+function getQueryParams() {
+    const qsObject = deparam(loc.search, false);
     let hashStringParams = {};
-    if (window.location.hash.match(REG_HASH_QUERY)) {
-        hashStringParams = {
-            ...hashStringParams,
-            ...deparam(window.location.hash.match(REG_HASH_QUERY)[0], coerce)
-        };
+    const hashQuery = loc.hash.match(REG_HASH_QUERY);
+    if (hashQuery) {
+        hashStringParams = assign({}, hashStringParams, deparam(hashQuery[0], false));
     }
-    return {
-        ...qsObject,
-        ...hashStringParams
-    };
+    return assign({}, qsObject, hashStringParams);
 }
 
 /**
@@ -90,15 +87,12 @@ function getQueryParams(coerce = false) {
  * @param {boolean} replaceMode Replace mode
  * @param {boolean} noTrigger Do not trigger handler
  */
-export function execRoute(route = {}, replaceMode = false, noTrigger = false) {
-    let routeObject = typeof route === 'string' ? { route } : {
-        ...route
-    };
-    routeObject = {
-        ...routeObject,
+export function execRoute(route, replaceMode, noTrigger) {
+    let routeObject = typeof route === 'string' ? { route } : assign({}, route);
+    routeObject = assign({}, routeObject, {
         replaceMode,
         noTrigger
-    };
+    });
     const {
         route: sroute,
         replaceMode: rm,
@@ -110,7 +104,9 @@ export function execRoute(route = {}, replaceMode = false, noTrigger = false) {
     } = routeObject;
     if (typeof sroute === 'string') {
         const isHash = sroute.charAt(0) === '#' ? 1 : 0;
-        let [pureRoute, queryString = ''] = sroute.trim().split('?');
+        const routeParts = trim(sroute).split('?');
+        let pureRoute = routeParts[0];
+        let queryString = trim(routeParts[1]);
         const routeMethod = `${rm ? 'replace' : 'push'}State`;
         queryString = toQueryString(queryString || qs);
         pureRoute = pureRoute.substring(isHash);
@@ -121,9 +117,11 @@ export function execRoute(route = {}, replaceMode = false, noTrigger = false) {
             if (!nt) {
                 triggerRoute(
                     {
+                        originalEvent: {},
                         route: `${isHash ? '#' : ''}${pureRoute}`,
                         type: (isHash ? HASH_CHANGE : POP_STATE),
-                        hash: (isHash === 1)
+                        hash: (isHash === 1),
+                        originalData: {}
                     }
                 );
             }
@@ -135,6 +133,7 @@ export function execRoute(route = {}, replaceMode = false, noTrigger = false) {
 
 /**
  * Binds generic route if route is passed as a list of URLs
+ * @private
  * @param {string[]} route Array of routes
  * @param {*} handler Handler function
  */
@@ -199,9 +198,9 @@ export function bindRoute(route, handler, prevHandler) {
         });
     }
     // Execute handler if matches current route (Replaces init method in version 2.0)
-    const { pathname, hash } = window.location;
+    const { pathname, hash } = loc;
     const paths = startIndex === 1 ? [hash] : [pathname, hash];
-    paths.filter(path => path.trim()).forEach(currentPath => {
+    paths.filter(path => trim(path)).forEach(currentPath => {
         let cRoute = route;
         let cCurrentPath = currentPath;
         if (isCaseInsensitive) {
@@ -266,12 +265,13 @@ export function unbindRoute(...args) {
  * @param {string} url Current url
  * @param {object} params Parameters
  */
-function testRoute(route, url, originalData = {}) {
+function testRoute(route, url, originalData) {
+    originalData = assign(originalData);
     const isHash = url.charAt(0) === '#';
     if (isHash) {
         url = url.substring(1);
     }
-    const [path] = url.split('?');
+    const path = url.split('?')[0];
     if (!!Object.keys(originalData).length) {
         libs.setDataToStore(path, isHash, originalData); // Sync store with event data.
     }
@@ -293,9 +293,10 @@ function testRoute(route, url, originalData = {}) {
  * @param {string} eventName Name of route event
  * @param {object} params Parameters
  */
-function execListeners(eventName, routeConfig, originalData = {}) {
+function execListeners(eventName, routeConfig, originalData) {
+    originalData = assign(originalData);
     const { hash: isHash } = routeConfig;
-    const { hash, pathname } = window.location;
+    const { hash, pathname } = loc;
     libs.handlers.forEach(ob => {
         if (ob.eventName === eventName) {
             let cRoute = ob.route;
@@ -310,12 +311,11 @@ function execListeners(eventName, routeConfig, originalData = {}) {
                 originalData
             );
             if (hasMatch && (!ob.hash || (ob.hash && isHash))) {
-                ob.handler({
-                    ...routeConfig,
+                ob.handler(assign({}, routeConfig, {
                     data,
                     params,
                     query: getQueryParams()
-                });
+                }));
             }
         }
     });
@@ -335,8 +335,10 @@ export function trigger(...args) {
  */
 export function initRouterEvents() {
     window.addEventListener(`${POP_STATE}`, function (e) {
-        const completePath = `${location.pathname}${location.hash}`;
-        const [pathname, hashstring] = completePath.split('#');
+        const completePath = `${loc.pathname}${loc.hash}`;
+        const pathParts = completePath.split('#');
+        const pathname = pathParts[0];
+        const hashstring = pathParts[1];
         let originalData = {};
         if (e.state) {
             const { data } = e.state;
