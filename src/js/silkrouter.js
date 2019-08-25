@@ -2,7 +2,8 @@ import { execRoute, bindRoute, unbindRoute, initRouterEvents, trigger } from './
 import { extractParams } from './utils/params';
 import { CASE_INSENSITIVE_FLAG } from './utils/constants';
 import { toQueryString } from './utils/query';
-import deparam from './utils/deparam';
+import { deparam } from './utils/deparam';
+
 
 /**
  * @namespace router
@@ -14,6 +15,7 @@ const router = {
      * @namespace api
      * @memberof router
      * @type {object}
+     * @deprecated
      */
     api: {
         /**
@@ -22,6 +24,7 @@ const router = {
          * @public
          * @memberof router.api
          * @param {...*} arguments
+         * @deprecated
          */
         trigger(...args) {
             return trigger.apply(this, args);
@@ -32,6 +35,7 @@ const router = {
          * @public
          * @memberof router.api
          * @params {...*} arguments
+         * @deprecated
          */
         extractParams(...args) {
             return extractParams.apply(this, args);
@@ -42,19 +46,10 @@ const router = {
          * @public
          * @memberof router.api
          * @params {...*} arguments
+         * @deprecated
          */
         toQueryString(...args) {
             return toQueryString.apply(this, args);
-        },
-        /**
-         * Converts object to query string
-         * @method fromQueryString
-         * @public
-         * @memberof router.api
-         * @params {...*} arguments
-         */
-        fromQueryString(...args) {
-            return deparam.apply(this, args);
         }
     },
     /**
@@ -109,5 +104,6 @@ export {
     routeIgnoreCase,
     unroute,
     deparam,
-    toQueryString as param
+    toQueryString as param,
+    extractParams as routeParams
 };

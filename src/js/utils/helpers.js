@@ -3,9 +3,10 @@ import { libs } from './libs';
 import { extractParams } from './params';
 import { toQueryString } from './query';
 import { assign } from './assign';
-import deparam from './deparam';
+import { deparam } from './deparam';
 import { loc } from './vars';
 import { isArr, trim } from './utils';
+
 
 /**
  * Triggers "route.changed" event

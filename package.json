@@ -4,7 +4,7 @@
   "description": "Silk router is a library for implementing single page applications",
   "main": "dist/js/silkrouter.js",
   "module": "src/js/silkrouter.js",
-  "typings": "src/typings/silkrouter.d.ts",
+  "types": "src/typings/silkrouter.d.ts",
   "scripts": {
     "start": "node server.js",
     "buildAndStart": "npm run build && npm run start",

@@ -150,4 +150,4 @@ function lib() {
     return deparam.apply(this, arguments);
 }
 
-export default lib;
+export { lib as deparam };
