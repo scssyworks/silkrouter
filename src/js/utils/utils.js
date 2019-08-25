@@ -37,3 +37,11 @@ export function isObject(key) {
 export function setDefault(value, defaultValue) {
     return typeof value === 'undefined' ? defaultValue : value;
 }
+
+/**
+ * Converts array like object to array
+ * @param {any[]} arr Arraylike object
+ */
+export function toArray(arr) {
+    return Array.prototype.slice.call(arr);
+}

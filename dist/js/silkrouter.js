@@ -87,62 +87,6 @@
     handlers: []
   };
 
-  function toArray(arr) {
-    return Array.prototype.slice.call(arr);
-  }
-
-  function extractParams(expr) {
-    var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window.location.pathname;
-
-    if (REG_ROUTE_PARAMS.test(expr)) {
-      var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
-      var params = {};
-
-      if (pathRegex.test(path)) {
-        REG_ROUTE_PARAMS.lastIndex = 0;
-        var keys = [].concat(toArray(expr.match(REG_ROUTE_PARAMS))).map(function (key) {
-          return key.replace(REG_TRIM_SPECIALCHARS, '');
-        });
-        var values = [].concat(toArray(path.match(pathRegex)));
-        values.shift();
-        keys.forEach(function (key, index) {
-          params[key] = values[index];
-        });
-      }
-
-      return params;
-    }
-
-    return {};
-  }
-
-  function buildQueryString(queryStringParts, key, obj) {
-    if (obj && _typeof(obj) === 'object') {
-      Object.keys(obj).forEach(function (obKey) {
-        buildQueryString(queryStringParts, "".concat(key, "[").concat(obKey, "]"), obj[obKey]);
-      });
-    } else if (['string', 'number', 'boolean', 'undefined', 'object'].indexOf(_typeof(obj)) > -1) {
-      queryStringParts.push("".concat(key, "=").concat(obj));
-    }
-  }
-
-  function toQueryString(obj) {
-    var queryStringParts = [];
-
-    if (obj && _typeof(obj) === 'object') {
-      Object.keys(obj).forEach(function (key) {
-        buildQueryString(queryStringParts, key, obj[key]);
-      });
-      return queryStringParts.join('&');
-    } else if (typeof obj === 'string') {
-      return obj;
-    }
-
-    return '';
-  }
-
-  var loc = window.location;
-
   var isArr = Array.isArray;
 
   function trim(str) {
@@ -162,6 +106,64 @@
   function setDefault(value, defaultValue) {
     return typeof value === 'undefined' ? defaultValue : value;
   }
+
+  function toArray(arr) {
+    return Array.prototype.slice.call(arr);
+  }
+
+  function extractParams(expr) {
+    var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window.location.pathname;
+
+    if (REG_ROUTE_PARAMS.test(expr)) {
+      var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
+      var params = {};
+
+      if (pathRegex.test(path)) {
+        REG_ROUTE_PARAMS.lastIndex = 0;
+        var keys = toArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
+          return key.replace(REG_TRIM_SPECIALCHARS, '');
+        });
+        var values = toArray(path.match(pathRegex));
+        values.shift();
+        keys.forEach(function (key, index) {
+          params[key] = values[index];
+        });
+      }
+
+      return params;
+    }
+
+    return {};
+  }
+
+  function buildQueryString(queryStringParts, key, obj) {
+    if (obj && _typeof(obj) === 'object') {
+      var isCurrObjArray = isArr(obj);
+      Object.keys(obj).forEach(function (obKey) {
+        var qKey = isCurrObjArray ? '' : obKey;
+        buildQueryString(queryStringParts, "".concat(key, "[").concat(qKey, "]"), obj[obKey]);
+      });
+    } else if (['string', 'number', 'boolean', 'undefined', 'object'].indexOf(_typeof(obj)) > -1) {
+      queryStringParts.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
+    }
+  }
+
+  function toQueryString(obj) {
+    var queryStringParts = [];
+
+    if (obj && _typeof(obj) === 'object') {
+      Object.keys(obj).forEach(function (key) {
+        buildQueryString(queryStringParts, key, obj[key]);
+      });
+      return queryStringParts.join('&');
+    } else if (typeof obj === 'string') {
+      return obj;
+    }
+
+    return '';
+  }
+
+  var loc = window.location;
 
   function ifComplex(q) {
     return /\[/.test(q);
@@ -183,6 +185,10 @@
     if (qs) {
       queryParamList.forEach(function (qq) {
         var qArr = qq.split("=");
+
+        if (qArr[0]) {
+          qArr[0] = decodeURIComponent(qArr[0]);
+        }
 
         if (qArr[1]) {
           qArr[1] = decodeURIComponent(qArr[1]);
@@ -667,20 +673,12 @@
         }
 
         return toQueryString.apply(this, args);
-      },
-
-      fromQueryString: function fromQueryString() {
-        for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-          args[_key4] = arguments[_key4];
-        }
-
-        return lib.apply(this, args);
       }
     },
 
     set: function set() {
-      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-        args[_key5] = arguments[_key5];
+      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
       }
 
       return execRoute.apply(this, args);
@@ -688,8 +686,8 @@
   };
 
   function route() {
-    for (var _len6 = arguments.length, args = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
-      args[_key6] = arguments[_key6];
+    for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+      args[_key5] = arguments[_key5];
     }
 
     return bindRoute.apply(this, args);
@@ -697,8 +695,8 @@
 
   function routeIgnoreCase(firstArg) {
     if (typeof firstArg === 'string') {
-      for (var _len7 = arguments.length, args = new Array(_len7 > 1 ? _len7 - 1 : 0), _key7 = 1; _key7 < _len7; _key7++) {
-        args[_key7 - 1] = arguments[_key7];
+      for (var _len6 = arguments.length, args = new Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
+        args[_key6 - 1] = arguments[_key6];
       }
 
       route.apply(this, ["".concat(CASE_INSENSITIVE_FLAG).concat(firstArg)].concat(args));
@@ -706,8 +704,8 @@
   }
 
   function unroute() {
-    for (var _len8 = arguments.length, args = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
-      args[_key8] = arguments[_key8];
+    for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
+      args[_key7] = arguments[_key7];
     }
 
     return unbindRoute.apply(this, args);
@@ -719,6 +717,7 @@
   exports.param = toQueryString;
   exports.route = route;
   exports.routeIgnoreCase = routeIgnoreCase;
+  exports.routeParams = extractParams;
   exports.router = router;
   exports.unroute = unroute;
 

@@ -8,7 +8,8 @@
   "scripts": {
     "start": "node server.js",
     "buildAndStart": "npm run build && npm run start",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "test": "jest tests/*"
   },
   "repository": {
     "type": "git",
@@ -33,9 +34,11 @@
   "devDependencies": {
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
+    "@types/jest": "^24.0.18",
     "bootstrap": "^4.3.1",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
+    "jest": "^24.9.0",
     "jquery": "^3.4.1",
     "lzstorage": "^1.0.8",
     "popper.js": "^1.15.0",

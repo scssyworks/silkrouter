@@ -1,3 +1,5 @@
+import { isArr } from './utils';
+
 /**
  * Builds query string recursively
  * @private
@@ -7,11 +9,13 @@
  */
 function buildQueryString(queryStringParts, key, obj) {
     if (obj && typeof obj === 'object') {
+        const isCurrObjArray = isArr(obj);
         Object.keys(obj).forEach(obKey => {
-            buildQueryString(queryStringParts, `${key}[${obKey}]`, obj[obKey]);
+            let qKey = isCurrObjArray ? '' : obKey;
+            buildQueryString(queryStringParts, `${key}[${qKey}]`, obj[obKey]);
         });
     } else if (['string', 'number', 'boolean', 'undefined', 'object'].indexOf(typeof obj) > -1) {
-        queryStringParts.push(`${key}=${obj}`);
+        queryStringParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(obj)}`);
     }
 }
 
