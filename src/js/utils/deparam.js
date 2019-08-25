@@ -23,13 +23,7 @@ function deparam(qs, coerce) {
     const queryObject = {};
     if (qs) {
         queryParamList.forEach((qq) => {
-            const qArr = qq.split("=");
-            if (qArr[0]) {
-                qArr[0] = decodeURIComponent(qArr[0]);
-            }
-            if (qArr[1]) {
-                qArr[1] = decodeURIComponent(qArr[1]);
-            }
+            const qArr = qq.split("=").map(part => decodeURIComponent(part));
             if (ifComplex(qArr[0])) {
                 complex.apply(this, [].concat(qArr).concat([queryObject, coerce]));
             } else {

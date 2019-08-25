@@ -184,15 +184,9 @@
 
     if (qs) {
       queryParamList.forEach(function (qq) {
-        var qArr = qq.split("=");
-
-        if (qArr[0]) {
-          qArr[0] = decodeURIComponent(qArr[0]);
-        }
-
-        if (qArr[1]) {
-          qArr[1] = decodeURIComponent(qArr[1]);
-        }
+        var qArr = qq.split("=").map(function (part) {
+          return decodeURIComponent(part);
+        });
 
         if (ifComplex(qArr[0])) {
           complex.apply(_this, [].concat(qArr).concat([queryObject, coerce]));
