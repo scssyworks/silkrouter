@@ -1,4 +1,4 @@
-import { execRoute, bindRoute, unbindRoute, initRouterEvents, trigger } from './utils/helpers';
+import { execRoute, bindRoute, unbindRoute, initRouterEvents, trigger } from './utils/api';
 import { extractParams } from './utils/params';
 import { CASE_INSENSITIVE_FLAG } from './utils/constants';
 import { toQueryString } from './utils/query';

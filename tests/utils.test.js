@@ -1,4 +1,4 @@
-import { isArr, trim, isNumber, isObject, setDefault, toArray } from '../src/js/utils/utils';
+import { isArr, trim, isNumber, isObject, setDefault, toArray, isValidRoute } from '../src/js/utils/utils';
 
 describe('Utils module', () => {
     test('Function isArr should test if a passed argument is an array', () => {
@@ -39,5 +39,11 @@ describe('Utils module', () => {
             return toArray(arguments);
         }
         expect(isArr(arrayTest())).toBeTruthy();
+    });
+    test('Function isValidRoute should return true if given route is valid', () => {
+        expect(isValidRoute('/path/to/route')).toBeTruthy();
+    });
+    test('Function isValidRoute should return false if given route is invalid', () => {
+        expect(isValidRoute('path/to/route')).toBeFalsy();
     });
 });

@@ -50,5 +50,13 @@
     "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-uglify": "^6.0.2"
   },
-  "dependencies": {}
+  "jest": {
+    "verbose": true,
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/js/utils/*.js",
+      "src/js/silkrouter.js"
+    ],
+    "coverageDirectory": "coverage/"
+  }
 }

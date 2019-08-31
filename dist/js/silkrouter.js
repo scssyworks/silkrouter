@@ -3,7 +3,7 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <contactsachinsingh@gmail.com>
- * @version 3.2.0
+ * @version 3.3.0
  * @license MIT
  */
 (function (global, factory) {
@@ -109,6 +109,10 @@
 
   function toArray(arr) {
     return Array.prototype.slice.call(arr);
+  }
+
+  function isValidRoute(route) {
+    return typeof route === 'string' && REG_PATHNAME.test(route);
   }
 
   function extractParams(expr) {
@@ -322,10 +326,6 @@
       type: type,
       hash: hash
     }, originalData);
-  }
-
-  function isValidRoute(route) {
-    return typeof route === 'string' ? REG_PATHNAME.test(route) : false;
   }
 
   function resolveQuery(route, isHash, queryString, append) {

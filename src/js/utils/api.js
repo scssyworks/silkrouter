@@ -1,11 +1,11 @@
-import { POP_STATE, HASH_CHANGE, ROUTE_CHANGED, INVALID_ROUTE, REG_HASH_QUERY, REG_PATHNAME, CASE_INSENSITIVE_FLAG } from './constants';
+import { POP_STATE, HASH_CHANGE, ROUTE_CHANGED, INVALID_ROUTE, REG_HASH_QUERY, CASE_INSENSITIVE_FLAG } from './constants';
 import { libs } from './libs';
 import { extractParams } from './params';
 import { toQueryString } from './query';
 import { assign } from './assign';
 import { deparam } from './deparam';
 import { loc } from './vars';
-import { isArr, trim } from './utils';
+import { isArr, trim, isValidRoute } from './utils';
 
 
 /**
@@ -29,15 +29,6 @@ function triggerRoute({ originalEvent, route, type, hash, originalData }) {
         },
         originalData
     );
-}
-
-/**
- * Checks if given route is valid
- * @private
- * @param {string} route Route string
- */
-function isValidRoute(route) {
-    return ((typeof route === 'string') ? REG_PATHNAME.test(route) : false);
 }
 
 /**

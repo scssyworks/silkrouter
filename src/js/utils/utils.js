@@ -1,3 +1,5 @@
+import { REG_PATHNAME } from './constants';
+
 /**
  * Shorthand for Array.isArray
  */
@@ -44,4 +46,13 @@ export function setDefault(value, defaultValue) {
  */
 export function toArray(arr) {
     return Array.prototype.slice.call(arr);
+}
+
+/**
+ * Checks if given route is valid
+ * @private
+ * @param {string} route Route string
+ */
+export function isValidRoute(route) {
+    return (typeof route === 'string' && REG_PATHNAME.test(route));
 }
