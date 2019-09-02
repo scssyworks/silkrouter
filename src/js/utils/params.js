@@ -1,5 +1,6 @@
 import { REG_ROUTE_PARAMS, REG_TRIM_SPECIALCHARS } from './constants';
 import { toArray } from './utils';
+import { loc } from './vars';
 
 /**
  * Parses current path and returns params object
@@ -8,7 +9,7 @@ import { toArray } from './utils';
  * @param {string} path URL path
  * @returns {object}
  */
-export function extractParams(expr, path = window.location.pathname) {
+export function extractParams(expr, path = loc.pathname) {
     if (REG_ROUTE_PARAMS.test(expr)) {
         const pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
         const params = {};
