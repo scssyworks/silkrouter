@@ -115,8 +115,10 @@
     return typeof route === 'string' && REG_PATHNAME.test(route);
   }
 
+  var loc = window.location;
+
   function extractParams(expr) {
-    var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window.location.pathname;
+    var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : loc.pathname;
 
     if (REG_ROUTE_PARAMS.test(expr)) {
       var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
@@ -166,8 +168,6 @@
 
     return '';
   }
-
-  var loc = window.location;
 
   function ifComplex(q) {
     return /\[/.test(q);
