@@ -3,7 +3,7 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <contactsachinsingh@gmail.com>
- * @version 3.3.1
+ * @version 3.3.2
  * @license MIT
  */
 (function (global, factory) {
