@@ -1,9 +1,12 @@
-import { execRoute, bindRoute, unbindRoute, initRouterEvents, trigger } from './utils/api';
 import { extractParams } from './utils/params';
 import { CASE_INSENSITIVE_FLAG } from './utils/constants';
 import { toQueryString } from './utils/query';
 import { deparam } from './utils/deparam';
-
+import execRoute from './api/execRoute';
+import bindRoute from './api/bindRoute';
+import unbindRoute from './api/unbindRoute';
+import initRouterEvents from './api/initRouterEvents';
+import trigger from './api/trigger';
 
 /**
  * @namespace router
