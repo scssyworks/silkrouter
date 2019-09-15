@@ -1,7 +1,6 @@
 import $ from 'jquery';
-import deparam from 'deparam.js';
 import 'bootstrap';
-import { router, route, unroute, routeIgnoreCase } from "../silkrouter";
+import { router, route, unroute, routeIgnoreCase, param, deparam } from "../silkrouter";
 import 'bootstrap/dist/css/bootstrap.css';
 import './demo.css';
 
@@ -130,6 +129,7 @@ const demo = {
         window.route = route;
         window.unroute = unroute;
         window.routeIgnoreCase = routeIgnoreCase;
+        window.param = param;
         window.deparam = deparam;
     }
 };

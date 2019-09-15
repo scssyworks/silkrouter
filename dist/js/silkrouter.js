@@ -3,868 +3,711 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <contactsachinsingh@gmail.com>
- * @version 3.2.0
+ * @version 3.3.0
  * @license MIT
  */
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('deparam.js'), require('lzstorage')) :
-  typeof define === 'function' && define.amd ? define(['exports', 'deparam.js', 'lzstorage'], factory) :
-  (global = global || self, factory(global.silkrouter = {}, global.deparam, global.LZStorage));
-}(this, function (exports, deparam, LZStorage) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('lzstorage')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'lzstorage'], factory) :
+    (global = global || self, factory(global.silkrouter = {}, global.LZStorage));
+}(this, function (exports, LZStorage) { 'use strict';
 
-  deparam = deparam && deparam.hasOwnProperty('default') ? deparam['default'] : deparam;
-  LZStorage = LZStorage && LZStorage.hasOwnProperty('default') ? LZStorage['default'] : LZStorage;
+    LZStorage = LZStorage && LZStorage.hasOwnProperty('default') ? LZStorage['default'] : LZStorage;
 
-  function _typeof(obj) {
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof = function (obj) {
-        return typeof obj;
-      };
-    } else {
-      _typeof = function (obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-      };
+    var HASH_CHANGE$1 = 'hashchange';
+    var POP_STATE = 'popstate';
+    var ROUTE_CHANGED = 'route.changed';
+    var REG_ROUTE_PARAMS = /:[^\/]+/g;
+    var REG_PATHNAME = /^\/(?=[^?]*)/;
+    var REG_HASH_QUERY = /\?.+/;
+    var REG_TRIM_SPECIALCHARS = /^([^a-zA-Z0-9]+)|([^a-zA-Z0-9]+)$/g;
+    var INVALID_ROUTE = 'Route string is not a pure route';
+    var CASE_INSENSITIVE_FLAG = '$$';
+
+    var isArr = Array.isArray;
+
+    function trim(str) {
+      return typeof str === 'string' ? str.trim() : '';
     }
 
-    return _typeof(obj);
-  }
-
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
+    function isNumber(key) {
+      key = trim("".concat(key));
+      if (['null', 'undefined', ''].indexOf(key) > -1) return false;
+      return !isNaN(Number(key));
     }
 
-    return obj;
-  }
-
-  function _objectSpread(target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i] != null ? arguments[i] : {};
-      var ownKeys = Object.keys(source);
-
-      if (typeof Object.getOwnPropertySymbols === 'function') {
-        ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {
-          return Object.getOwnPropertyDescriptor(source, sym).enumerable;
-        }));
-      }
-
-      ownKeys.forEach(function (key) {
-        _defineProperty(target, key, source[key]);
-      });
+    function isObject(key) {
+      return key != null && !isArr(key) && key.toString() === "[object Object]";
     }
 
-    return target;
-  }
-
-  function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
-  }
-
-  function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
-  }
-
-  function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
-
-      return arr2;
-    }
-  }
-
-  function _arrayWithHoles(arr) {
-    if (Array.isArray(arr)) return arr;
-  }
-
-  function _iterableToArray(iter) {
-    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
-  }
-
-  function _iterableToArrayLimit(arr, i) {
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-    var _e = undefined;
-
-    try {
-      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
-
-        if (i && _arr.length === i) break;
-      }
-    } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"] != null) _i["return"]();
-      } finally {
-        if (_d) throw _e;
-      }
+    function setDefault(value, defaultValue) {
+      return typeof value === 'undefined' ? defaultValue : value;
     }
 
-    return _arr;
-  }
-
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance");
-  }
-
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance");
-  }
-
-  /**
-   * Router constants
-   */
-  var HASH_CHANGE = 'hashchange';
-  var POP_STATE = 'popstate';
-  var ROUTE_CHANGED = 'route.changed';
-  var REG_ROUTE_PARAMS = /:[^\/]+/g;
-  var REG_PATHNAME = /^\/(?=[^?]*)/;
-  var REG_HASH_QUERY = /\?.+/;
-  var REG_TRIM_SPECIALCHARS = /^([^a-zA-Z0-9]+)|([^a-zA-Z0-9]+)$/g;
-  var INVALID_ROUTE = 'Route string is not a pure route';
-  var CASE_INSENSITIVE_FLAG = '$$';
-
-  var store = new LZStorage({
-    compression: true
-  });
-  /**
-   * Store library
-   * @namespace libs
-   * @type {object}
-   * @private
-   */
-
-  var libs = {
-    /**
-     * Get's decompressed data from store
-     * @private
-     * @method getDataFromStore
-     * @memberof libs
-     * @param {string} path URL path
-     * @param {boolean} isHash Flag to determine if it's a pathname or hash
-     * @returns {*}
-     */
-    getDataFromStore: function getDataFromStore(path, isHash) {
-      var paths = store.get('routeStore') || {};
-      return paths["".concat(isHash ? '#' : '').concat(path)];
-    },
-
-    /**
-     * @private
-     * @method setDataToStore
-     * @memberof libs
-     * @param {string} path URL path
-     * @param {boolean} isHash Flag to determine if it's a pathname or hash
-     * @param {any} data Data
-     * @returns {boolean}
-     */
-    setDataToStore: function setDataToStore(path, isHash, data) {
-      var paths = store.get('routeStore') || {};
-
-      if (paths[path]) {
-        if (!data || _typeof(data) === 'object' && Object.keys(data).length === 0) {
-          // Don't change existing data
-          return false;
-        }
-      }
-
-      paths = _objectSpread({}, paths, _defineProperty({}, "".concat(isHash ? '#' : '').concat(path), data));
-      return store.set('routeStore', paths, true);
-    },
-
-    /**
-     * @namespace handlers
-     * @type {object[]}
-     * @private
-     */
-    handlers: []
-  };
-
-  /**
-   * Helper functions to test and extract params
-   */
-
-  /**
-   * Tests if route has parameters
-   * @private
-   * @param {string} expr Route expression
-   * @returns {boolean}
-   */
-
-  function hasParams(expr) {
-    return REG_ROUTE_PARAMS.test(expr);
-  }
-  /**
-   * Parses current path and returns params object
-   * @private
-   * @param {string} expr Route expression
-   * @param {string} path URL path
-   * @returns {object}
-   */
-
-  function extractParams(expr) {
-    var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window.location.pathname;
-
-    if (hasParams(expr)) {
-      var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
-      var params = {};
-
-      if (pathRegex.test(path)) {
-        REG_ROUTE_PARAMS.lastIndex = 0;
-
-        var keys = _toConsumableArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
-          return key.replace(REG_TRIM_SPECIALCHARS, '');
-        });
-
-        var values = _toConsumableArray(path.match(pathRegex));
-
-        values.shift();
-        keys.forEach(function (key, index) {
-          params[key] = values[index];
-        });
-      }
-
-      return params;
+    function toArray(arr) {
+      return Array.prototype.slice.call(arr);
     }
 
-    return {};
-  }
-
-  /**
-   * Builds query string recursively
-   * @private
-   * @param {string[]} queryStringParts List of query string key value pairs
-   * @param {*} key Key
-   * @param {*} obj Value
-   */
-  function buildQueryString(queryStringParts, key, obj) {
-    if (obj && _typeof(obj) === 'object') {
-      Object.keys(obj).forEach(function (obKey) {
-        buildQueryString(queryStringParts, "".concat(key, "[").concat(obKey, "]"), obj[obKey]);
-      });
-    } else if (['string', 'number', 'boolean', 'undefined', 'object'].indexOf(_typeof(obj)) > -1) {
-      queryStringParts.push("".concat(key, "=").concat(obj));
-    }
-  }
-  /**
-   * Converts an object to a query string
-   * @private
-   * @param {object} obj Object which should be converted to a string
-   * @returns {string}
-   */
-
-
-  function toQueryString(obj) {
-    var queryStringParts = [];
-
-    if (obj && _typeof(obj) === 'object') {
-      Object.keys(obj).forEach(function (key) {
-        buildQueryString(queryStringParts, key, obj[key]);
-      });
-      return queryStringParts.join('&');
-    } else if (typeof obj === 'string') {
-      return obj;
+    function isValidRoute(route) {
+      return typeof route === 'string' && REG_PATHNAME.test(route);
     }
 
-    return '';
-  }
+    var loc = window.location;
 
-  /**
-   * Triggers "route.changed" event
-   * @private
-   * @param {object} config Route event configuration
-   * @param {object} config.originalEvent Original "popstate" event object
-   * @param {string} config.route route string
-   * @param {string} config.type Type of event
-   * @param {boolean} config.hash Flag that determines type of event expected
-   * @param {object} config.originalData Original data persisted by history API
-   */
+    function extractParams(expr) {
+      var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : loc.pathname;
 
-  function triggerRoute(_ref) {
-    var _ref$originalEvent = _ref.originalEvent,
-        originalEvent = _ref$originalEvent === void 0 ? {} : _ref$originalEvent,
-        route = _ref.route,
-        type = _ref.type,
-        _ref$hash = _ref.hash,
-        hash = _ref$hash === void 0 ? false : _ref$hash,
-        _ref$originalData = _ref.originalData,
-        originalData = _ref$originalData === void 0 ? {} : _ref$originalData;
-    trigger(ROUTE_CHANGED, {
-      originalEvent: originalEvent,
-      route: route,
-      type: type,
-      hash: hash
-    }, originalData);
-  }
-  /**
-   * Checks if given route is valid
-   * @private
-   * @param {string} route Route string
-   */
+      if (REG_ROUTE_PARAMS.test(expr)) {
+        var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
+        var params = {};
 
-
-  function isValidRoute(route) {
-    if (typeof route === "string") {
-      return REG_PATHNAME.test(route);
-    }
-    return false;
-  }
-  /**
-   * Adds a query string
-   * @private
-   * @param {string} route Route string
-   * @param {string} qString Query string
-   * @param {boolean} appendQString Append query string flag
-   */
-
-
-  function resolveQuery() {
-    var route = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-    var isHash = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-    var queryString = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
-    var append = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-    queryString = queryString.charAt(0) === '?' ? queryString.substring(1).trim() : queryString.trim();
-
-    if (!isHash) {
-      if (append) {
-        if (queryString) {
-          return "".concat(route).concat(location.search, "&").concat(queryString);
-        }
-
-        return "".concat(route).concat(location.search);
-      } else if (queryString) {
-        return "".concat(route, "?").concat(queryString);
-      }
-
-      return route;
-    } else if (queryString) {
-      return "".concat(location.pathname).concat(location.search, "#").concat(route, "?").concat(queryString);
-    }
-
-    return "".concat(location.pathname).concat(location.search, "#").concat(route);
-  }
-  /**
-   * Converts current query string into an object
-   * @private
-   */
-
-
-  function getQueryParams() {
-    var coerce = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    var qsObject = deparam(window.location.search, coerce);
-    var hashStringParams = {};
-
-    if (window.location.hash.match(REG_HASH_QUERY)) {
-      hashStringParams = _objectSpread({}, hashStringParams, deparam(window.location.hash.match(REG_HASH_QUERY)[0], coerce));
-    }
-
-    return _objectSpread({}, qsObject, hashStringParams);
-  }
-  /**
-   * Set route for given view
-   * @private
-   * @param {string|object} oRoute Route string or object
-   * @param {boolean} replaceMode Replace mode
-   * @param {boolean} noTrigger Do not trigger handler
-   */
-
-
-  function execRoute() {
-    var route = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    var replaceMode = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-    var noTrigger = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    var routeObject = typeof route === 'string' ? {
-      route: route
-    } : _objectSpread({}, route);
-    routeObject = _objectSpread({}, routeObject, {
-      replaceMode: replaceMode,
-      noTrigger: noTrigger
-    });
-    var _routeObject = routeObject,
-        sroute = _routeObject.route,
-        rm = _routeObject.replaceMode,
-        nt = _routeObject.noTrigger,
-        _routeObject$queryStr = _routeObject.queryString,
-        qs = _routeObject$queryStr === void 0 ? '' : _routeObject$queryStr,
-        data = _routeObject.data,
-        _routeObject$title = _routeObject.title,
-        title = _routeObject$title === void 0 ? null : _routeObject$title,
-        appendQuery = _routeObject.appendQuery;
-
-    if (typeof sroute === 'string') {
-      var isHash = sroute.charAt(0) === '#' ? 1 : 0;
-
-      var _sroute$trim$split = sroute.trim().split('?'),
-          _sroute$trim$split2 = _slicedToArray(_sroute$trim$split, 2),
-          pureRoute = _sroute$trim$split2[0],
-          _sroute$trim$split2$ = _sroute$trim$split2[1],
-          queryString = _sroute$trim$split2$ === void 0 ? '' : _sroute$trim$split2$;
-
-      var routeMethod = "".concat(rm ? 'replace' : 'push', "State");
-      queryString = toQueryString(queryString || qs);
-      pureRoute = pureRoute.substring(isHash);
-
-      if (isValidRoute(pureRoute)) {
-        libs.setDataToStore(pureRoute, isHash === 1, data);
-        var completeRoute = resolveQuery(pureRoute, isHash === 1, queryString, appendQuery);
-        history[routeMethod]({
-          data: data
-        }, title, completeRoute);
-
-        if (!nt) {
-          triggerRoute({
-            route: "".concat(isHash ? '#' : '').concat(pureRoute),
-            type: isHash ? HASH_CHANGE : POP_STATE,
-            hash: isHash === 1
+        if (pathRegex.test(path)) {
+          REG_ROUTE_PARAMS.lastIndex = 0;
+          var keys = toArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
+            return key.replace(REG_TRIM_SPECIALCHARS, '');
+          });
+          var values = toArray(path.match(pathRegex));
+          values.shift();
+          keys.forEach(function (key, index) {
+            params[key] = values[index];
           });
         }
+
+        return params;
+      }
+
+      return {};
+    }
+
+    function _typeof(obj) {
+      if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+        _typeof = function (obj) {
+          return typeof obj;
+        };
       } else {
-        throw new Error(INVALID_ROUTE);
+        _typeof = function (obj) {
+          return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+        };
+      }
+
+      return _typeof(obj);
+    }
+
+    function buildQueryString(queryStringParts, key, obj) {
+      if (obj && _typeof(obj) === 'object') {
+        var isCurrObjArray = isArr(obj);
+        Object.keys(obj).forEach(function (obKey) {
+          var qKey = isCurrObjArray ? '' : obKey;
+          buildQueryString(queryStringParts, "".concat(key, "[").concat(qKey, "]"), obj[obKey]);
+        });
+      } else if (['string', 'number', 'boolean', 'undefined', 'object'].indexOf(_typeof(obj)) > -1) {
+        queryStringParts.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
       }
     }
-  }
-  /**
-   * Binds generic route if route is passed as a list of URLs
-   * @param {string[]} route Array of routes
-   * @param {*} handler Handler function
-   */
 
-  function bindGenericRoute(route, handler) {
-    var _this = this;
+    function toQueryString(obj) {
+      var queryStringParts = [];
 
-    if (libs.handlers.filter(function (ob) {
-      return ob.prevHandler === handler;
-    }).length) {
-      return;
+      if (obj && _typeof(obj) === 'object') {
+        Object.keys(obj).forEach(function (key) {
+          buildQueryString(queryStringParts, key, obj[key]);
+        });
+        return queryStringParts.join('&');
+      } else if (typeof obj === 'string') {
+        return obj;
+      }
+
+      return '';
     }
 
-    bindRoute(function () {
-      if (typeof handler === 'function') {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
+    function ifComplex(q) {
+      return /\[/.test(q);
+    }
 
-        var e = args[0];
-        var compareRoute = e.route;
+    function deparam(qs, coerce) {
+      var _this = this;
 
-        if (compareRoute.charAt(0) === '#') {
-          compareRoute = compareRoute.substring(1);
-        }
+      qs = trim(setDefault(qs, loc.search));
+      coerce = setDefault(coerce, true);
 
-        if (route.indexOf(compareRoute) > -1) {
-          handler.apply(_this, args);
-        } else if (route.indexOf("#".concat(compareRoute)) > -1 && e.hash) {
-          handler.apply(_this, args);
+      if (qs.charAt(0) === "?") {
+        qs = qs.replace("?", "");
+      }
+
+      var queryParamList = qs.split("&");
+      var queryObject = {};
+
+      if (qs) {
+        queryParamList.forEach(function (qq) {
+          var qArr = qq.split("=").map(function (part) {
+            return decodeURIComponent(part);
+          });
+
+          if (ifComplex(qArr[0])) {
+            complex.apply(_this, [].concat(qArr).concat([queryObject, coerce]));
+          } else {
+            simple.apply(_this, [qArr, queryObject, false, coerce]);
+          }
+        });
+      }
+
+      return queryObject;
+    }
+
+    function toObject(arr) {
+      var convertedObj = {};
+
+      if (isArr(arr)) {
+        arr.forEach(function (value, index) {
+          convertedObj[index] = value;
+        });
+      }
+
+      return convertedObj;
+    }
+
+    function resolve(ob, isNextNumber) {
+      if (typeof ob === "undefined") return isNextNumber ? [] : {};
+      return isNextNumber ? ob : toObject(ob);
+    }
+
+    function resolveObj(ob, nextProp) {
+      if (isObject(ob)) return {
+        ob: ob
+      };
+      if (isArr(ob) || typeof ob === "undefined") return {
+        ob: resolve(ob, isNumber(nextProp))
+      };
+      return {
+        ob: [ob],
+        push: ob !== null
+      };
+    }
+
+    function complex(key, value, obj, doCoerce) {
+      doCoerce = setDefault(doCoerce, true);
+      var match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
+
+      if (match.length === 3) {
+        var prop = match[1];
+        var nextProp = match[2];
+        key = key.replace(/\[([^\[]*)\]/, "");
+
+        if (ifComplex(key)) {
+          if (nextProp === "") nextProp = "0";
+          key = key.replace(/[^\[]+/, nextProp);
+          complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, doCoerce);
+        } else if (nextProp) {
+          var _resolveObj = resolveObj(obj[prop], nextProp),
+              ob = _resolveObj.ob,
+              push = _resolveObj.push;
+
+          obj[prop] = ob;
+
+          if (push) {
+            var tempObj = {};
+            tempObj[nextProp] = doCoerce ? coerce(value) : value;
+            obj[prop].push(tempObj);
+          } else {
+            obj[prop][nextProp] = doCoerce ? coerce(value) : value;
+          }
+        } else {
+          simple([match[1], value], obj, true);
         }
       }
-    }, handler);
-  }
-  /**
-   * Attaches a route handler function
-   * @private
-   * @param {string} route Route string
-   * @param {function} handler Callback function
-   */
-
-
-  function bindRoute(route, handler, prevHandler) {
-    // Resolve generic route
-    var isCaseInsensitive = false;
-
-    if (typeof route === 'function') {
-      prevHandler = handler;
-      handler = route;
-      route = '*';
     }
 
-    if (Array.isArray(route)) {
-      bindGenericRoute(route, handler);
-      return;
+    function simple(qArr, queryObject, toArray, doCoerce) {
+      doCoerce = setDefault(doCoerce, true);
+      var key = qArr[0];
+      var value = qArr[1];
+
+      if (doCoerce) {
+        value = coerce(value);
+      }
+
+      if (key in queryObject) {
+        queryObject[key] = isArr(queryObject[key]) ? queryObject[key] : [queryObject[key]];
+        queryObject[key].push(value);
+      } else {
+        queryObject[key] = toArray ? [value] : value;
+      }
     }
 
-    if (route.indexOf(CASE_INSENSITIVE_FLAG) === 0) {
-      isCaseInsensitive = true;
-      route = route.substring(CASE_INSENSITIVE_FLAG.length);
+    function coerce(value) {
+      if (value == null) return "";
+      if (typeof value !== "string") return value;
+      value = trim(value);
+      if (isNumber(value)) return +value;
+
+      switch (value) {
+        case "null":
+          return null;
+
+        case "undefined":
+          return undefined;
+
+        case "true":
+          return true;
+
+        case "false":
+          return false;
+
+        case "NaN":
+          return NaN;
+
+        default:
+          return value;
+      }
     }
 
-    var startIndex = route.charAt(0) === '#' ? 1 : 0;
-    route = route.substring(startIndex); // Check existence
+    function lib() {
+      return deparam.apply(this, arguments);
+    }
 
-    var exists = libs.handlers.filter(function (ob) {
-      return ob.handler === handler && ob.route === route;
-    }).length; // Attach handler
+    function loopFunc(ref, target) {
+      if (ref != null && _typeof(ref) === 'object') {
+        Object.keys(ref).forEach(function (key) {
+          target[key] = ref[key];
+        });
+      }
+    }
 
-    if (!exists && typeof handler === 'function') {
-      libs.handlers.push({
-        eventName: ROUTE_CHANGED,
-        handler: handler,
-        prevHandler: prevHandler,
-        route: route,
-        hash: startIndex === 1,
-        isCaseInsensitive: isCaseInsensitive
+    function assign() {
+      var i = 0;
+      var target = _typeof(arguments[0]) !== 'object' || arguments[0] == null ? {} : arguments[0];
+
+      for (i = 1; i < arguments.length; i++) {
+        loopFunc(arguments[i], target);
+      }
+
+      return target;
+    }
+
+    var store = new LZStorage({
+      compression: true
+    });
+
+    var libs = {
+
+      getDataFromStore: function getDataFromStore(path, isHash) {
+        var paths = store.get('routeStore') || {};
+        return paths["".concat(isHash ? '#' : '').concat(path)];
+      },
+
+      setDataToStore: function setDataToStore(path, isHash, data) {
+        var paths = store.get('routeStore') || {};
+
+        if (paths[path]) {
+          if (!data || _typeof(data) === 'object' && Object.keys(data).length === 0) {
+
+            return false;
+          }
+        }
+
+        var newPath = {};
+        newPath["".concat(isHash ? '#' : '').concat(path)] = data;
+        paths = assign({}, paths, newPath);
+        return store.set('routeStore', paths, true);
+      },
+
+      handlers: []
+    };
+
+    function resolveQuery(route, isHash, queryString, append) {
+      queryString = trim(queryString.substring(queryString.charAt(0) === '?' ? 1 : 0));
+
+      if (!isHash) {
+        if (append) {
+          return "".concat(route).concat(loc.search).concat(queryString ? "&".concat(queryString) : '');
+        }
+
+        return "".concat(route).concat(queryString ? "?".concat(queryString) : '');
+      }
+
+      return "".concat(loc.pathname).concat(loc.search, "#").concat(route).concat(queryString ? "?".concat(queryString) : '');
+    }
+
+    function getQueryParams() {
+      var qsObject = lib(loc.search, false);
+      var hashStringParams = {};
+      var hashQuery = loc.hash.match(REG_HASH_QUERY);
+
+      if (hashQuery) {
+        hashStringParams = assign({}, hashStringParams, lib(hashQuery[0], false));
+      }
+
+      return assign({}, qsObject, hashStringParams);
+    }
+
+    function testRoute(route, url, originalData) {
+      originalData = assign(originalData);
+      var isHash = url.charAt(0) === '#';
+
+      if (isHash) {
+        url = url.substring(1);
+      }
+
+      var path = url.split('?')[0];
+
+      if (!!Object.keys(originalData).length) {
+        libs.setDataToStore(path, isHash, originalData);
+      }
+
+      var data = libs.getDataFromStore(path, isHash);
+      var params = extractParams(route, url);
+      var hasMatch = Object.keys(params).length > 0 || isValidRoute(url) && (route === url || route === '*');
+      return {
+        hasMatch: hasMatch,
+        data: data,
+        params: params
+      };
+    }
+
+    function execListeners(eventName, routeConfig, originalData) {
+      originalData = assign(originalData);
+      var isHash = routeConfig.hash;
+      var hash = loc.hash,
+          pathname = loc.pathname;
+      libs.handlers.forEach(function (ob) {
+        if (ob.eventName === eventName) {
+          var cRoute = ob.route;
+          var cCurrentPath = isHash ? hash : pathname;
+
+          if (ob.isCaseInsensitive) {
+            cRoute = cRoute.toLowerCase();
+            cCurrentPath = cCurrentPath.toLowerCase();
+          }
+
+          var _testRoute = testRoute(cRoute, cCurrentPath, originalData),
+              hasMatch = _testRoute.hasMatch,
+              data = _testRoute.data,
+              params = _testRoute.params;
+
+          if (hasMatch && (!ob.hash || ob.hash && isHash)) {
+            ob.handler(assign({}, routeConfig, {
+              data: data,
+              params: params,
+              query: getQueryParams()
+            }));
+          }
+        }
       });
-    } // Execute handler if matches current route (Replaces init method in version 2.0)
+    }
 
+    function triggerRoute(_ref) {
+      var originalEvent = _ref.originalEvent,
+          route = _ref.route,
+          type = _ref.type,
+          hash = _ref.hash,
+          originalData = _ref.originalData;
+      execListeners(ROUTE_CHANGED, {
+        originalEvent: originalEvent,
+        route: route,
+        type: type,
+        hash: hash
+      }, originalData);
+    }
 
-    var _window$location = window.location,
-        pathname = _window$location.pathname,
-        hash = _window$location.hash;
-    var paths = startIndex === 1 ? [hash] : [pathname, hash];
-    paths.filter(function (path) {
-      return path.trim();
-    }).forEach(function (currentPath) {
-      var cRoute = route;
-      var cCurrentPath = currentPath;
+    function execRoute(route, replaceMode, noTrigger) {
+      var routeObject = typeof route === 'string' ? {
+        route: route
+      } : assign({}, route);
+      routeObject = assign({}, routeObject, {
+        replaceMode: replaceMode,
+        noTrigger: noTrigger
+      });
+      var _routeObject = routeObject,
+          sroute = _routeObject.route,
+          rm = _routeObject.replaceMode,
+          nt = _routeObject.noTrigger,
+          _routeObject$queryStr = _routeObject.queryString,
+          qs = _routeObject$queryStr === void 0 ? '' : _routeObject$queryStr,
+          data = _routeObject.data,
+          _routeObject$title = _routeObject.title,
+          title = _routeObject$title === void 0 ? null : _routeObject$title,
+          appendQuery = _routeObject.appendQuery;
 
-      if (isCaseInsensitive) {
-        cRoute = cRoute.toLowerCase();
-        cCurrentPath = cCurrentPath.toLowerCase();
+      if (typeof sroute === 'string') {
+        var isHash = sroute.charAt(0) === '#' ? 1 : 0;
+        var routeParts = trim(sroute).split('?');
+        var pureRoute = routeParts[0];
+        var queryString = trim(routeParts[1]);
+        var routeMethod = "".concat(rm ? 'replace' : 'push', "State");
+        queryString = toQueryString(queryString || qs);
+        pureRoute = pureRoute.substring(isHash);
+
+        if (isValidRoute(pureRoute)) {
+          libs.setDataToStore(pureRoute, isHash === 1, data);
+          var completeRoute = resolveQuery(pureRoute, isHash === 1, queryString, appendQuery);
+          history[routeMethod]({
+            data: data
+          }, title, completeRoute);
+
+          if (!nt) {
+            triggerRoute({
+              originalEvent: {},
+              route: "".concat(isHash ? '#' : '').concat(pureRoute),
+              type: isHash ? HASH_CHANGE$1 : POP_STATE,
+              hash: isHash === 1,
+              originalData: {}
+            });
+          }
+        } else {
+          throw new Error(INVALID_ROUTE);
+        }
+      }
+    }
+
+    function bindGenericRoute(route, handler) {
+      var _this = this;
+
+      if (libs.handlers.filter(function (ob) {
+        return ob.prevHandler === handler;
+      }).length) {
+        return;
       }
 
-      var pathIndex = currentPath.charAt(0) === '#' ? 1 : 0;
+      bindRoute(function () {
+        if (typeof handler === 'function') {
+          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+          }
 
-      var _testRoute = testRoute(cRoute, cCurrentPath),
-          hasMatch = _testRoute.hasMatch,
-          data = _testRoute.data,
-          params = _testRoute.params;
+          var e = args[0];
+          var compareRoute = e.route;
 
-      if (hasMatch && typeof handler === 'function') {
-        handler({
-          route: currentPath,
-          hash: pathIndex === 1,
-          eventName: pathIndex === 1 ? HASH_CHANGE : POP_STATE,
-          data: data,
-          params: params,
-          query: getQueryParams(),
+          if (compareRoute.charAt(0) === '#') {
+            compareRoute = compareRoute.substring(1);
+          }
+
+          if (route.indexOf(compareRoute) > -1) {
+            handler.apply(_this, args);
+          } else if (route.indexOf("#".concat(compareRoute)) > -1 && e.hash) {
+            handler.apply(_this, args);
+          }
+        }
+      }, handler);
+    }
+
+    function bindRoute(route, handler, prevHandler) {
+
+      var isCaseInsensitive = false;
+
+      if (typeof route === 'function') {
+        prevHandler = handler;
+        handler = route;
+        route = '*';
+      }
+
+      if (isArr(route)) {
+        bindGenericRoute(route, handler);
+        return;
+      }
+
+      if (route.indexOf(CASE_INSENSITIVE_FLAG) === 0) {
+        isCaseInsensitive = true;
+        route = route.substring(CASE_INSENSITIVE_FLAG.length);
+      }
+
+      var startIndex = route.charAt(0) === '#' ? 1 : 0;
+      route = route.substring(startIndex);
+
+      var exists = libs.handlers.filter(function (ob) {
+        return ob.handler === handler && ob.route === route;
+      }).length;
+
+      if (!exists && typeof handler === 'function') {
+        libs.handlers.push({
+          eventName: ROUTE_CHANGED,
+          handler: handler,
+          prevHandler: prevHandler,
+          route: route,
+          hash: startIndex === 1,
           isCaseInsensitive: isCaseInsensitive
         });
       }
-    });
-  }
-  /**
-   * Unbinds route handlers
-   * @private
-   * @param {string} route Route string
-   * @param {function} handler Callback function
-   */
 
-  function unbindRoute() {
-    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      args[_key2] = arguments[_key2];
-    }
+      var pathname = loc.pathname,
+          hash = loc.hash;
+      var paths = startIndex === 1 ? [hash] : [pathname, hash];
+      paths.filter(function (path) {
+        return trim(path);
+      }).forEach(function (currentPath) {
+        var cRoute = route;
+        var cCurrentPath = currentPath;
 
-    var route = args[0],
-        handler = args[1];
-    var prevLength = libs.handlers.length;
-    var isRouteList = false;
-
-    if (args.length === 0) {
-      libs.handlers.length = 0;
-    }
-
-    if (Array.isArray(route)) {
-      route = '*';
-      isRouteList = true;
-    }
-
-    libs.handlers = libs.handlers.filter(function (ob) {
-      if (args.length === 1 && typeof args[0] === 'string' && !isRouteList) {
-        return ob.route !== route;
-      } // Check for generic route
-
-
-      if (args.length === 1 && typeof args[0] === 'function') {
-        handler = args[0];
-        route = '*'; // Generic route
-      }
-
-      return !(ob.route === route && (ob.handler === handler || ob.prevHandler === handler));
-    });
-    return prevLength > libs.handlers.length;
-  }
-  /**
-   * Compares route with current URL
-   * @private
-   * @param {string} route Route string
-   * @param {string} url Current url
-   * @param {object} params Parameters
-   */
-
-  function testRoute(route, url) {
-    var originalData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-    var isHash = url.charAt(0) === '#';
-
-    if (isHash) {
-      url = url.substring(1);
-    }
-
-    var _url$split = url.split('?'),
-        _url$split2 = _slicedToArray(_url$split, 1),
-        path = _url$split2[0];
-
-    if (!!Object.keys(originalData).length) {
-      libs.setDataToStore(path, isHash, originalData); // Sync store with event data.
-    }
-
-    var data = libs.getDataFromStore(path, isHash);
-    var params = extractParams(route, url);
-    var hasMatch = Object.keys(params).length > 0 || isValidRoute(url) && (route === url || route === '*');
-    return {
-      hasMatch: hasMatch,
-      data: data,
-      params: params
-    };
-  }
-  /**
-   * Triggers a router event
-   * @private
-   * @param {string} eventName Name of route event
-   * @param {object} params Parameters
-   */
-
-
-  function execListeners(eventName, routeConfig) {
-    var originalData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-    var isHash = routeConfig.hash;
-    var _window$location2 = window.location,
-        hash = _window$location2.hash,
-        pathname = _window$location2.pathname;
-    libs.handlers.forEach(function (ob) {
-      if (ob.eventName === eventName) {
-        var cRoute = ob.route;
-        var cCurrentPath = isHash ? hash : pathname;
-
-        if (ob.isCaseInsensitive) {
+        if (isCaseInsensitive) {
           cRoute = cRoute.toLowerCase();
           cCurrentPath = cCurrentPath.toLowerCase();
         }
 
-        var _testRoute2 = testRoute(cRoute, cCurrentPath, originalData),
-            hasMatch = _testRoute2.hasMatch,
-            data = _testRoute2.data,
-            params = _testRoute2.params;
+        var pathIndex = currentPath.charAt(0) === '#' ? 1 : 0;
 
-        if (hasMatch && (!ob.hash || ob.hash && isHash)) {
-          ob.handler(_objectSpread({}, routeConfig, {
+        var _testRoute = testRoute(cRoute, cCurrentPath),
+            hasMatch = _testRoute.hasMatch,
+            data = _testRoute.data,
+            params = _testRoute.params;
+
+        if (hasMatch && typeof handler === 'function') {
+          handler({
+            route: currentPath,
+            hash: pathIndex === 1,
+            eventName: pathIndex === 1 ? HASH_CHANGE$1 : POP_STATE,
             data: data,
             params: params,
-            query: getQueryParams()
-          }));
+            query: getQueryParams(),
+            isCaseInsensitive: isCaseInsensitive
+          });
         }
-      }
-    });
-  }
-  /**
-   * Internal method to trigger a routing event
-   * @private
-   */
-
-
-  function trigger() {
-    for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-      args[_key3] = arguments[_key3];
+      });
     }
 
-    return execListeners.apply(this, args);
-  }
-  /**
-   * Initializes router events
-   * @private
-   */
-
-  function initRouterEvents() {
-    window.addEventListener("".concat(POP_STATE), function (e) {
-      var completePath = "".concat(location.pathname).concat(location.hash);
-
-      var _completePath$split = completePath.split('#'),
-          _completePath$split2 = _slicedToArray(_completePath$split, 2),
-          pathname = _completePath$split2[0],
-          hashstring = _completePath$split2[1];
-
-      var originalData = {};
-
-      if (e.state) {
-        var data = e.state.data;
-
-        if (data) {
-          originalData = data;
-        }
+    function unbindRoute() {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
       }
 
-      triggerRoute({
-        originalEvent: e,
-        route: pathname,
-        type: e.type,
-        hash: false,
-        originalData: originalData
-      });
+      var route = args[0],
+          handler = args[1];
+      var prevLength = libs.handlers.length;
+      var isRouteList = false;
 
-      if (hashstring) {
+      if (args.length === 0) {
+        libs.handlers.length = 0;
+      }
+
+      if (isArr(route)) {
+        route = '*';
+        isRouteList = true;
+      }
+
+      libs.handlers = libs.handlers.filter(function (ob) {
+        if (args.length === 1 && typeof args[0] === 'string' && !isRouteList) {
+          return ob.route !== route;
+        }
+
+        if (args.length === 1 && typeof args[0] === 'function') {
+          handler = args[0];
+          route = '*';
+        }
+
+        return !(ob.route === route && (ob.handler === handler || ob.prevHandler === handler));
+      });
+      return prevLength > libs.handlers.length;
+    }
+
+    function initRouterEvents() {
+      window.addEventListener("".concat(POP_STATE), function (e) {
+        var completePath = "".concat(loc.pathname).concat(loc.hash);
+        var pathParts = completePath.split('#');
+        var pathname = pathParts[0];
+        var hashstring = pathParts[1];
+        var originalData = {};
+
+        if (e.state) {
+          var data = e.state.data;
+
+          if (data) {
+            originalData = data;
+          }
+        }
+
         triggerRoute({
           originalEvent: e,
-          route: "#".concat(hashstring),
-          type: HASH_CHANGE,
-          hash: true,
+          route: pathname,
+          type: e.type,
+          hash: false,
           originalData: originalData
         });
-      }
-    });
-  }
 
-  /**
-   * @namespace router
-   * @public
-   * @type {object}
-   */
-
-  var router = {
-    /**
-     * @namespace api
-     * @memberof router
-     * @type {object}
-     */
-    api: {
-      /**
-       * Triggers a custom route event
-       * @method trigger
-       * @public
-       * @memberof router.api
-       * @param {...*} arguments
-       */
-      trigger: function trigger$1() {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
+        if (hashstring) {
+          triggerRoute({
+            originalEvent: e,
+            route: "#".concat(hashstring),
+            type: HASH_CHANGE,
+            hash: true,
+            originalData: originalData
+          });
         }
+      });
+    }
 
-        return trigger.apply(this, args);
+    var router = {
+
+      api: {
+
+        trigger: function trigger() {
+          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+          }
+
+          return execListeners.apply(this, args);
+        },
+
+        extractParams: function extractParams$1() {
+          for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            args[_key2] = arguments[_key2];
+          }
+
+          return extractParams.apply(this, args);
+        },
+
+        toQueryString: function toQueryString$1() {
+          for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+            args[_key3] = arguments[_key3];
+          }
+
+          return toQueryString.apply(this, args);
+        }
       },
 
-      /**
-       * Checks if a route has parameters
-       * @method hasParams
-       * @public
-       * @memberof router.api
-       * @params {...*} arguments
-       */
-      hasParams: function hasParams$1() {
-        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-
-        return hasParams.apply(this, args);
-      },
-
-      /**
-       * Extract parameters as an object if route has parameters
-       * @method extractParams
-       * @public
-       * @memberof router.api
-       * @params {...*} arguments
-       */
-      extractParams: function extractParams$1() {
-        for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-          args[_key3] = arguments[_key3];
-        }
-
-        return extractParams.apply(this, args);
-      },
-
-      /**
-       * Converts object to query string
-       * @method toQueryString
-       * @public
-       * @memberof router.api
-       * @params {...*} arguments
-       */
-      toQueryString: function toQueryString$1() {
+      set: function set() {
         for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
           args[_key4] = arguments[_key4];
         }
 
-        return toQueryString.apply(this, args);
+        return execRoute.apply(this, args);
       }
-    },
+    };
 
-    /**
-     * Sets a route url
-     * @public
-     * @param {string|object} route Route object or URL
-     * @param {boolean} replaceMode Flag to enable replace mode
-     * @param {boolean} noTrigger Flag to disable handler while changing route
-     */
-    set: function set() {
+    function route() {
       for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
         args[_key5] = arguments[_key5];
       }
 
-      return execRoute.apply(this, args);
-    }
-  };
-  /**
-   * Attaches a route handler
-   * @public
-   * @param {string|function} route Route string or handler function (in case of generic route)
-   * @param {function} handler Handler function
-   */
-
-  function route() {
-    for (var _len6 = arguments.length, args = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
-      args[_key6] = arguments[_key6];
+      return bindRoute.apply(this, args);
     }
 
-    return bindRoute.apply(this, args);
-  }
-  /**
-   * Attaches case insensitive route handler
-   * @public
-   * @param {string|function} route Route string or handler function (in case of generic route)
-   * @param {function} handler Handler function
-   */
+    function routeIgnoreCase(firstArg) {
+      if (typeof firstArg === 'string') {
+        for (var _len6 = arguments.length, args = new Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
+          args[_key6 - 1] = arguments[_key6];
+        }
 
+        route.apply(this, ["".concat(CASE_INSENSITIVE_FLAG).concat(firstArg)].concat(args));
+      }
+    }
 
-  function routeIgnoreCase(firstArg) {
-    if (typeof firstArg === 'string') {
-      for (var _len7 = arguments.length, args = new Array(_len7 > 1 ? _len7 - 1 : 0), _key7 = 1; _key7 < _len7; _key7++) {
-        args[_key7 - 1] = arguments[_key7];
+    function unroute() {
+      for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
+        args[_key7] = arguments[_key7];
       }
 
-      route.apply(this, ["".concat(CASE_INSENSITIVE_FLAG).concat(firstArg)].concat(args));
-    }
-  }
-  /**
-   * Detaches a route handler
-   * @public
-   * @param {string|function} route Route string or handler function (in case of generic route)
-   * @param {function} handler Handler function
-   */
-
-
-  function unroute() {
-    for (var _len8 = arguments.length, args = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
-      args[_key8] = arguments[_key8];
+      return unbindRoute.apply(this, args);
     }
 
-    return unbindRoute.apply(this, args);
-  }
+    initRouterEvents();
 
-  initRouterEvents();
+    exports.deparam = lib;
+    exports.param = toQueryString;
+    exports.route = route;
+    exports.routeIgnoreCase = routeIgnoreCase;
+    exports.routeParams = extractParams;
+    exports.router = router;
+    exports.unroute = unroute;
 
-  exports.route = route;
-  exports.routeIgnoreCase = routeIgnoreCase;
-  exports.router = router;
-  exports.unroute = unroute;
-
-  Object.defineProperty(exports, '__esModule', { value: true });
+    Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
 //# sourceMappingURL=silkrouter.js.map

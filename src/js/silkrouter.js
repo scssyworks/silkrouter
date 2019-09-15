@@ -1,7 +1,12 @@
-import { execRoute, bindRoute, unbindRoute, initRouterEvents, trigger } from './utils/helpers';
-import { extractParams, hasParams } from './utils/params';
+import { extractParams } from './utils/params';
 import { CASE_INSENSITIVE_FLAG } from './utils/constants';
 import { toQueryString } from './utils/query';
+import { deparam } from './utils/deparam';
+import execRoute from './api/execRoute';
+import bindRoute from './api/bindRoute';
+import unbindRoute from './api/unbindRoute';
+import initRouterEvents from './api/initRouterEvents';
+import trigger from './api/trigger';
 
 /**
  * @namespace router
@@ -13,6 +18,7 @@ const router = {
      * @namespace api
      * @memberof router
      * @type {object}
+     * @deprecated
      */
     api: {
         /**
@@ -21,19 +27,10 @@ const router = {
          * @public
          * @memberof router.api
          * @param {...*} arguments
+         * @deprecated
          */
         trigger(...args) {
             return trigger.apply(this, args);
-        },
-        /**
-         * Checks if a route has parameters
-         * @method hasParams
-         * @public
-         * @memberof router.api
-         * @params {...*} arguments
-         */
-        hasParams(...args) {
-            return hasParams.apply(this, args);
         },
         /**
          * Extract parameters as an object if route has parameters
@@ -41,6 +38,7 @@ const router = {
          * @public
          * @memberof router.api
          * @params {...*} arguments
+         * @deprecated
          */
         extractParams(...args) {
             return extractParams.apply(this, args);
@@ -51,6 +49,7 @@ const router = {
          * @public
          * @memberof router.api
          * @params {...*} arguments
+         * @deprecated
          */
         toQueryString(...args) {
             return toQueryString.apply(this, args);
@@ -102,4 +101,12 @@ function unroute(...args) {
 
 initRouterEvents();
 
-export { router, route, routeIgnoreCase, unroute };
+export {
+    router,
+    route,
+    routeIgnoreCase,
+    unroute,
+    deparam,
+    toQueryString as param,
+    extractParams as routeParams
+};

@@ -1,15 +1,15 @@
 {
   "name": "silkrouter",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "Silk router is a library for implementing single page applications",
   "main": "dist/js/silkrouter.js",
   "module": "src/js/silkrouter.js",
-  "typings": "src/typings/silkrouter.d.ts",
+  "types": "src/typings/silkrouter.d.ts",
   "scripts": {
     "start": "node server.js",
     "buildAndStart": "npm run build && npm run start",
     "build": "rollup -c",
-    "jsdoc": "jsdoc ./src/js/silkrouter.js -p -d docs && jsdoc ./src/js/utils/constants.js -p -d docs && jsdoc ./src/js/utils/helpers.js -p -d docs && jsdoc ./src/js/utils/libs.js -p -d docs && jsdoc ./src/js/utils/params.js -p -d docs"
+    "test": "jest tests/*"
   },
   "repository": {
     "type": "git",
@@ -29,25 +29,34 @@
   },
   "homepage": "https://github.com/scssyworks/silkrouter#readme",
   "peerDependencies": {
-    "deparam.js": "^2.0.2",
     "lzstorage": "^1.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
+    "@types/jest": "^24.0.18",
     "bootstrap": "^4.3.1",
-    "deparam.js": "^2.0.2",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
+    "jest": "^24.9.0",
     "jquery": "^3.4.1",
-    "jsdoc": "^3.6.3",
     "lzstorage": "^1.0.8",
     "popper.js": "^1.15.0",
     "rollup": "^1.11.3",
     "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-cleanup": "^3.1.1",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-resolve": "^4.2.4",
     "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-uglify": "^6.0.2"
+  },
+  "jest": {
+    "verbose": true,
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/js/utils/*.js",
+      "src/js/silkrouter.js"
+    ],
+    "coverageDirectory": "coverage/"
   }
 }

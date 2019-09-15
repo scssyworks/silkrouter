@@ -3,6 +3,7 @@ import commonjs from "rollup-plugin-commonjs";
 import postcss from "rollup-plugin-postcss";
 import babel from "rollup-plugin-babel";
 import { uglify } from "rollup-plugin-uglify";
+import cleanup from "rollup-plugin-cleanup";
 import pkg from './package.json';
 
 const banner = `/**!
@@ -24,7 +25,6 @@ export default [
             name: "silkrouter",
             sourcemap: true,
             globals: {
-                'deparam.js': 'deparam',
                 'lzstorage': 'LZStorage'
             },
             banner
@@ -38,6 +38,9 @@ export default [
             commonjs(),
             babel({
                 exclude: "node_modules/**"
+            }),
+            cleanup({
+                maxEmptyLines: 1
             })
         ]
     },
@@ -49,7 +52,6 @@ export default [
             format: "umd",
             name: "silkrouter",
             globals: {
-                'deparam.js': 'deparam',
                 'lzstorage': 'LZStorage'
             },
             banner

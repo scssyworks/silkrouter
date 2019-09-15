@@ -1,4 +1,5 @@
 import LZStorage from 'lzstorage';
+import { assign } from './assign';
 
 const store = new LZStorage({
     compression: true
@@ -47,10 +48,9 @@ export const libs = {
                 return false;
             }
         }
-        paths = {
-            ...paths,
-            [`${isHash ? '#' : ''}${path}`]: data
-        };
+        const newPath = {};
+        newPath[`${isHash ? '#' : ''}${path}`] = data;
+        paths = assign({}, paths, newPath);
         return store.set('routeStore', paths, true);
     },
     /**
