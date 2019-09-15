@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/js/silkrouter.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/js/silkrouter.js?label=uncompressed) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter) 
+
 # Silkrouter
 Silkrouter (formerly <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">jqueryrouter</a>) is a JavaScript library for single page application routing.
 
@@ -6,7 +8,7 @@ Silkrouter (formerly <a href="https://github.com/scssyworks/silkrouter/tree/feat
 ### NPM
 <b>Stable release</b>
 ```sh
-npm install --save silkrouter deparam.js lzstorage
+npm install --save silkrouter lzstorage
 ```
 
 ### CDN
@@ -20,7 +22,7 @@ npm install --save jqueryrouter@2.2.2
 ```
 
 ### Notes
-1. This version does not support IE9 or any other legacy browsers. Please use jQuery version (2.2.2) if you want IE9 support.
+1. This version does not support IE9 or any other legacy browsers. Please use jQuery version (2.2.2) for IE9 support.
 
 ### Peer dependencies
 <a href="https://www.npmjs.com/package/deparam.js">Deparam.js</a><br>
