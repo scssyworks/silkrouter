@@ -106,17 +106,20 @@
       return;
     }
 
-    cache.data = _assign(cache.data);
+    var currentData = _assign({}, cache.currentData);
 
-    var ref = cache.data.data = _assign(cache.data.data);
+    if (isHashRoute) {
+      delete cache.currentData;
+    }
 
-    cache.data.data = _assign({}, ref, {
-      eventType: eventType,
-      hash: !!isHashRoute,
-      route: route,
-      isInit: isInit
+    router.events.trigger(eventNames.routeChanged, {
+      data: _assign({}, isHashRoute ? currentData : {}, {
+        eventType: eventType,
+        hash: !!isHashRoute,
+        route: route,
+        isInit: isInit
+      })
     });
-    router.events.trigger(eventNames.routeChanged, cache.data);
   }
   /**
    * Checks if given route is valid
@@ -194,21 +197,17 @@
         qString = "",
         appendQString = false,
         isHashString = false,
-        routeMethod = replaceMode ? "replaceState" : "pushState";
+        routeMethod = replaceMode ? "replaceState" : "pushState",
+        currentData = {};
     cache.noTrigger = noTrigger;
 
     if (_typeof(oRoute) === "object") {
-      cache.data = {
-        data: oRoute.data
-      };
+      currentData = oRoute.data;
       title = oRoute.title;
       sRoute = oRoute.route;
       qString = oRoute.queryString;
       appendQString = oRoute.appendQuery;
     } else if (typeof oRoute === "string") {
-      cache.data = {
-        data: {}
-      };
       sRoute = oRoute;
     } // Support for hash routes
 
@@ -222,14 +221,18 @@
       history[routeMethod](cache.data, title, _validateRoute(sRoute, qString, appendQString));
 
       if (!noTrigger) {
-        cache.data.data = _assign({}, cache.data.data, {
+        currentData = _assign({}, currentData, {
           eventType: eventNames.popstate,
           hash: false,
           route: sRoute
         });
-        router.events.trigger(eventNames.routeChanged, cache.data);
+        router.events.trigger(eventNames.routeChanged, {
+          data: currentData
+        });
       }
     } else {
+      cache.currentData = currentData;
+
       if (replaceMode) {
         loc.replace("#" + _validateRoute(sRoute, qString, appendQString));
       } else {

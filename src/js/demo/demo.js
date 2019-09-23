@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import 'bootstrap';
-import { router, route } from "../jquery.router";
+import { router, route, unroute } from "../jquery.router";
 import 'bootstrap/dist/css/bootstrap.css';
 import './demo.css';
 
@@ -18,7 +18,6 @@ const demo = {
     },
     bindEvents() {
         route((routeData) => {
-            console.log(`Initialized "*" for ${routeData.route} with hash: ${routeData.hash}`);
             if (!routeData.hash) {
                 _cache.homeLinks.removeClass('active');
                 let rootRoute = routeData.route;
@@ -49,7 +48,6 @@ const demo = {
             }
         });
         route('/demos/demo2/modalroute/:progress', function (...args) {
-            console.log(`Initialized "/demos/demo2/modalroute/:progress" for ${args[0].route} with hash: ${args[0].hash}`);
             const [, params] = args;
             let progress = +params.progress;
             // If modal is not already open then open the modal
@@ -64,13 +62,15 @@ const demo = {
                 .removeClass('d-none').addClass('active');
         });
         route('/demos/demo3', function (...args) {
-            console.log(`Initialized "/demos/demo3" for ${args[0].route} with hash: ${args[0].hash}`);
             const [, , query] = args;
             if (!$.isEmptyObject(query)) {
                 $('.js-query-data').text(JSON.stringify(query, null, 2));
             } else {
                 $('.js-query-data').text('No data!');
             }
+        });
+        route('/route/for/test', function (...args) {
+            console.log(...args);
         });
         _cache.homeLinks.find('.nav-link').on('click', function () {
             router.set($(this).parent().data('route'));
@@ -112,11 +112,11 @@ const demo = {
         });
     },
     init() {
+        window.router = router;
         this.updateCache();
         this.bindEvents();
         console.log("Demo initialized");
         router.init();
-        router.init(); // Test double initialization
     }
 };
 demo.init();

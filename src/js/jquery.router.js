@@ -85,15 +85,18 @@ function _triggerRoute(route, eventType, isHashRoute = false, isInit = false) {
         cache.noTrigger = false;
         return;
     }
-    cache.data = _assign(cache.data);
-    let ref = cache.data.data = _assign(cache.data.data);
-    cache.data.data = _assign({}, ref, {
-        eventType: eventType,
-        hash: !!isHashRoute,
-        route: route,
-        isInit
+    let currentData = _assign({}, cache.currentData);
+    if (isHashRoute) {
+        delete cache.currentData;
+    }
+    router.events.trigger(eventNames.routeChanged, {
+        data: _assign({}, (isHashRoute ? currentData : {}), {
+            eventType: eventType,
+            hash: !!isHashRoute,
+            route: route,
+            isInit
+        })
     });
-    router.events.trigger(eventNames.routeChanged, cache.data);
 }
 
 /**
@@ -161,20 +164,16 @@ function _setRoute(oRoute, replaceMode, noTrigger) {
         qString = "",
         appendQString = false,
         isHashString = false,
-        routeMethod = replaceMode ? "replaceState" : "pushState";
+        routeMethod = replaceMode ? "replaceState" : "pushState",
+        currentData = {};
     cache.noTrigger = noTrigger;
     if (typeof oRoute === "object") {
-        cache.data = {
-            data: oRoute.data
-        };
+        currentData = oRoute.data;
         title = oRoute.title;
         sRoute = oRoute.route;
         qString = oRoute.queryString;
         appendQString = oRoute.appendQuery;
     } else if (typeof oRoute === "string") {
-        cache.data = {
-            data: {}
-        };
         sRoute = oRoute;
     }
     // Support for hash routes
@@ -185,14 +184,17 @@ function _setRoute(oRoute, replaceMode, noTrigger) {
     if (isHistorySupported && !isHashString) {
         history[routeMethod](cache.data, title, _validateRoute(sRoute, qString, appendQString));
         if (!noTrigger) {
-            cache.data.data = _assign({}, cache.data.data, {
+            currentData = _assign({}, currentData, {
                 eventType: eventNames.popstate,
                 hash: false,
                 route: sRoute
             });
-            router.events.trigger(eventNames.routeChanged, cache.data);
+            router.events.trigger(eventNames.routeChanged, {
+                data: currentData
+            });
         }
     } else {
+        cache.currentData = currentData;
         if (replaceMode) {
             loc.replace("#" + _validateRoute(sRoute, qString, appendQString));
         } else {
