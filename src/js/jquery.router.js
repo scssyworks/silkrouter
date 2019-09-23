@@ -1,14 +1,3 @@
-/**
- * jQuery router plugin
- * This file contains SPA router methods to handle routing mechanism in single page applications (SPA). Supported versions IE9+, Chrome, Safari, Firefox
- *
- * @project      Jquery Routing Plugin
- * @date         2019-05-27
- * @author       Sachin Singh <ssingh.300889@gmail.com>
- * @dependencies jQuery
- * @version      2.2.2
- */
-
 import $ from 'jquery';
 import deparam from 'deparam.js';
 
@@ -18,6 +7,9 @@ const libs = {
 };
 // Variable to check if browser supports history API properly    
 const isHistorySupported = history && history.pushState;
+
+// Alias for window.location
+const loc = window.location;
 
 // Data cache
 const cache = {
@@ -43,23 +35,43 @@ const errorMessage = {
     invalidPath: "Path is invalid"
 };
 
+/* eslint-disable */
+
+/**
+ * Inner loop function for assign
+ * @private
+ * @param {object} ref Argument object
+ * @param {object} target First object
+ */
+function _loopFunc(ref, target) {
+    if (ref != null && typeof ref === 'object') {
+        Object.keys(ref).forEach(function (key) {
+            target[key] = ref[key];
+        });
+    }
+}
+
+/**
+ * Polyfill for Object.assign only smaller and with less features
+ * @private
+ * @returns {object}
+ */
+function _assign() {
+    let i = 0;
+    const target = typeof arguments[0] !== 'object' || arguments[0] == null ? {} : arguments[0];
+    for (i = 1; i < arguments.length; i++) {
+        _loopFunc(arguments[i], target);
+    }
+    return target;
+}
+/* eslint-enable */
+
 /**
  * Converts any list to JavaScript array
  * @param {any[]} arr Array like object
  */
 function _arr(arr) {
     return Array.prototype.slice.call(arr);
-}
-
-/**
- * Tests if parameter is a valid JavaScript object
- * @param {any} testObject Test object
- */
-function _resolveObject(testObject) {
-    if (testObject !== null && typeof testObject === 'object') {
-        return testObject;
-    }
-    return {};
 }
 
 /**
@@ -73,27 +85,15 @@ function _triggerRoute(route, eventType, isHashRoute = false, isInit = false) {
         cache.noTrigger = false;
         return;
     }
-    cache.data = _resolveObject(cache.data);
-    let ref = cache.data.data = _resolveObject(cache.data.data);
-    let routeOb = {
+    cache.data = _assign(cache.data);
+    let ref = cache.data.data = _assign(cache.data.data);
+    cache.data.data = _assign({}, ref, {
         eventType: eventType,
         hash: !!isHashRoute,
         route: route,
         isInit
-    };
-    cache.data.data = {
-        ...ref,
-        ...routeOb
-    };
+    });
     router.events.trigger(eventNames.routeChanged, cache.data);
-}
-
-/**
- * Throw JavaScript errors with custom message
- * @param {string} message Error message
- */
-function _throwError(message) {
-    throw new Error(message);
 }
 
 /**
@@ -101,10 +101,7 @@ function _throwError(message) {
  * @param {string} sRoute Route string
  */
 function _isValidRoute(sRoute) {
-    if (typeof sRoute !== "string") {
-        return false;
-    };
-    return regex.pathname.test(sRoute);
+    return (typeof sRoute === "string" && regex.pathname.test(sRoute));
 }
 
 /**
@@ -117,9 +114,9 @@ function _resolveQueryString(sRoute, qString, appendQString) {
     if (!qString && !appendQString) return sRoute;
     if (typeof qString === "string") {
         if ((qString = qString.trim()) && appendQString) {
-            return sRoute + window.location.search + "&" + qString.replace("?", "");
+            return `${sRoute}${loc.search}&${qString.replace("?", "")}`;
         } else if (qString) {
-            return sRoute + "?" + qString.replace("?", "");
+            return `${sRoute}?${qString.replace("?", "")}`;
         } else {
             return sRoute;
         }
@@ -130,15 +127,12 @@ function _resolveQueryString(sRoute, qString, appendQString) {
  * Converts current query string into an object
  */
 function _getQueryParams(coerce = true) {
-    let qsObject = deparam(window.location.search, coerce),
+    let qsObject = deparam(loc.search, coerce),
         hashStringParams = {};
-    if (window.location.hash.match(regex.hashQuery)) {
-        hashStringParams = deparam(window.location.hash.match(regex.hashQuery)[0], coerce);
+    if (loc.hash.match(regex.hashQuery)) {
+        hashStringParams = deparam(loc.hash.match(regex.hashQuery)[0], coerce);
     }
-    return {
-        ...qsObject,
-        ...hashStringParams
-    };
+    return _assign({}, qsObject, hashStringParams);
 }
 
 /**
@@ -151,7 +145,7 @@ function _validateRoute(sRoute, qString, appendQString) {
     if (_isValidRoute(sRoute)) {
         return _resolveQueryString(sRoute, qString, appendQString);
     }
-    _throwError(errorMessage.invalidPath);
+    throw new TypeError(errorMessage.invalidPath);
 }
 
 /**
@@ -191,23 +185,18 @@ function _setRoute(oRoute, replaceMode, noTrigger) {
     if (isHistorySupported && !isHashString) {
         history[routeMethod](cache.data, title, _validateRoute(sRoute, qString, appendQString));
         if (!noTrigger) {
-            let routeOb = {
+            cache.data.data = _assign({}, cache.data.data, {
                 eventType: eventNames.popstate,
                 hash: false,
                 route: sRoute
-            };
-            let ref = cache.data.data;
-            cache.data.data = {
-                ...ref,
-                ...routeOb
-            };
+            });
             router.events.trigger(eventNames.routeChanged, cache.data);
         }
     } else {
         if (replaceMode) {
-            window.location.replace("#" + _validateRoute(sRoute, qString, appendQString));
+            loc.replace("#" + _validateRoute(sRoute, qString, appendQString));
         } else {
-            window.location.hash = _validateRoute(sRoute, qString, appendQString);
+            loc.hash = _validateRoute(sRoute, qString, appendQString);
         }
     }
 }
@@ -307,15 +296,15 @@ function _matched(route, url, params) {
  */
 function _routeTrigger(eventName, params) {
     // Ensures that params is always an object
-    params = _resolveObject(params);
-    params.data = _resolveObject(params.data);
+    params = _assign(params);
+    params.data = _assign(params.data);
     const { hash: isHashRoute, isInit } = params.data;
     libs.handlers.forEach(function (eventObject) {
         if (eventObject.eventName === eventName) {
             if (
                 isHistorySupported
                 && !isHashRoute
-                && _matched(eventObject.route, window.location.pathname, params)
+                && _matched(eventObject.route, loc.pathname, params)
                 && !(
                     isInit
                     && eventObject.called
@@ -324,11 +313,11 @@ function _routeTrigger(eventName, params) {
                 eventObject.called = true;
                 eventObject.handler(params.data, params.params, _getQueryParams(false));
             } else if (isHashRoute) {
-                if (!window.location.hash && !isHistorySupported && _matched(eventObject.route, window.location.pathname, params)) {
+                if (!loc.hash && !isHistorySupported && _matched(eventObject.route, loc.pathname, params)) {
                     cache.data = params.data;
-                    window.location.replace("#" + window.location.pathname); // <-- This will trigger router handler automatically
+                    loc.replace("#" + loc.pathname); // <-- This will trigger router handler automatically
                 } else if (
-                    _matched(eventObject.route, window.location.hash.substring(1), params)
+                    _matched(eventObject.route, loc.hash.substring(1), params)
                     && !(
                         isInit
                         && eventObject.hashCalled
@@ -348,18 +337,16 @@ function _routeTrigger(eventName, params) {
 function _bindRouterEvents() {
     const $win = $(window);
     $win.on(eventNames.popstate, function (e) {
-        _triggerRoute.apply(this, [window.location.pathname, e.type]);
+        _triggerRoute.apply(this, [loc.pathname, e.type]);
     });
     $win.on(eventNames.hashchange, function (e, isInit) {
-        _triggerRoute.apply(this, [window.location.hash, e.type, true, isInit]);
+        _triggerRoute.apply(this, [loc.hash, e.type, true, isInit]);
     });
 }
 
 const router = {
     // Events object
-    events: {
-        // Available event names
-        ...eventNames,
+    events: _assign({
         /**
          * Triggers a custom route event
          * @param {string} eventName Name of event
@@ -368,7 +355,7 @@ const router = {
         trigger(eventName, params) {
             return _routeTrigger.apply(this, [eventName, params]);
         }
-    },
+    }, eventNames),
     /**
      * Initializes router
      */
@@ -377,7 +364,7 @@ const router = {
         let settings = {
             eventType: (isHistorySupported ? eventNames.popstate : eventNames.hashchange),
             hash: !isHistorySupported,
-            route: (isHistorySupported ? window.location.pathname : window.location.hash),
+            route: (isHistorySupported ? loc.pathname : loc.hash),
             isInit: true
         };
         // Triggers route change event on initialize
@@ -385,7 +372,7 @@ const router = {
             data: settings
         });
         // Triggers a hashchange event on initialize if url hash is available
-        if (window.location.hash) {
+        if (loc.hash) {
             $(window).trigger(eventNames.hashchange, [true]);
         }
     },

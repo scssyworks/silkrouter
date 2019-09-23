@@ -21,45 +21,13 @@
     return _typeof(obj);
   }
 
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
-
-    return obj;
-  }
-
-  function _objectSpread(target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i] != null ? arguments[i] : {};
-      var ownKeys = Object.keys(source);
-
-      if (typeof Object.getOwnPropertySymbols === 'function') {
-        ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {
-          return Object.getOwnPropertyDescriptor(source, sym).enumerable;
-        }));
-      }
-
-      ownKeys.forEach(function (key) {
-        _defineProperty(target, key, source[key]);
-      });
-    }
-
-    return target;
-  }
-
   var libs = {
     handlers: []
   }; // Variable to check if browser supports history API properly    
 
-  var isHistorySupported = history && history.pushState; // Data cache
+  var isHistorySupported = history && history.pushState; // Alias for window.location
+
+  var loc = window.location; // Data cache
 
   var cache = {
     noTrigger: false
@@ -80,26 +48,49 @@
   var errorMessage = {
     invalidPath: "Path is invalid"
   };
+  /* eslint-disable */
+
+  /**
+   * Inner loop function for assign
+   * @private
+   * @param {object} ref Argument object
+   * @param {object} target First object
+   */
+
+  function _loopFunc(ref, target) {
+    if (ref != null && _typeof(ref) === 'object') {
+      Object.keys(ref).forEach(function (key) {
+        target[key] = ref[key];
+      });
+    }
+  }
+  /**
+   * Polyfill for Object.assign only smaller and with less features
+   * @private
+   * @returns {object}
+   */
+
+
+  function _assign() {
+    var i = 0;
+    var target = _typeof(arguments[0]) !== 'object' || arguments[0] == null ? {} : arguments[0];
+
+    for (i = 1; i < arguments.length; i++) {
+      _loopFunc(arguments[i], target);
+    }
+
+    return target;
+  }
+  /* eslint-enable */
+
   /**
    * Converts any list to JavaScript array
    * @param {any[]} arr Array like object
    */
 
+
   function _arr(arr) {
     return Array.prototype.slice.call(arr);
-  }
-  /**
-   * Tests if parameter is a valid JavaScript object
-   * @param {any} testObject Test object
-   */
-
-
-  function _resolveObject(testObject) {
-    if (testObject !== null && _typeof(testObject) === 'object') {
-      return testObject;
-    }
-
-    return {};
   }
   /**
    * Triggers "routeChanged" event unless "noTrigger" flag is true
@@ -115,27 +106,17 @@
       return;
     }
 
-    cache.data = _resolveObject(cache.data);
+    cache.data = _assign(cache.data);
 
-    var ref = cache.data.data = _resolveObject(cache.data.data);
+    var ref = cache.data.data = _assign(cache.data.data);
 
-    var routeOb = {
+    cache.data.data = _assign({}, ref, {
       eventType: eventType,
       hash: !!isHashRoute,
       route: route,
       isInit: isInit
-    };
-    cache.data.data = _objectSpread({}, ref, routeOb);
+    });
     router.events.trigger(eventNames.routeChanged, cache.data);
-  }
-  /**
-   * Throw JavaScript errors with custom message
-   * @param {string} message Error message
-   */
-
-
-  function _throwError(message) {
-    throw new Error(message);
   }
   /**
    * Checks if given route is valid
@@ -144,10 +125,7 @@
 
 
   function _isValidRoute(sRoute) {
-    if (typeof sRoute !== "string") {
-      return false;
-    }
-    return regex.pathname.test(sRoute);
+    return typeof sRoute === "string" && regex.pathname.test(sRoute);
   }
   /**
    * Adds a query string
@@ -162,9 +140,9 @@
 
     if (typeof qString === "string") {
       if ((qString = qString.trim()) && appendQString) {
-        return sRoute + window.location.search + "&" + qString.replace("?", "");
+        return "".concat(sRoute).concat(loc.search, "&").concat(qString.replace("?", ""));
       } else if (qString) {
-        return sRoute + "?" + qString.replace("?", "");
+        return "".concat(sRoute, "?").concat(qString.replace("?", ""));
       } else {
         return sRoute;
       }
@@ -177,14 +155,14 @@
 
   function _getQueryParams() {
     var coerce = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-    var qsObject = deparam(window.location.search, coerce),
+    var qsObject = deparam(loc.search, coerce),
         hashStringParams = {};
 
-    if (window.location.hash.match(regex.hashQuery)) {
-      hashStringParams = deparam(window.location.hash.match(regex.hashQuery)[0], coerce);
+    if (loc.hash.match(regex.hashQuery)) {
+      hashStringParams = deparam(loc.hash.match(regex.hashQuery)[0], coerce);
     }
 
-    return _objectSpread({}, qsObject, hashStringParams);
+    return _assign({}, qsObject, hashStringParams);
   }
   /**
    * Checks if route is valid and returns the valid route
@@ -199,7 +177,7 @@
       return _resolveQueryString(sRoute, qString, appendQString);
     }
 
-    _throwError(errorMessage.invalidPath);
+    throw new TypeError(errorMessage.invalidPath);
   }
   /**
    * Set route for given view
@@ -244,20 +222,18 @@
       history[routeMethod](cache.data, title, _validateRoute(sRoute, qString, appendQString));
 
       if (!noTrigger) {
-        var routeOb = {
+        cache.data.data = _assign({}, cache.data.data, {
           eventType: eventNames.popstate,
           hash: false,
           route: sRoute
-        };
-        var ref = cache.data.data;
-        cache.data.data = _objectSpread({}, ref, routeOb);
+        });
         router.events.trigger(eventNames.routeChanged, cache.data);
       }
     } else {
       if (replaceMode) {
-        window.location.replace("#" + _validateRoute(sRoute, qString, appendQString));
+        loc.replace("#" + _validateRoute(sRoute, qString, appendQString));
       } else {
-        window.location.hash = _validateRoute(sRoute, qString, appendQString);
+        loc.hash = _validateRoute(sRoute, qString, appendQString);
       }
     }
   }
@@ -377,21 +353,21 @@
 
   function _routeTrigger(eventName, params) {
     // Ensures that params is always an object
-    params = _resolveObject(params);
-    params.data = _resolveObject(params.data);
+    params = _assign(params);
+    params.data = _assign(params.data);
     var _params$data = params.data,
         isHashRoute = _params$data.hash,
         isInit = _params$data.isInit;
     libs.handlers.forEach(function (eventObject) {
       if (eventObject.eventName === eventName) {
-        if (isHistorySupported && !isHashRoute && _matched(eventObject.route, window.location.pathname, params) && !(isInit && eventObject.called)) {
+        if (isHistorySupported && !isHashRoute && _matched(eventObject.route, loc.pathname, params) && !(isInit && eventObject.called)) {
           eventObject.called = true;
           eventObject.handler(params.data, params.params, _getQueryParams(false));
         } else if (isHashRoute) {
-          if (!window.location.hash && !isHistorySupported && _matched(eventObject.route, window.location.pathname, params)) {
+          if (!loc.hash && !isHistorySupported && _matched(eventObject.route, loc.pathname, params)) {
             cache.data = params.data;
-            window.location.replace("#" + window.location.pathname); // <-- This will trigger router handler automatically
-          } else if (_matched(eventObject.route, window.location.hash.substring(1), params) && !(isInit && eventObject.hashCalled)) {
+            loc.replace("#" + loc.pathname); // <-- This will trigger router handler automatically
+          } else if (_matched(eventObject.route, loc.hash.substring(1), params) && !(isInit && eventObject.hashCalled)) {
             eventObject.hashCalled = true;
             eventObject.handler(params.data, params.params, _getQueryParams(false));
           }
@@ -407,16 +383,16 @@
   function _bindRouterEvents() {
     var $win = $(window);
     $win.on(eventNames.popstate, function (e) {
-      _triggerRoute.apply(this, [window.location.pathname, e.type]);
+      _triggerRoute.apply(this, [loc.pathname, e.type]);
     });
     $win.on(eventNames.hashchange, function (e, isInit) {
-      _triggerRoute.apply(this, [window.location.hash, e.type, true, isInit]);
+      _triggerRoute.apply(this, [loc.hash, e.type, true, isInit]);
     });
   }
 
   var router = {
     // Events object
-    events: _objectSpread({}, eventNames, {
+    events: _assign({
       /**
        * Triggers a custom route event
        * @param {string} eventName Name of event
@@ -425,7 +401,7 @@
       trigger: function trigger(eventName, params) {
         return _routeTrigger.apply(this, [eventName, params]);
       }
-    }),
+    }, eventNames),
 
     /**
      * Initializes router
@@ -435,7 +411,7 @@
       var settings = {
         eventType: isHistorySupported ? eventNames.popstate : eventNames.hashchange,
         hash: !isHistorySupported,
-        route: isHistorySupported ? window.location.pathname : window.location.hash,
+        route: isHistorySupported ? loc.pathname : loc.hash,
         isInit: true
       }; // Triggers route change event on initialize
 
@@ -443,7 +419,7 @@
         data: settings
       }); // Triggers a hashchange event on initialize if url hash is available
 
-      if (window.location.hash) {
+      if (loc.hash) {
         $(window).trigger(eventNames.hashchange, [true]);
       }
     },
@@ -459,13 +435,12 @@
     },
     // Flag to check if history API is supported in current browser
     historySupported: isHistorySupported
-    /**
-     * Attaches a route handler
-     * @param {string|function} route Route string or handler function (in case of generic route)
-     * @param {function} handler Handler function
-     */
-
   };
+  /**
+   * Attaches a route handler
+   * @param {string|function} route Route string or handler function (in case of generic route)
+   * @param {function} handler Handler function
+   */
 
   function route() {
     return _route.apply(this, arguments);
@@ -490,8 +465,8 @@
 
   _bindRouterEvents();
 
-  exports.router = router;
   exports.route = route;
+  exports.router = router;
   exports.unroute = unroute;
 
   Object.defineProperty(exports, '__esModule', { value: true });
