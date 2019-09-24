@@ -18,7 +18,7 @@ npm install --save silkrouter lzstorage
 
 ### JQuery version
 ```sh
-npm install --save jqueryrouter@2.2.2
+npm install --save jqueryrouter@2.2.3
 ```
 
 ### Notes
