@@ -1,6 +1,6 @@
 {
   "name": "silkrouter",
-  "version": "3.3.2",
+  "version": "3.3.3",
   "description": "Silk router is a library for implementing single page applications",
   "main": "dist/js/silkrouter.js",
   "module": "src/js/silkrouter.js",
@@ -32,23 +32,23 @@
     "lzstorage": "^1.0.8"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.4",
-    "@babel/preset-env": "^7.4.4",
+    "@babel/core": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
     "@types/jest": "^24.0.18",
     "bootstrap": "^4.3.1",
-    "ejs": "^2.6.1",
-    "express": "^4.16.4",
+    "ejs": "^2.7.1",
+    "express": "^4.17.1",
     "jest": "^24.9.0",
     "jquery": "^3.4.1",
     "lzstorage": "^1.0.8",
     "popper.js": "^1.15.0",
-    "rollup": "^1.11.3",
-    "rollup-plugin-babel": "^4.3.2",
+    "rollup": "^1.21.4",
+    "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-cleanup": "^3.1.1",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-resolve": "^4.2.4",
     "rollup-plugin-postcss": "^2.0.3",
-    "rollup-plugin-uglify": "^6.0.2"
+    "rollup-plugin-uglify": "^6.0.3"
   },
   "jest": {
     "verbose": true,
