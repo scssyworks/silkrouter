@@ -15,7 +15,7 @@ function ifComplex(q) {
  */
 function deparam(qs, coerce) {
     qs = trim(setDefault(qs, loc.search));
-    coerce = setDefault(coerce, true);
+    coerce = setDefault(coerce, false);
     if (qs.charAt(0) === "?") {
         qs = qs.replace("?", "");
     }

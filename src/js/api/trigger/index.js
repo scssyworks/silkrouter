@@ -10,14 +10,12 @@ import { assign } from '../../utils/assign';
  * @param {string} eventName Name of route event
  * @param {object} params Parameters
  */
-export default function execListeners(eventName, routeConfig, originalData) {
+export default function execListeners(eventName, rc, originalData) {
     originalData = assign(originalData);
-    const { hash: isHash } = routeConfig;
-    const { hash, pathname } = loc;
     libs.handlers.forEach(ob => {
         if (ob.eventName === eventName) {
             let cRoute = ob.route;
-            let cCurrentPath = (isHash ? hash : pathname);
+            let cCurrentPath = (rc.hash ? loc.hash : loc.pathname);
             if (ob.isCaseInsensitive) {
                 cRoute = cRoute.toLowerCase();
                 cCurrentPath = cCurrentPath.toLowerCase();
@@ -27,8 +25,8 @@ export default function execListeners(eventName, routeConfig, originalData) {
                 cCurrentPath,
                 originalData
             );
-            if (hasMatch && (!ob.hash || (ob.hash && isHash))) {
-                ob.handler(assign({}, routeConfig, {
+            if (hasMatch && (!ob.hash || (ob.hash && rc.hash))) {
+                ob.handler(assign({}, rc, {
                     data,
                     params,
                     query: getQueryParams()

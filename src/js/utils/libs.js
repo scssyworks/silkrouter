@@ -1,5 +1,6 @@
 import LZStorage from 'lzstorage';
 import { assign } from './assign';
+import { isObject } from './utils';
 
 const store = new LZStorage({
     compression: true
@@ -22,7 +23,7 @@ export const libs = {
      * @returns {*}
      */
     getDataFromStore(path, isHash) {
-        const paths = store.get('routeStore') || {};
+        const paths = assign(store.get('routeStore'));
         return paths[`${isHash ? '#' : ''}${path}`];
     },
     /**
@@ -35,12 +36,12 @@ export const libs = {
      * @returns {boolean}
      */
     setDataToStore(path, isHash, data) {
-        let paths = store.get('routeStore') || {};
+        let paths = assign(store.get('routeStore'));
         if (paths[path]) {
             if (
                 !data
                 || (
-                    typeof data === 'object'
+                    isObject(data)
                     && Object.keys(data).length === 0
                 )
             ) {
@@ -58,5 +59,8 @@ export const libs = {
      * @type {object[]}
      * @private
      */
-    handlers: []
+    handlers: [],
+    contains(fn) {
+        return !!this.handlers.filter(fn).length;
+    }
 };

@@ -1,4 +1,4 @@
-import { isArr } from './utils';
+import { isArr, isObject } from './utils';
 
 /**
  * Builds query string recursively
@@ -8,7 +8,7 @@ import { isArr } from './utils';
  * @param {*} obj Value
  */
 function buildQueryString(queryStringParts, key, obj) {
-    if (obj && typeof obj === 'object') {
+    if (isObject(obj)) {
         const isCurrObjArray = isArr(obj);
         Object.keys(obj).forEach(obKey => {
             let qKey = isCurrObjArray ? '' : obKey;
@@ -27,7 +27,7 @@ function buildQueryString(queryStringParts, key, obj) {
  */
 export function toQueryString(obj) {
     let queryStringParts = [];
-    if (obj && typeof obj === 'object') {
+    if (isObject(obj)) {
         Object.keys(obj).forEach(key => {
             buildQueryString(queryStringParts, key, obj[key]);
         });

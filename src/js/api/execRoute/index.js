@@ -1,5 +1,5 @@
 import { assign } from '../../utils/assign';
-import { trim, isValidRoute } from '../../utils/utils';
+import { trim, isValidRoute, isHashURL } from '../../utils/utils';
 import { toQueryString } from '../../utils/query';
 import { libs } from '../../utils/libs';
 import resolveQuery from '../resolveQuery';
@@ -14,42 +14,30 @@ import { INVALID_ROUTE, HASH_CHANGE, POP_STATE } from '../../utils/constants';
  * @param {boolean} noTrigger Do not trigger handler
  */
 export default function execRoute(route, replaceMode, noTrigger) {
-    let routeObject = typeof route === 'string' ? { route } : assign({}, route);
-    routeObject = assign({}, routeObject, {
-        replaceMode,
-        noTrigger
-    });
-    const {
-        route: sroute,
-        replaceMode: rm,
-        noTrigger: nt,
-        queryString: qs = '',
-        data,
-        title = null,
-        appendQuery
-    } = routeObject;
-    if (typeof sroute === 'string') {
-        const isHash = sroute.charAt(0) === '#' ? 1 : 0;
-        const routeParts = trim(sroute).split('?');
+    let ro = assign(
+        { replaceMode, noTrigger },
+        (
+            typeof route === 'string'
+                ? { route }
+                : route
+        )
+    );
+    if (typeof ro.route === 'string') {
+        const hash = isHashURL(ro.route);
+        const routeParts = trim(ro.route).split('?');
         let pureRoute = routeParts[0];
         let queryString = trim(routeParts[1]);
-        const routeMethod = `${rm ? 'replace' : 'push'}State`;
-        queryString = toQueryString(queryString || qs);
-        pureRoute = pureRoute.substring(isHash);
+        queryString = toQueryString(queryString || trim(ro.queryString));
+        pureRoute = pureRoute.substring(hash ? 1 : 0);
         if (isValidRoute(pureRoute)) {
-            libs.setDataToStore(pureRoute, isHash === 1, data);
-            const completeRoute = resolveQuery(pureRoute, isHash === 1, queryString, appendQuery);
-            history[routeMethod]({ data }, title, completeRoute);
-            if (!nt) {
-                triggerRoute(
-                    {
-                        originalEvent: {},
-                        route: `${isHash ? '#' : ''}${pureRoute}`,
-                        type: (isHash ? HASH_CHANGE : POP_STATE),
-                        hash: (isHash === 1),
-                        originalData: {}
-                    }
-                );
+            libs.setDataToStore(pureRoute, hash, ro.data);
+            const completeRoute = resolveQuery(pureRoute, hash, queryString, ro.appendQuery);
+            history[ro.replaceMode ? 'replaceState' : 'pushState']({ data: ro.data }, ro.title, completeRoute);
+            if (!ro.noTrigger) {
+                triggerRoute({
+                    route: `${hash ? '#' : ''}${pureRoute}`,
+                    hash
+                });
             }
         } else {
             throw new Error(INVALID_ROUTE);

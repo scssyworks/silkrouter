@@ -1,5 +1,5 @@
-import { REG_ROUTE_PARAMS, REG_TRIM_SPECIALCHARS } from './constants';
-import { toArray } from './utils';
+import { REG_ROUTE_PARAMS } from './constants';
+import { toArray, setDefault } from './utils';
 import { loc } from './vars';
 
 /**
@@ -9,20 +9,22 @@ import { loc } from './vars';
  * @param {string} path URL path
  * @returns {object}
  */
-export function extractParams(expr, path = loc.pathname) {
-    if (REG_ROUTE_PARAMS.test(expr)) {
+export function extractParams(expr, path) {
+    path = setDefault(path, loc.pathname);
+    const params = {};
+    let matchedKeys;
+    let matchedValues;
+    if (matchedKeys = REG_ROUTE_PARAMS.exec(expr)) {
         const pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
-        const params = {};
-        if (pathRegex.test(path)) {
-            REG_ROUTE_PARAMS.lastIndex = 0;
-            const keys = toArray(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(REG_TRIM_SPECIALCHARS, ''));
-            const values = toArray(path.match(pathRegex));
+        REG_ROUTE_PARAMS.lastIndex = 0;
+        if (matchedValues = pathRegex.exec(path)) {
+            const keys = toArray(matchedKeys).map(key => key.replace(':', ''));
+            const values = toArray(matchedValues);
             values.shift();
             keys.forEach((key, index) => {
                 params[key] = values[index];
             });
         }
-        return params;
     }
-    return {};
+    return params;
 }
