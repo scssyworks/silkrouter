@@ -14,13 +14,12 @@
 
     LZStorage = LZStorage && LZStorage.hasOwnProperty('default') ? LZStorage['default'] : LZStorage;
 
-    var HASH_CHANGE$1 = 'hashchange';
+    var HASH_CHANGE = 'hashchange';
     var POP_STATE = 'popstate';
     var ROUTE_CHANGED = 'route.changed';
     var REG_ROUTE_PARAMS = /:[^\/]+/g;
     var REG_PATHNAME = /^\/(?=[^?]*)/;
     var REG_HASH_QUERY = /\?.+/;
-    var REG_TRIM_SPECIALCHARS = /^([^a-zA-Z0-9]+)|([^a-zA-Z0-9]+)$/g;
     var INVALID_ROUTE = 'Route string is not a pure route';
     var CASE_INSENSITIVE_FLAG = '$$';
 
@@ -37,7 +36,7 @@
     }
 
     function isObject(key) {
-      return key != null && !isArr(key) && key.toString() === "[object Object]";
+      return key && !isArr(key) && key.toString() === "[object Object]";
     }
 
     function setDefault(value, defaultValue) {
@@ -52,31 +51,39 @@
       return typeof route === 'string' && REG_PATHNAME.test(route);
     }
 
+    function isHashURL(URL) {
+      return typeof URL === 'string' && URL.charAt(0) === '#';
+    }
+
+    function isFunc(fn) {
+      return typeof fn === 'function';
+    }
+
     var loc = window.location;
 
-    function extractParams(expr) {
-      var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : loc.pathname;
+    function extractParams(expr, path) {
+      path = setDefault(path, loc.pathname);
+      var params = {};
+      var matchedKeys;
+      var matchedValues;
 
-      if (REG_ROUTE_PARAMS.test(expr)) {
+      if (matchedKeys = REG_ROUTE_PARAMS.exec(expr)) {
         var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
-        var params = {};
+        REG_ROUTE_PARAMS.lastIndex = 0;
 
-        if (pathRegex.test(path)) {
-          REG_ROUTE_PARAMS.lastIndex = 0;
-          var keys = toArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
-            return key.replace(REG_TRIM_SPECIALCHARS, '');
+        if (matchedValues = pathRegex.exec(path)) {
+          var keys = toArray(matchedKeys).map(function (key) {
+            return key.replace(':', '');
           });
-          var values = toArray(path.match(pathRegex));
+          var values = toArray(matchedValues);
           values.shift();
           keys.forEach(function (key, index) {
             params[key] = values[index];
           });
         }
-
-        return params;
       }
 
-      return {};
+      return params;
     }
 
     function _typeof(obj) {
@@ -94,7 +101,7 @@
     }
 
     function buildQueryString(queryStringParts, key, obj) {
-      if (obj && _typeof(obj) === 'object') {
+      if (isObject(obj)) {
         var isCurrObjArray = isArr(obj);
         Object.keys(obj).forEach(function (obKey) {
           var qKey = isCurrObjArray ? '' : obKey;
@@ -108,7 +115,7 @@
     function toQueryString(obj) {
       var queryStringParts = [];
 
-      if (obj && _typeof(obj) === 'object') {
+      if (isObject(obj)) {
         Object.keys(obj).forEach(function (key) {
           buildQueryString(queryStringParts, key, obj[key]);
         });
@@ -128,7 +135,7 @@
       var _this = this;
 
       qs = trim(setDefault(qs, loc.search));
-      coerce = setDefault(coerce, true);
+      coerce = setDefault(coerce, false);
 
       if (qs.charAt(0) === "?") {
         qs = qs.replace("?", "");
@@ -266,7 +273,7 @@
     }
 
     function loopFunc(ref, target) {
-      if (ref != null && _typeof(ref) === 'object') {
+      if (isObject(ref)) {
         Object.keys(ref).forEach(function (key) {
           target[key] = ref[key];
         });
@@ -274,10 +281,9 @@
     }
 
     function assign() {
-      var i = 0;
-      var target = _typeof(arguments[0]) !== 'object' || arguments[0] == null ? {} : arguments[0];
+      var target = isObject(arguments[0]) ? arguments[0] : {};
 
-      for (i = 1; i < arguments.length; i++) {
+      for (var i = 1; i < arguments.length; i++) {
         loopFunc(arguments[i], target);
       }
 
@@ -291,15 +297,15 @@
     var libs = {
 
       getDataFromStore: function getDataFromStore(path, isHash) {
-        var paths = store.get('routeStore') || {};
+        var paths = assign(store.get('routeStore'));
         return paths["".concat(isHash ? '#' : '').concat(path)];
       },
 
       setDataToStore: function setDataToStore(path, isHash, data) {
-        var paths = store.get('routeStore') || {};
+        var paths = assign(store.get('routeStore'));
 
         if (paths[path]) {
-          if (!data || _typeof(data) === 'object' && Object.keys(data).length === 0) {
+          if (!data || isObject(data) && Object.keys(data).length === 0) {
 
             return false;
           }
@@ -311,7 +317,10 @@
         return store.set('routeStore', paths, true);
       },
 
-      handlers: []
+      handlers: [],
+      contains: function contains(fn) {
+        return !!this.handlers.filter(fn).length;
+      }
     };
 
     function resolveQuery(route, isHash, queryString, append) {
@@ -329,12 +338,12 @@
     }
 
     function getQueryParams() {
-      var qsObject = lib(loc.search, false);
+      var qsObject = lib();
       var hashStringParams = {};
       var hashQuery = loc.hash.match(REG_HASH_QUERY);
 
       if (hashQuery) {
-        hashStringParams = assign({}, hashStringParams, lib(hashQuery[0], false));
+        hashStringParams = assign({}, lib(hashQuery[0]));
       }
 
       return assign({}, qsObject, hashStringParams);
@@ -342,12 +351,8 @@
 
     function testRoute(route, url, originalData) {
       originalData = assign(originalData);
-      var isHash = url.charAt(0) === '#';
-
-      if (isHash) {
-        url = url.substring(1);
-      }
-
+      var isHash = isHashURL(url);
+      url = url.substring(isHash ? 1 : 0);
       var path = url.split('?')[0];
 
       if (!!Object.keys(originalData).length) {
@@ -364,15 +369,12 @@
       };
     }
 
-    function execListeners(eventName, routeConfig, originalData) {
+    function execListeners(eventName, rc, originalData) {
       originalData = assign(originalData);
-      var isHash = routeConfig.hash;
-      var hash = loc.hash,
-          pathname = loc.pathname;
       libs.handlers.forEach(function (ob) {
         if (ob.eventName === eventName) {
           var cRoute = ob.route;
-          var cCurrentPath = isHash ? hash : pathname;
+          var cCurrentPath = rc.hash ? loc.hash : loc.pathname;
 
           if (ob.isCaseInsensitive) {
             cRoute = cRoute.toLowerCase();
@@ -384,8 +386,8 @@
               data = _testRoute.data,
               params = _testRoute.params;
 
-          if (hasMatch && (!ob.hash || ob.hash && isHash)) {
-            ob.handler(assign({}, routeConfig, {
+          if (hasMatch && (!ob.hash || ob.hash && rc.hash)) {
+            ob.handler(assign({}, rc, {
               data: data,
               params: params,
               query: getQueryParams()
@@ -395,62 +397,41 @@
       });
     }
 
-    function triggerRoute(_ref) {
-      var originalEvent = _ref.originalEvent,
-          route = _ref.route,
-          type = _ref.type,
-          hash = _ref.hash,
-          originalData = _ref.originalData;
-      execListeners(ROUTE_CHANGED, {
-        originalEvent: originalEvent,
-        route: route,
-        type: type,
-        hash: hash
-      }, originalData);
+    function triggerRoute(ob) {
+      ob.originalEvent = assign(ob.originalEvent);
+      ob.type = ob.hash ? HASH_CHANGE : POP_STATE;
+      var originalData = assign(ob.originalData);
+      delete ob.originalData;
+      execListeners(ROUTE_CHANGED, ob, originalData);
     }
 
     function execRoute(route, replaceMode, noTrigger) {
-      var routeObject = typeof route === 'string' ? {
-        route: route
-      } : assign({}, route);
-      routeObject = assign({}, routeObject, {
+      var ro = assign({
         replaceMode: replaceMode,
         noTrigger: noTrigger
-      });
-      var _routeObject = routeObject,
-          sroute = _routeObject.route,
-          rm = _routeObject.replaceMode,
-          nt = _routeObject.noTrigger,
-          _routeObject$queryStr = _routeObject.queryString,
-          qs = _routeObject$queryStr === void 0 ? '' : _routeObject$queryStr,
-          data = _routeObject.data,
-          _routeObject$title = _routeObject.title,
-          title = _routeObject$title === void 0 ? null : _routeObject$title,
-          appendQuery = _routeObject.appendQuery;
+      }, typeof route === 'string' ? {
+        route: route
+      } : route);
 
-      if (typeof sroute === 'string') {
-        var isHash = sroute.charAt(0) === '#' ? 1 : 0;
-        var routeParts = trim(sroute).split('?');
+      if (typeof ro.route === 'string') {
+        var hash = isHashURL(ro.route);
+        var routeParts = trim(ro.route).split('?');
         var pureRoute = routeParts[0];
         var queryString = trim(routeParts[1]);
-        var routeMethod = "".concat(rm ? 'replace' : 'push', "State");
-        queryString = toQueryString(queryString || qs);
-        pureRoute = pureRoute.substring(isHash);
+        queryString = toQueryString(queryString || trim(ro.queryString));
+        pureRoute = pureRoute.substring(hash ? 1 : 0);
 
         if (isValidRoute(pureRoute)) {
-          libs.setDataToStore(pureRoute, isHash === 1, data);
-          var completeRoute = resolveQuery(pureRoute, isHash === 1, queryString, appendQuery);
-          history[routeMethod]({
-            data: data
-          }, title, completeRoute);
+          libs.setDataToStore(pureRoute, hash, ro.data);
+          var completeRoute = resolveQuery(pureRoute, hash, queryString, ro.appendQuery);
+          history[ro.replaceMode ? 'replaceState' : 'pushState']({
+            data: ro.data
+          }, ro.title, completeRoute);
 
-          if (!nt) {
+          if (!ro.noTrigger) {
             triggerRoute({
-              originalEvent: {},
-              route: "".concat(isHash ? '#' : '').concat(pureRoute),
-              type: isHash ? HASH_CHANGE$1 : POP_STATE,
-              hash: isHash === 1,
-              originalData: {}
+              route: "".concat(hash ? '#' : '').concat(pureRoute),
+              hash: hash
             });
           }
         } else {
@@ -462,29 +443,18 @@
     function bindGenericRoute(route, handler) {
       var _this = this;
 
-      if (libs.handlers.filter(function (ob) {
+      if (libs.contains(function (ob) {
         return ob.prevHandler === handler;
-      }).length) {
+      })) {
         return;
       }
 
-      bindRoute(function () {
-        if (typeof handler === 'function') {
-          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-          }
+      bindRoute(function (e) {
+        if (isFunc(handler)) {
+          var compareRoute = e.route.substring(e.hash ? 1 : 0);
 
-          var e = args[0];
-          var compareRoute = e.route;
-
-          if (compareRoute.charAt(0) === '#') {
-            compareRoute = compareRoute.substring(1);
-          }
-
-          if (route.indexOf(compareRoute) > -1) {
-            handler.apply(_this, args);
-          } else if (route.indexOf("#".concat(compareRoute)) > -1 && e.hash) {
-            handler.apply(_this, args);
+          if (route.indexOf("".concat(e.hash ? '#' : '').concat(compareRoute)) > -1) {
+            handler.apply(_this, [e]);
           }
         }
       }, handler);
@@ -494,7 +464,7 @@
 
       var isCaseInsensitive = false;
 
-      if (typeof route === 'function') {
+      if (isFunc(route)) {
         prevHandler = handler;
         handler = route;
         route = '*';
@@ -510,27 +480,27 @@
         route = route.substring(CASE_INSENSITIVE_FLAG.length);
       }
 
-      var startIndex = route.charAt(0) === '#' ? 1 : 0;
-      route = route.substring(startIndex);
+      var containsHash = isHashURL(route);
+      route = route.substring(containsHash ? 1 : 0);
 
-      var exists = libs.handlers.filter(function (ob) {
+      var exists = libs.contains(function (ob) {
         return ob.handler === handler && ob.route === route;
-      }).length;
+      });
 
-      if (!exists && typeof handler === 'function') {
+      if (!exists && isFunc(handler)) {
         libs.handlers.push({
           eventName: ROUTE_CHANGED,
           handler: handler,
           prevHandler: prevHandler,
           route: route,
-          hash: startIndex === 1,
+          hash: containsHash,
           isCaseInsensitive: isCaseInsensitive
         });
       }
 
       var pathname = loc.pathname,
           hash = loc.hash;
-      var paths = startIndex === 1 ? [hash] : [pathname, hash];
+      var paths = containsHash ? [hash] : [pathname, hash];
       paths.filter(function (path) {
         return trim(path);
       }).forEach(function (currentPath) {
@@ -542,18 +512,18 @@
           cCurrentPath = cCurrentPath.toLowerCase();
         }
 
-        var pathIndex = currentPath.charAt(0) === '#' ? 1 : 0;
+        var containsHash = isHashURL(currentPath);
 
         var _testRoute = testRoute(cRoute, cCurrentPath),
             hasMatch = _testRoute.hasMatch,
             data = _testRoute.data,
             params = _testRoute.params;
 
-        if (hasMatch && typeof handler === 'function') {
+        if (hasMatch && isFunc(handler)) {
           handler({
             route: currentPath,
-            hash: pathIndex === 1,
-            eventName: pathIndex === 1 ? HASH_CHANGE$1 : POP_STATE,
+            hash: containsHash,
+            eventName: containsHash ? HASH_CHANGE : POP_STATE,
             data: data,
             params: params,
             query: getQueryParams(),
@@ -563,17 +533,12 @@
       });
     }
 
-    function unbindRoute() {
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      var route = args[0],
-          handler = args[1];
+    function unbindRoute(route, handler) {
+      var _arguments = arguments;
       var prevLength = libs.handlers.length;
       var isRouteList = false;
 
-      if (args.length === 0) {
+      if (arguments.length === 0) {
         libs.handlers.length = 0;
       }
 
@@ -583,52 +548,37 @@
       }
 
       libs.handlers = libs.handlers.filter(function (ob) {
-        if (args.length === 1 && typeof args[0] === 'string' && !isRouteList) {
+        if (_arguments.length === 1 && typeof route === 'string' && !isRouteList) {
           return ob.route !== route;
         }
 
-        if (args.length === 1 && typeof args[0] === 'function') {
-          handler = args[0];
+        if (_arguments.length === 1 && isFunc(route)) {
+          handler = route;
           route = '*';
         }
 
         return !(ob.route === route && (ob.handler === handler || ob.prevHandler === handler));
       });
-      return prevLength > libs.handlers.length;
+      return prevLength - libs.handlers.length;
     }
 
     function initRouterEvents() {
       window.addEventListener("".concat(POP_STATE), function (e) {
-        var completePath = "".concat(loc.pathname).concat(loc.hash);
-        var pathParts = completePath.split('#');
-        var pathname = pathParts[0];
-        var hashstring = pathParts[1];
-        var originalData = {};
-
-        if (e.state) {
-          var data = e.state.data;
-
-          if (data) {
-            originalData = data;
-          }
-        }
-
-        triggerRoute({
+        var pathParts = "".concat(loc.pathname).concat(loc.hash).split('#');
+        var defaultConfig = {
           originalEvent: e,
-          route: pathname,
-          type: e.type,
-          hash: false,
-          originalData: originalData
-        });
+          originalData: assign(e.state && e.state.data)
+        };
+        triggerRoute(assign({}, defaultConfig, {
+          route: pathParts[0],
+          hash: false
+        }));
 
-        if (hashstring) {
-          triggerRoute({
-            originalEvent: e,
-            route: "#".concat(hashstring),
-            type: HASH_CHANGE,
-            hash: true,
-            originalData: originalData
-          });
+        if (pathParts[1]) {
+          triggerRoute(assign({}, defaultConfig, {
+            route: "#".concat(pathParts[1]),
+            hash: true
+          }));
         }
       });
     }

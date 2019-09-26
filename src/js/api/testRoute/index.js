@@ -1,6 +1,6 @@
 import { libs } from '../../utils/libs';
 import { extractParams } from '../../utils/params';
-import { isValidRoute } from '../../utils/utils';
+import { isValidRoute, isHashURL } from '../../utils/utils';
 import { assign } from '../../utils/assign';
 
 /**
@@ -12,10 +12,8 @@ import { assign } from '../../utils/assign';
  */
 export default function testRoute(route, url, originalData) {
     originalData = assign(originalData);
-    const isHash = url.charAt(0) === '#';
-    if (isHash) {
-        url = url.substring(1);
-    }
+    const isHash = isHashURL(url);
+    url = url.substring(isHash ? 1 : 0);
     const path = url.split('?')[0];
     if (!!Object.keys(originalData).length) {
         libs.setDataToStore(path, isHash, originalData); // Sync store with event data.

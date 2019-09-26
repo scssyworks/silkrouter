@@ -1,5 +1,6 @@
-import { ROUTE_CHANGED } from '../../utils/constants';
+import { ROUTE_CHANGED, HASH_CHANGE, POP_STATE } from '../../utils/constants';
 import trigger from '../trigger';
+import { assign } from '../../utils/assign';
 
 /**
  * Triggers "route.changed" event
@@ -11,15 +12,14 @@ import trigger from '../trigger';
  * @param {boolean} config.hash Flag that determines type of event expected
  * @param {object} config.originalData Original data persisted by history API
  */
-export default function triggerRoute({ originalEvent, route, type, hash, originalData }) {
+export default function triggerRoute(ob) {
+    ob.originalEvent = assign(ob.originalEvent);
+    ob.type = ob.hash ? HASH_CHANGE : POP_STATE;
+    const originalData = assign(ob.originalData);
+    delete ob.originalData;
     trigger(
         ROUTE_CHANGED,
-        {
-            originalEvent,
-            route,
-            type,
-            hash
-        },
+        ob,
         originalData
     );
 }

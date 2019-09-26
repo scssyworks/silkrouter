@@ -28,7 +28,7 @@ export function isNumber(key) {
  * @param {*} key Any type of value
  */
 export function isObject(key) {
-    return (key != null && !isArr(key) && key.toString() === "[object Object]");
+    return (key && !isArr(key) && key.toString() === "[object Object]");
 }
 
 /**
@@ -55,4 +55,21 @@ export function toArray(arr) {
  */
 export function isValidRoute(route) {
     return (typeof route === 'string' && REG_PATHNAME.test(route));
+}
+
+/**
+ * Checks if the URL is a hash URL
+ * @private
+ * @param {string} URL URL string
+ */
+export function isHashURL(URL) {
+    return typeof URL === 'string' && URL.charAt(0) === '#';
+}
+
+/**
+ * Checks if input value is a function
+ * @param {function} fn Input function
+ */
+export function isFunc(fn) {
+    return typeof fn === 'function';
 }

@@ -1,6 +1,7 @@
 import triggerRoute from '../triggerRoute';
 import { POP_STATE } from '../../utils/constants';
 import { loc } from '../../utils/vars';
+import { assign } from '../../utils/assign';
 
 /**
  * Initializes router events
@@ -8,32 +9,20 @@ import { loc } from '../../utils/vars';
  */
 export default function initRouterEvents() {
     window.addEventListener(`${POP_STATE}`, function (e) {
-        const completePath = `${loc.pathname}${loc.hash}`;
-        const pathParts = completePath.split('#');
-        const pathname = pathParts[0];
-        const hashstring = pathParts[1];
-        let originalData = {};
-        if (e.state) {
-            const { data } = e.state;
-            if (data) {
-                originalData = data;
-            }
-        }
-        triggerRoute({
+        const pathParts = (`${loc.pathname}${loc.hash}`).split('#');
+        const defaultConfig = {
             originalEvent: e,
-            route: pathname,
-            type: e.type,
-            hash: false,
-            originalData
-        });
-        if (hashstring) {
-            triggerRoute({
-                originalEvent: e,
-                route: `#${hashstring}`,
-                type: HASH_CHANGE,
-                hash: true,
-                originalData
-            });
+            originalData: assign(e.state && e.state.data)
+        };
+        triggerRoute(assign({}, defaultConfig, {
+            route: pathParts[0],
+            hash: false
+        }));
+        if (pathParts[1]) {
+            triggerRoute(assign({}, defaultConfig, {
+                route: `#${pathParts[1]}`,
+                hash: true
+            }));
         }
     });
 }

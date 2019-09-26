@@ -1,4 +1,4 @@
-/* eslint-disable */
+import { isObject } from './utils';
 
 /**
  * Inner loop function for assign
@@ -7,7 +7,7 @@
  * @param {object} target First object
  */
 function loopFunc(ref, target) {
-    if (ref != null && typeof ref === 'object') {
+    if (isObject(ref)) {
         Object.keys(ref).forEach(function (key) {
             target[key] = ref[key];
         });
@@ -20,11 +20,9 @@ function loopFunc(ref, target) {
  * @returns {object}
  */
 export function assign() {
-    let i = 0;
-    const target = typeof arguments[0] !== 'object' || arguments[0] == null ? {} : arguments[0];
-    for (i = 1; i < arguments.length; i++) {
+    const target = isObject(arguments[0]) ? arguments[0] : {};
+    for (let i = 1; i < arguments.length; i++) {
         loopFunc(arguments[i], target);
     }
     return target;
 }
-/* eslint-enable */
