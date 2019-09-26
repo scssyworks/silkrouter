@@ -12,14 +12,12 @@ import { loc } from './vars';
 export function extractParams(expr, path) {
     path = setDefault(path, loc.pathname);
     const params = {};
-    let matchedKeys;
-    let matchedValues;
-    if (matchedKeys = REG_ROUTE_PARAMS.exec(expr)) {
+    if (REG_ROUTE_PARAMS.test(expr)) {
         const pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
         REG_ROUTE_PARAMS.lastIndex = 0;
-        if (matchedValues = pathRegex.exec(path)) {
-            const keys = toArray(matchedKeys).map(key => key.replace(':', ''));
-            const values = toArray(matchedValues);
+        if (pathRegex.test(path)) {
+            const keys = toArray(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(':', ''));
+            const values = toArray(path.match(pathRegex));
             values.shift();
             keys.forEach((key, index) => {
                 params[key] = values[index];

@@ -8,8 +8,8 @@ import { isArr, isObject } from './utils';
  * @param {*} obj Value
  */
 function buildQueryString(queryStringParts, key, obj) {
-    if (isObject(obj)) {
-        const isCurrObjArray = isArr(obj);
+    let isCurrObjArray = false;
+    if (isObject(obj) || (isCurrObjArray = isArr(obj))) {
         Object.keys(obj).forEach(obKey => {
             let qKey = isCurrObjArray ? '' : obKey;
             buildQueryString(queryStringParts, `${key}[${qKey}]`, obj[obKey]);
@@ -27,7 +27,7 @@ function buildQueryString(queryStringParts, key, obj) {
  */
 export function toQueryString(obj) {
     let queryStringParts = [];
-    if (isObject(obj)) {
+    if (isObject(obj) || isArr(obj)) {
         Object.keys(obj).forEach(key => {
             buildQueryString(queryStringParts, key, obj[key]);
         });

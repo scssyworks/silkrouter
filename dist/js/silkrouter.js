@@ -64,18 +64,16 @@
     function extractParams(expr, path) {
       path = setDefault(path, loc.pathname);
       var params = {};
-      var matchedKeys;
-      var matchedValues;
 
-      if (matchedKeys = REG_ROUTE_PARAMS.exec(expr)) {
+      if (REG_ROUTE_PARAMS.test(expr)) {
         var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
         REG_ROUTE_PARAMS.lastIndex = 0;
 
-        if (matchedValues = pathRegex.exec(path)) {
-          var keys = toArray(matchedKeys).map(function (key) {
+        if (pathRegex.test(path)) {
+          var keys = toArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
             return key.replace(':', '');
           });
-          var values = toArray(matchedValues);
+          var values = toArray(path.match(pathRegex));
           values.shift();
           keys.forEach(function (key, index) {
             params[key] = values[index];
@@ -101,8 +99,9 @@
     }
 
     function buildQueryString(queryStringParts, key, obj) {
-      if (isObject(obj)) {
-        var isCurrObjArray = isArr(obj);
+      var isCurrObjArray = false;
+
+      if (isObject(obj) || (isCurrObjArray = isArr(obj))) {
         Object.keys(obj).forEach(function (obKey) {
           var qKey = isCurrObjArray ? '' : obKey;
           buildQueryString(queryStringParts, "".concat(key, "[").concat(qKey, "]"), obj[obKey]);
@@ -115,7 +114,7 @@
     function toQueryString(obj) {
       var queryStringParts = [];
 
-      if (isObject(obj)) {
+      if (isObject(obj) || isArr(obj)) {
         Object.keys(obj).forEach(function (key) {
           buildQueryString(queryStringParts, key, obj[key]);
         });
