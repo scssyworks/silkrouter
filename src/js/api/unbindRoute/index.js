@@ -1,5 +1,5 @@
 import { libs } from '../../utils/libs';
-import { isArr, isFunc } from '../../utils/utils';
+import { isArr, isFunc, toArray } from '../../utils/utils';
 
 /**
  * Unbinds route handlers
@@ -9,20 +9,21 @@ import { isArr, isFunc } from '../../utils/utils';
  */
 export default function unbindRoute(route, handler) {
     const prevLength = libs.handlers.length;
-    let isRouteList = false;
-    if (arguments.length === 0) {
+    let isRouteList = isArr(route);
+    const args = toArray(arguments);
+    if (args.length === 0) {
         libs.handlers.length = 0;
+        return prevLength;
     }
-    if (isArr(route)) {
+    if (isRouteList) {
         route = '*';
-        isRouteList = true;
     }
     libs.handlers = libs.handlers.filter(ob => {
-        if (arguments.length === 1 && typeof route === 'string' && !isRouteList) {
+        if (args.length === 1 && typeof route === 'string' && !isRouteList) {
             return ob.route !== route;
         }
         // Check for generic route
-        if (arguments.length === 1 && isFunc(route)) {
+        if (args.length === 1 && isFunc(route)) {
             handler = route;
             route = '*'; // Generic route
         }

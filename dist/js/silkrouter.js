@@ -136,16 +136,16 @@
       qs = trim(setDefault(qs, loc.search));
       coerce = setDefault(coerce, false);
 
-      if (qs.charAt(0) === "?") {
-        qs = qs.replace("?", "");
+      if (qs.charAt(0) === '?') {
+        qs = qs.replace('?', '');
       }
 
-      var queryParamList = qs.split("&");
+      var queryParamList = qs.split('&');
       var queryObject = {};
 
       if (qs) {
         queryParamList.forEach(function (qq) {
-          var qArr = qq.split("=").map(function (part) {
+          var qArr = qq.split('=').map(function (part) {
             return decodeURIComponent(part);
           });
 
@@ -173,7 +173,10 @@
     }
 
     function resolve(ob, isNextNumber) {
-      if (typeof ob === "undefined") return isNextNumber ? [] : {};
+      if (typeof ob === 'undefined') {
+        ob = [];
+      }
+
       return isNextNumber ? ob : toObject(ob);
     }
 
@@ -181,7 +184,7 @@
       if (isObject(ob)) return {
         ob: ob
       };
-      if (isArr(ob) || typeof ob === "undefined") return {
+      if (isArr(ob) || typeof ob === 'undefined') return {
         ob: resolve(ob, isNumber(nextProp))
       };
       return {
@@ -197,25 +200,23 @@
       if (match.length === 3) {
         var prop = match[1];
         var nextProp = match[2];
-        key = key.replace(/\[([^\[]*)\]/, "");
+        key = key.replace(/\[([^\[]*)\]/, '');
 
         if (ifComplex(key)) {
-          if (nextProp === "") nextProp = "0";
+          if (nextProp === '') nextProp = '0';
           key = key.replace(/[^\[]+/, nextProp);
           complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, doCoerce);
         } else if (nextProp) {
-          var _resolveObj = resolveObj(obj[prop], nextProp),
-              ob = _resolveObj.ob,
-              push = _resolveObj.push;
+          var r = resolveObj(obj[prop], nextProp);
+          obj[prop] = r.ob;
+          var coercedValue = doCoerce ? coerce(value) : value;
 
-          obj[prop] = ob;
-
-          if (push) {
+          if (r.push) {
             var tempObj = {};
-            tempObj[nextProp] = doCoerce ? coerce(value) : value;
+            tempObj[nextProp] = coercedValue;
             obj[prop].push(tempObj);
           } else {
-            obj[prop][nextProp] = doCoerce ? coerce(value) : value;
+            obj[prop][nextProp] = coercedValue;
           }
         } else {
           simple([match[1], value], obj, true);
@@ -241,25 +242,25 @@
     }
 
     function coerce(value) {
-      if (value == null) return "";
-      if (typeof value !== "string") return value;
+      if (value == null) return '';
+      if (typeof value !== 'string') return value;
       value = trim(value);
       if (isNumber(value)) return +value;
 
       switch (value) {
-        case "null":
+        case 'null':
           return null;
 
-        case "undefined":
+        case 'undefined':
           return undefined;
 
-        case "true":
+        case 'true':
           return true;
 
-        case "false":
+        case 'false':
           return false;
 
-        case "NaN":
+        case 'NaN':
           return NaN;
 
         default:
@@ -415,10 +416,9 @@
       if (typeof ro.route === 'string') {
         var hash = isHashURL(ro.route);
         var routeParts = trim(ro.route).split('?');
-        var pureRoute = routeParts[0];
+        var pureRoute = routeParts[0].substring(hash ? 1 : 0);
         var queryString = trim(routeParts[1]);
         queryString = toQueryString(queryString || trim(ro.queryString));
-        pureRoute = pureRoute.substring(hash ? 1 : 0);
 
         if (isValidRoute(pureRoute)) {
           libs.setDataToStore(pureRoute, hash, ro.data);
@@ -450,9 +450,7 @@
 
       bindRoute(function (e) {
         if (isFunc(handler)) {
-          var compareRoute = e.route.substring(e.hash ? 1 : 0);
-
-          if (route.indexOf("".concat(e.hash ? '#' : '').concat(compareRoute)) > -1) {
+          if (route.indexOf("".concat(e.hash ? '#' : '').concat(e.route.substring(e.hash ? 1 : 0))) > -1) {
             handler.apply(_this, [e]);
           }
         }
@@ -461,7 +459,7 @@
 
     function bindRoute(route, handler, prevHandler) {
 
-      var isCaseInsensitive = false;
+      var isCaseInsensitive = route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
 
       if (isFunc(route)) {
         prevHandler = handler;
@@ -474,19 +472,13 @@
         return;
       }
 
-      if (route.indexOf(CASE_INSENSITIVE_FLAG) === 0) {
-        isCaseInsensitive = true;
-        route = route.substring(CASE_INSENSITIVE_FLAG.length);
-      }
-
+      route = route.substring(isCaseInsensitive ? CASE_INSENSITIVE_FLAG.length : 0);
       var containsHash = isHashURL(route);
       route = route.substring(containsHash ? 1 : 0);
 
-      var exists = libs.contains(function (ob) {
+      if (!libs.contains(function (ob) {
         return ob.handler === handler && ob.route === route;
-      });
-
-      if (!exists && isFunc(handler)) {
+      }) && isFunc(handler)) {
         libs.handlers.push({
           eventName: ROUTE_CHANGED,
           handler: handler,
@@ -497,34 +489,22 @@
         });
       }
 
-      var pathname = loc.pathname,
-          hash = loc.hash;
-      var paths = containsHash ? [hash] : [pathname, hash];
+      var paths = containsHash ? [loc.hash] : [loc.pathname, loc.hash];
       paths.filter(function (path) {
         return trim(path);
       }).forEach(function (currentPath) {
-        var cRoute = route;
-        var cCurrentPath = currentPath;
-
-        if (isCaseInsensitive) {
-          cRoute = cRoute.toLowerCase();
-          cCurrentPath = cCurrentPath.toLowerCase();
-        }
-
+        var cRoute = isCaseInsensitive ? route.toLowerCase() : route;
+        var cCurrentPath = isCaseInsensitive ? currentPath.toLowerCase() : currentPath;
         var containsHash = isHashURL(currentPath);
+        var tr = testRoute(cRoute, cCurrentPath);
 
-        var _testRoute = testRoute(cRoute, cCurrentPath),
-            hasMatch = _testRoute.hasMatch,
-            data = _testRoute.data,
-            params = _testRoute.params;
-
-        if (hasMatch && isFunc(handler)) {
+        if (tr.hasMatch && isFunc(handler)) {
           handler({
             route: currentPath,
             hash: containsHash,
             eventName: containsHash ? HASH_CHANGE : POP_STATE,
-            data: data,
-            params: params,
+            data: tr.data,
+            params: tr.params,
             query: getQueryParams(),
             isCaseInsensitive: isCaseInsensitive
           });
@@ -533,25 +513,25 @@
     }
 
     function unbindRoute(route, handler) {
-      var _arguments = arguments;
       var prevLength = libs.handlers.length;
-      var isRouteList = false;
+      var isRouteList = isArr(route);
+      var args = toArray(arguments);
 
-      if (arguments.length === 0) {
+      if (args.length === 0) {
         libs.handlers.length = 0;
+        return prevLength;
       }
 
-      if (isArr(route)) {
+      if (isRouteList) {
         route = '*';
-        isRouteList = true;
       }
 
       libs.handlers = libs.handlers.filter(function (ob) {
-        if (_arguments.length === 1 && typeof route === 'string' && !isRouteList) {
+        if (args.length === 1 && typeof route === 'string' && !isRouteList) {
           return ob.route !== route;
         }
 
-        if (_arguments.length === 1 && isFunc(route)) {
+        if (args.length === 1 && isFunc(route)) {
           handler = route;
           route = '*';
         }
@@ -584,66 +564,23 @@
 
     var router = {
 
-      api: {
-
-        trigger: function trigger() {
-          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-          }
-
-          return execListeners.apply(this, args);
-        },
-
-        extractParams: function extractParams$1() {
-          for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-            args[_key2] = arguments[_key2];
-          }
-
-          return extractParams.apply(this, args);
-        },
-
-        toQueryString: function toQueryString$1() {
-          for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-            args[_key3] = arguments[_key3];
-          }
-
-          return toQueryString.apply(this, args);
-        }
-      },
-
       set: function set() {
-        for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-          args[_key4] = arguments[_key4];
-        }
-
-        return execRoute.apply(this, args);
+        return execRoute.apply(this, arguments);
       }
     };
 
     function route() {
-      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-        args[_key5] = arguments[_key5];
-      }
-
-      return bindRoute.apply(this, args);
+      return bindRoute.apply(this, arguments);
     }
 
     function routeIgnoreCase(firstArg) {
       if (typeof firstArg === 'string') {
-        for (var _len6 = arguments.length, args = new Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
-          args[_key6 - 1] = arguments[_key6];
-        }
-
-        route.apply(this, ["".concat(CASE_INSENSITIVE_FLAG).concat(firstArg)].concat(args));
+        route.apply(this, ["".concat(CASE_INSENSITIVE_FLAG).concat(firstArg), toArray(arguments).slice(1)]);
       }
     }
 
     function unroute() {
-      for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
-        args[_key7] = arguments[_key7];
-      }
-
-      return unbindRoute.apply(this, args);
+      return unbindRoute.apply(this, arguments);
     }
 
     initRouterEvents();

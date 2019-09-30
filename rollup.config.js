@@ -2,7 +2,7 @@ import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
 import postcss from "rollup-plugin-postcss";
 import babel from "rollup-plugin-babel";
-import { uglify } from "rollup-plugin-uglify";
+import { terser } from "rollup-plugin-terser";
 import cleanup from "rollup-plugin-cleanup";
 import pkg from './package.json';
 
@@ -66,7 +66,7 @@ export default [
             babel({
                 exclude: "node_modules/**"
             }),
-            uglify({
+            terser({
                 output: {
                     comments: function () {
                         const [, comment] = arguments;
@@ -102,7 +102,7 @@ export default [
             babel({
                 exclude: "node_modules/**"
             }),
-            uglify()
+            terser()
         ]
     }
 ]
