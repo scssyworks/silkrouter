@@ -16,14 +16,14 @@ function ifComplex(q) {
 function deparam(qs, coerce) {
     qs = trim(setDefault(qs, loc.search));
     coerce = setDefault(coerce, false);
-    if (qs.charAt(0) === "?") {
-        qs = qs.replace("?", "");
+    if (qs.charAt(0) === '?') {
+        qs = qs.replace('?', '');
     }
-    const queryParamList = qs.split("&");
+    const queryParamList = qs.split('&');
     const queryObject = {};
     if (qs) {
         queryParamList.forEach((qq) => {
-            const qArr = qq.split("=").map(part => decodeURIComponent(part));
+            const qArr = qq.split('=').map(part => decodeURIComponent(part));
             if (ifComplex(qArr[0])) {
                 complex.apply(this, [].concat(qArr).concat([queryObject, coerce]));
             } else {
@@ -54,7 +54,9 @@ function toObject(arr) {
  * @param {boolean} isNumber flag to test if next key is number
  */
 function resolve(ob, isNextNumber) {
-    if (typeof ob === "undefined") return isNextNumber ? [] : {};
+    if (typeof ob === 'undefined') {
+        ob = [];
+    }
     return isNextNumber ? ob : toObject(ob);
 }
 
@@ -65,7 +67,7 @@ function resolve(ob, isNextNumber) {
  */
 function resolveObj(ob, nextProp) {
     if (isObject(ob)) return { ob };
-    if (isArr(ob) || typeof ob === "undefined") return { ob: resolve(ob, isNumber(nextProp)) };
+    if (isArr(ob) || typeof ob === 'undefined') return { ob: resolve(ob, isNumber(nextProp)) };
     return { ob: [ob], push: ob !== null };
 }
 
@@ -81,20 +83,21 @@ function complex(key, value, obj, doCoerce) {
     if (match.length === 3) {
         let prop = match[1];
         let nextProp = match[2];
-        key = key.replace(/\[([^\[]*)\]/, "");
+        key = key.replace(/\[([^\[]*)\]/, '');
         if (ifComplex(key)) {
-            if (nextProp === "") nextProp = "0";
+            if (nextProp === '') nextProp = '0';
             key = key.replace(/[^\[]+/, nextProp);
             complex(key, value, (obj[prop] = resolveObj(obj[prop], nextProp).ob), doCoerce);
         } else if (nextProp) {
-            const { ob, push } = resolveObj(obj[prop], nextProp);
-            obj[prop] = ob;
-            if (push) {
+            const r = resolveObj(obj[prop], nextProp);
+            obj[prop] = r.ob;
+            const coercedValue = doCoerce ? coerce(value) : value;
+            if (r.push) {
                 const tempObj = {};
-                tempObj[nextProp] = (doCoerce ? coerce(value) : value);
+                tempObj[nextProp] = coercedValue;
                 obj[prop].push(tempObj);
             } else {
-                obj[prop][nextProp] = (doCoerce ? coerce(value) : value);
+                obj[prop][nextProp] = coercedValue;
             }
         } else {
             simple([match[1], value], obj, true);
@@ -128,16 +131,16 @@ function simple(qArr, queryObject, toArray, doCoerce) {
  * @param {string} value undefined or string value
  */
 function coerce(value) {
-    if (value == null) return "";
-    if (typeof value !== "string") return value;
+    if (value == null) return '';
+    if (typeof value !== 'string') return value;
     value = trim(value);
     if (isNumber(value)) return +value;
     switch (value) {
-        case "null": return null;
-        case "undefined": return undefined;
-        case "true": return true;
-        case "false": return false;
-        case "NaN": return NaN;
+        case 'null': return null;
+        case 'undefined': return undefined;
+        case 'true': return true;
+        case 'false': return false;
+        case 'NaN': return NaN;
         default: return value;
     }
 }

@@ -17,8 +17,7 @@ function bindGenericRoute(route, handler) {
     }
     bindRoute((e) => {
         if (isFunc(handler)) {
-            const compareRoute = e.route.substring(e.hash ? 1 : 0);
-            if (route.indexOf(`${e.hash ? '#' : ''}${compareRoute}`) > -1) {
+            if (route.indexOf(`${e.hash ? '#' : ''}${e.route.substring(e.hash ? 1 : 0)}`) > -1) {
                 handler.apply(this, [e]);
             }
         }
@@ -33,7 +32,7 @@ function bindGenericRoute(route, handler) {
  */
 export default function bindRoute(route, handler, prevHandler) {
     // Resolve generic route
-    let isCaseInsensitive = false;
+    let isCaseInsensitive = route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
     if (isFunc(route)) {
         prevHandler = handler;
         handler = route;
@@ -43,16 +42,14 @@ export default function bindRoute(route, handler, prevHandler) {
         bindGenericRoute(route, handler);
         return;
     }
-    if (route.indexOf(CASE_INSENSITIVE_FLAG) === 0) {
-        isCaseInsensitive = true;
-        route = route.substring(CASE_INSENSITIVE_FLAG.length);
-    }
+    route = route.substring(isCaseInsensitive ? CASE_INSENSITIVE_FLAG.length : 0);
     const containsHash = isHashURL(route);
     route = route.substring((containsHash ? 1 : 0));
-    // Check existence
-    const exists = libs.contains(ob => (ob.handler === handler && ob.route === route));
     // Attach handler
-    if (!exists && isFunc(handler)) {
+    if (
+        !libs.contains(ob => (ob.handler === handler && ob.route === route))
+        && isFunc(handler)
+    ) {
         libs.handlers.push({
             eventName: ROUTE_CHANGED,
             handler,
@@ -63,24 +60,19 @@ export default function bindRoute(route, handler, prevHandler) {
         });
     }
     // Execute handler if matches current route (Replaces init method in version 2.0)
-    const { pathname, hash } = loc;
-    const paths = containsHash ? [hash] : [pathname, hash];
+    const paths = containsHash ? [loc.hash] : [loc.pathname, loc.hash];
     paths.filter(path => trim(path)).forEach(currentPath => {
-        let cRoute = route;
-        let cCurrentPath = currentPath;
-        if (isCaseInsensitive) {
-            cRoute = cRoute.toLowerCase();
-            cCurrentPath = cCurrentPath.toLowerCase();
-        }
+        let cRoute = isCaseInsensitive ? route.toLowerCase() : route;
+        let cCurrentPath = isCaseInsensitive ? currentPath.toLowerCase() : currentPath;
         const containsHash = isHashURL(currentPath);
-        const { hasMatch, data, params } = testRoute(cRoute, cCurrentPath);
-        if (hasMatch && isFunc(handler)) {
+        const tr = testRoute(cRoute, cCurrentPath);
+        if (tr.hasMatch && isFunc(handler)) {
             handler({
                 route: currentPath,
                 hash: containsHash,
                 eventName: containsHash ? HASH_CHANGE : POP_STATE,
-                data,
-                params,
+                data: tr.data,
+                params: tr.params,
                 query: getQueryParams(),
                 isCaseInsensitive
             });
