@@ -29,18 +29,18 @@
   },
   "homepage": "https://github.com/scssyworks/silkrouter#readme",
   "peerDependencies": {
-    "lzstorage": "^1.0.8"
+    "argon-storage": "^2.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",
     "@babel/preset-env": "^7.6.2",
     "@types/jest": "^24.0.18",
+    "argon-storage": "^2.0.1",
     "bootstrap": "^4.3.1",
     "ejs": "^2.7.1",
     "express": "^4.17.1",
     "jest": "^24.9.0",
     "jquery": "^3.4.1",
-    "lzstorage": "^1.0.8",
     "popper.js": "^1.15.0",
     "rollup": "^1.22.0",
     "rollup-plugin-babel": "^4.3.3",

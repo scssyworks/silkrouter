@@ -25,7 +25,7 @@ export default [
             name: "silkrouter",
             sourcemap: true,
             globals: {
-                'lzstorage': 'LZStorage'
+                'argon-storage': 'ArgonStorage'
             },
             banner
         },
@@ -40,7 +40,7 @@ export default [
                 exclude: "node_modules/**"
             }),
             cleanup({
-                maxEmptyLines: 1
+                maxEmptyLines: 0
             })
         ]
     },
@@ -52,7 +52,7 @@ export default [
             format: "umd",
             name: "silkrouter",
             globals: {
-                'lzstorage': 'LZStorage'
+                'argon-storage': 'ArgonStorage'
             },
             banner
         },
