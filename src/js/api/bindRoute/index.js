@@ -32,7 +32,7 @@ function bindGenericRoute(route, handler) {
  */
 export default function bindRoute(route, handler, prevHandler) {
     // Resolve generic route
-    let isCaseInsensitive = route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
+    let caseIgnored = typeof route === 'string' && route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
     if (isFunc(route)) {
         prevHandler = handler;
         handler = route;
@@ -42,7 +42,7 @@ export default function bindRoute(route, handler, prevHandler) {
         bindGenericRoute(route, handler);
         return;
     }
-    route = route.substring(isCaseInsensitive ? CASE_INSENSITIVE_FLAG.length : 0);
+    route = route.substring(caseIgnored ? CASE_INSENSITIVE_FLAG.length : 0);
     const containsHash = isHashURL(route);
     route = route.substring((containsHash ? 1 : 0));
     // Attach handler
@@ -56,14 +56,15 @@ export default function bindRoute(route, handler, prevHandler) {
             prevHandler,
             route,
             hash: containsHash,
-            isCaseInsensitive
+            caseIgnored,
+            isCaseInsensitive: caseIgnored
         });
     }
     // Execute handler if matches current route (Replaces init method in version 2.0)
     const paths = containsHash ? [loc.hash] : [loc.pathname, loc.hash];
     paths.filter(path => trim(path)).forEach(currentPath => {
-        let cRoute = isCaseInsensitive ? route.toLowerCase() : route;
-        let cCurrentPath = isCaseInsensitive ? currentPath.toLowerCase() : currentPath;
+        let cRoute = caseIgnored ? route.toLowerCase() : route;
+        let cCurrentPath = caseIgnored ? currentPath.toLowerCase() : currentPath;
         const containsHash = isHashURL(currentPath);
         const tr = testRoute(cRoute, cCurrentPath);
         if (tr.hasMatch && isFunc(handler)) {
@@ -74,7 +75,8 @@ export default function bindRoute(route, handler, prevHandler) {
                 data: tr.data,
                 params: tr.params,
                 query: getQueryParams(),
-                isCaseInsensitive
+                caseIgnored,
+                isCaseInsensitive: caseIgnored
             });
         }
     });

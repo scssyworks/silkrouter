@@ -1,14 +1,14 @@
 [![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/js/silkrouter.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/js/silkrouter.js?label=uncompressed)
 
 # Silkrouter
-Silkrouter (formerly <a href="https://github.com/scssyworks/silkrouter/tree/feature/ver2">jqueryrouter</a>) is a JavaScript library for single page application routing.
+Silkrouter is a JavaScript library created for single page application routing.
 
-# Installation
+# Install
 
 ### NPM
 <b>Stable release</b>
 ```sh
-npm install --save silkrouter lzstorage
+npm install --save silkrouter argon-storage
 ```
 
 ### CDN
@@ -22,162 +22,139 @@ npm install --save jqueryrouter@2.2.3
 ```
 
 ### Notes
-1. This version does not support IE9 or any other legacy browsers. Please use jQuery version (2.2.2) for IE9 support.
+1. JQuery version supports IE9 and other legacy browsers. For more details please <a href="https://www.npmjs.com/package/jqueryrouter">click here</a>.
 
 ### Peer dependencies
-<a href="https://www.npmjs.com/package/lzstorage">LZ Storage</a>
+<a href="https://www.npmjs.com/package/argon-storage">Argon Storage</a>
 
-# Using Silkrouter
+# How to use Silk Router?
 
-<b>Add a script tag</b><br/>
-```html
-<script src="silkrouter.js"></script>
-<script>
-    const { router, route } = silkrouter;
-</script>
-```
+Silkrouter follows a very simple concept. If you are familiar with custom events, it wouldn't take you much time to learn ``silkrouter``.
 
-<b>Use ES6 import (Webpack or Rollup)</b><br/>
+## Import dependencies
+
 ```js
-import { router, route } from 'silkrouter';
+import { router, route, unroute } from 'silkrouter';
 ```
 
-# How does it works?
-<b>1. Create routes:</b><br/>
+## Attach route listeners
+
 ```js
-route('/path/to/route1', function () { ... });
-route('/path/to/route2', function () { ... });
-route('#/path/to/route3', function () { ... }); // Hash route (added in v3)
+route('/path/to/route', (e) => { ... }); // For normal and hash routing (Use "e.hash" flag to differentiate)
+route('#/path/to/route', (e) => { ... }); // For hash routing
+route((e) => { ... }); // Generic route -> Listens to everything
 ```
 
-<b>2. Create multiple routes [Experimental]:</b><br/>
+## Trigger a route change event
+
+```js
+router.set('/path/to/route');
+router.set('#/path/to/route'); // <-- Triggers hash route
+```
+
+## Complex examples:
+
+### Setting query string
+
+```js
+route('/path/to/route', (e) => {
+    const { q, r } = e.query;
+    console.log(q, r); // -> 'Hello', 'World'
+});
+
+router.set({
+    route: '/path/to/route',
+    queryString: 'q=Hello&r=World'
+});
+```
+
+### Preserve existing query string
+
+```js
+router.set({
+    route: '/path/to/route',
+    queryString: 'q=Hello&r=World',
+    append: true
+});
+```
+
+### Using route parameters
+
+```js
+route('/path/:to/:route', (e) => {
+    const { to, route } = e.params;
+    console.log(to, route); // -> 'hello', 'world'
+});
+
+router.set('/path/hello/world');
+```
+
+### Pass data
+
+```js
+route('/path/to/route', (e) => {
+    console.log(e.data); // -> 'Hello World!'
+});
+
+router.set({
+    route: '/path/to/route',
+    data: 'Hello World!'
+});
+```
+
+## Handle multiple routes
+
+Silkrouter has several options to handle multiple routes.
+
+### Route list [Experimental]
+
 ```js
 route([
-    '/path/to/route/1',
-    '/path/to/route/2',
-    '#/path/to/route/3'
-], function (e) {
-    console.log(e.route); // Prints route that matches
-    ... 
-});
+    '/route1',
+    '#/route2'
+], (e) => { ... });
 ```
 
-<b>3. Create case-insensitive routes [Experimental]: </b><br/>
-```js
-routeIgnoreCase('/path/to/route', function (e) {
-    console.log(e.route, e.isCaseInsensitive);
-    ...
-});
-```
-<b>Notes:</b><br/>
-1. Case insensitive routes work for route strings only. Generic and list routes does not support case insensitivity. If you think about it, it doesn't make any sense either.<br/>
-2. Function ``routeIgnoreCase`` does not support generic and list routes. Please use ``route`` function instead.<br/>
+### Generic routes
 
-<b>4. Trigger a route by calling <code>router.set</code></b><br/>
 ```js
-router.set('/path/to/route1');
-```
-
-<b>5. Pass data:</b><br/>
-```js
-router.set({
-    route: '/path/to/route',
-    data: {
-        key1: 'value1',
-        key2: 'value2'
+route((e) => {
+    switch(e.route) {
+        case '/route1': ...;
+        case '#/route2': ...;
+        default: ...; // Handle error route here
     }
 });
-...
-route('/path/to/route', function (config) {
-    const { data } = config;
-    console.log(data.key1); // 'value1'
-    console.log(data.key2); // 'value2'
-});
-```
-<b>6. Route parameters:</b><br/>
-```js
-router.set('/path/to/route/hello/world');
-...
-route('/path/to/route/:param1/:param2', function (config) {
-    const { params } = config;
-    console.log(params.param1); // hello
-    console.log(params.param2); // world
-});
-```
-<b>7. Query parameters:</b><br/>
-```js
-router.set('/path/to/route?q=123&s=helloworld');
-// OR
-router.set({
-    route: '/path/to/route',
-    queryString: 'q=123&s=helloworld'
-});
-...
-route('/path/to/route', function (config) {
-    const { query } = config;
-    console.log(query.q); // 123
-    console.log(query.s); // 'helloworld'
-});
-```
-<b>8. Change current page path without updating history:</b><br/>
-```js
-var replaceMode = true;
-router.set('/path/to/route', replaceMode);
-// OR
-router.set({
-    route: '/path/to/route',
-    replaceMode
-});
-```
-<b>9. Change current page path without calling handler function:</b><br/>
-```js
-...
-var noTrigger = true;
-router.set('/path/to/route', replaceMode, noTrigger);
-// OR
-router.set({
-    route: '/path/to/route',
-    noTrigger
-});
-```
-<b>10. Set \# routes:</b><br/>
-```js
-router.set('#/path/to/route');
-...
-// Handler called for both pathname and hash changes
-route('/path/to/route', function () {
-    console.log('Still works');
-});
-// Handler called only for hash changes
-route('#/path/to/route', function () {
-    console.log('Also works');
-});
-```
-This forces plugin to change URL hash instead of pathname.<br/>
-
-<b>11. Detach routes:</b><br/>
-You can remove routes on application unmount using ``unroute`` method. (Added in v1.3.0)
-
-```js
-unroute(); // Removes all routes
-unroute('/path/to/route'); // Removes all handlers attached to given route
-unroute('/path/to/route', handlerFn); // Removes handler function attached to the given route
 ```
 
-# Browser support
-Silkrouter has been tested in following browsers:
-<b>Desktop:</b> IE 10+, Chrome, Firefox, Safari, Opera, Edge
-<b>Mobile:</b> Chrome, Safari, Firefox
+## Ignore route case
+
+### [Experimental]
+
+```js
+routeIgnoreCase('/mandatory/route/string', (e) => {
+    console.log(e.route); // -> '/MandATorY/RoUte/StriNg'
+});
+
+router.set('/MandATorY/RoUte/StriNg');
+```
+
+## Detach routes
+
+Detaching routes is simple:
+
+```js
+unroute(); // Removes all listeners
+unroute('/path/to/route'); // Removes all listeners for current route
+unroute('/path/to/route', fn); // Removes current listener
+unroute(fn); // Removes current generic listener
+unroute([...], fn); // Removes current list listener
+```
 
 # Debugging
-<a href="https://github.com/scssyworks/silkrouter/blob/master/DEBUGGING.md">Debugging</a>
 
-# Demos
+<a href="https://github.com/scssyworks/silkrouter/blob/master/DEBUGGING.md">https://github.com/scssyworks/silkrouter/blob/master/DEBUGGING.md</a>
 
-### Old version
-https://jqueryrouter.herokuapp.com/
+# Demo
 
-### Current version
-https://silkrouter.herokuapp.com/
-
-Spot the difference ;)
+<a href="https://silkrouter.herokuapp.com/">https://silkrouter.herokuapp.com</a>

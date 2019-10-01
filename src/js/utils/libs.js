@@ -1,9 +1,9 @@
-import LZStorage from 'lzstorage';
+import ArgonStorage from 'argon-storage';
 import { assign } from './assign';
 import { isObject } from './utils';
 
-const store = new LZStorage({
-    compression: true
+const store = new ArgonStorage({
+    compress: true
 });
 
 /**

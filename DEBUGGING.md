@@ -1,71 +1,46 @@
 # Debugging
 
-<b>1. Differentiating between \# and pathname if both are same:</b><br/>
-SILK router will execute route handler twice if both ``pathname`` and ``hash`` are same.
-Example: http://example.com/path/to/route#/path/to/route
+## Routes execute twice for hash routes
+
+This occurs if normal and hash routes are same (E.g.: ``https://example.com/path/to/route#/path/to/route``). Therefore, route listener executes twice for this scenario. To fix this you can either use ``e.hash`` flag or switch to hash routing.
+
 ```js
-route('/path/to/route', function () {
-   console.log('Executed twice');
-});
-```
-To prevent double execution use hash route or implement following check:
-```js
-route('#/path/to/route', function () {
-    console.log('Executes only for hash changes');
-});
-route('/path/to/route', function (e) {
-    if (e.hash) {
-        console.log('Executes for hash changes');
-    } else {
-        console.log('Executes for normal route changes');
-    }
-});
+route('#/path/to/route', () => { ... });
 ```
 
-<b>2. SILK router throws an "invalid route" error</b><br/>
-SILK router validates the path. A valid path starts with a ``/``
+## Silkrouter throws "Invalid route" error
+
+Silkrouter validates route strings and support routes that are valid for URL. If route string is invalid, you might get "Invalid route" error.
+
+### Valid route
+
 ```js
-route('/path/to/route', function () { ... }); // Correct
-route('path/to/route', function () { ... }); // Incorrect
+route('/valid/route', ...); // A valid route starts with '/'
 ```
 
-<b>3. How to handle error scenarios such as missing routes?</b><br/>
-This is a common use case where you want to render an error page if the route doesn't exist. You can use generic route handler to handle this scenario.
+### Invalid route
 
 ```js
-route(function (e) {
-    if (...) {
-    } else if (...) { 
-    } else {
-      // If none of the conditions matched then render error page
-      // ...
-    }
-});
+route('invalidRoute', ...);
 ```
 
-<b>4. How to ``unroute`` a list route?</b><br/>
-Currently SILK router uses generic route under the hood to handle route lists. This is what happens:<br/>
-```js
-route(['/', '/testroute'], function () { ... });
+## Trying to remove list routes removes all generic routes
 
+List routes are generic routes behind the scenes.
+
+```js
+route([ ... ], () => { ... });
 // Is equivalent to
-
-route(function (e) {
-    switch(e.route) {
-        case '/': ...
-        case '/testroute': ...
-        default: ...
-    }
+route((e) => {
+    switch(e.route) { ... }
 });
 ```
-This is done to achieve better performance.<br/>
-It doesn't mean you can't ``unroute`` a list route. One way is to call ``unroute`` without any parameters which basically unroutes everything (not recommended).<br/> 
-A better way is to pass the original handler function:
+
+Silkrouter registers a generic route, and hence the only way you can remove a list route is by passing route handler.
+
 ```js
-function handler() { ... }
-route(['/', '/testroute'], handler);
-...
-unroute(handler); // Works
+unroute([...]); // This will unroute all generic routes
+unroute([...], fn); // This will unroute the specific handler
 ```
-Note that you would need to store the reference of your handler somewhere in order to make this work.<br/>
-<b>Disclaimer:</b> List routing is still experimental.
+
+Please note that list routing is experimental.
