@@ -17,10 +17,10 @@ const demo = {
         _cache.wizardSections = $('.wizard-sections');
     },
     bindEvents() {
-        route((routeData) => {
-            if (!routeData.hash) {
+        route((e) => {
+            if (!e.hash) {
                 _cache.homeLinks.removeClass('active');
-                let rootRoute = routeData.route;
+                let rootRoute = e.route;
                 if ((/modalroute/).test(rootRoute)) {
                     rootRoute = rootRoute.substring(0, rootRoute.indexOf('/modalroute/'));
                 } else {
@@ -32,18 +32,18 @@ const demo = {
                 _cache.demoPages.addClass('d-none');
                 $(target).removeClass('d-none');
                 if (
-                    routeData.route === '/demos/demo1'
+                    e.route === '/demos/demo1'
                     && !window.location.hash.trim()
                 ) {
                     router.set('#/accordion1', true);
                 }
             }
-            if (routeData.hash) {
-                if ((/accordion/).test(routeData.route)) {
+            if (e.hash) {
+                if ((/accordion/).test(e.route)) {
                     _cache.accordionBtns.attr('aria-expanded', false);
-                    _cache.accordionBtns.filter(`[data-route="${routeData.route}"]`).attr('aria-expanded', true);
+                    _cache.accordionBtns.filter(`[data-route="${e.route}"]`).attr('aria-expanded', true);
                     _cache.accordionSections.removeClass('show');
-                    _cache.accordionSections.filter(`[data-route="${routeData.route}"]`).addClass('show');
+                    _cache.accordionSections.filter(`[data-route="${e.route}"]`).addClass('show');
                 }
             }
         });

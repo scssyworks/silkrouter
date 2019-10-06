@@ -1,4 +1,4 @@
-import { isArr, trim, isHashURL, isFunc } from '../../utils/utils';
+import { isArr, trim, isHashURL, isFunc, getPopStateEvent } from '../../utils/utils';
 import { CASE_INSENSITIVE_FLAG, ROUTE_CHANGED, POP_STATE, HASH_CHANGE } from '../../utils/constants';
 import { libs } from '../../utils/libs';
 import { loc } from '../../utils/vars';
@@ -68,10 +68,12 @@ export default function bindRoute(route, handler, prevHandler) {
         const containsHash = isHashURL(currentPath);
         const tr = testRoute(cRoute, cCurrentPath);
         if (tr.hasMatch && isFunc(handler)) {
+            const eventName = containsHash ? HASH_CHANGE : POP_STATE;
             handler({
+                originalEvent: getPopStateEvent(eventName, tr.data),
                 route: currentPath,
                 hash: containsHash,
-                eventName: containsHash ? HASH_CHANGE : POP_STATE,
+                eventName,
                 data: tr.data,
                 params: tr.params,
                 query: getQueryParams(),

@@ -25,10 +25,10 @@ export function isNumber(key) {
 
 /**
  * Checks if key is a true object
- * @param {*} key Any type of value
+ * @param {*} value Any type of value
  */
-export function isObject(key) {
-    return (key && !isArr(key) && key.toString() === "[object Object]");
+export function isObject(value) {
+    return (value && typeof value === 'object' && !isArr(value));
 }
 
 /**
@@ -72,4 +72,16 @@ export function isHashURL(URL) {
  */
 export function isFunc(fn) {
     return typeof fn === 'function';
+}
+
+/**
+ * Returns an empty PopStateEvent object
+ * @param {string} type Type of event
+ * @param {*} data Any type of data
+ */
+export function getPopStateEvent(type, data) {
+    return {
+        type,
+        state: { data }
+    };
 }
