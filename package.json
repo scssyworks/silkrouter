@@ -1,6 +1,6 @@
 {
   "name": "silkrouter",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "description": "Silk router is a library for implementing single page applications",
   "main": "dist/js/silkrouter.js",
   "module": "src/js/silkrouter.js",
