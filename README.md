@@ -1,7 +1,10 @@
 [![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/js/silkrouter.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/js/silkrouter.js?label=uncompressed)
 
 # Silkrouter
-Silkrouter is a JavaScript library created for single page application routing.
+Silkrouter is an SPA (Single Page Apps) routing library.
+
+# Disclaimer
+If you are upgrading from version 3.2.0, your apps might stop working as we have migrated from ``lzstorage`` to ``argon-storage``. <b>Apologies for this breaking change!</b>
 
 # Install
 

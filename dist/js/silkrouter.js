@@ -3,7 +3,7 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <contactsachinsingh@gmail.com>
- * @version 3.4.1
+ * @version 3.4.2
  * @license MIT
  */
 (function (global, factory) {
@@ -255,6 +255,7 @@
   var store = new ArgonStorage({
     compress: true
   });
+
   var libs = {
     getDataFromStore: function getDataFromStore(path, isHash) {
       var paths = assign(store.get('routeStore'));
