@@ -77,7 +77,7 @@ router.set({
 router.set({
     route: '/path/to/route',
     queryString: 'q=Hello&r=World',
-    append: true
+    appendQuery: true
 });
 ```
 
