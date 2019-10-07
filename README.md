@@ -1,136 +1,104 @@
 # JQuery Routing Plugin
-JQuery router (now <a href="https://www.npmjs.com/package/silkrouter">Silk router</a>) is a plugin created for for single page application routing.
+JQuery router is a SPA (Single Page Apps) router plugin for jQuery.
+
+# Upgrade to Silkrouter (Recommended)
+``Silkrouter`` is the next version of JQuery router (without jQuery). Refer to <a href="https://github.com/scssyworks/jqueryrouter/blob/master/MIGRATION.md">migration documentation</a> to migrate to newest version.
 
 # Installation
 
 Using npm:
 
 ```sh
-npm install --save jqueryrouter jquerydeparam
+npm install --save jqueryrouter deparam.js jquery
 ```
 
 Using CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@2.2.1/dist/js/jquery.router.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@2.2.4/dist/js/jquery.router.min.js"></script>
 ```
-
-### Notes
-1. JQuery router version 1 is now deprecated.
-2. JQuery router version 2 requires jQuery and <a href="https://www.npmjs.com/package/jquerydeparam">jquerydeparam</a>.
-3. If you are looking for non-jquery version, please use <a href="https://www.npmjs.com/package/silkrouter">silkrouter</a>.
 
 # How to use?
+JQuery router follows a similar pattern as custom events.
 
-<b>Add a script tag</b><br/>
-```html
-<script src="jquery.router.js"></script>
-<script>
-    const { router, route } = jqueryrouter;
-</script>
-```
+## Bind router events
 
-<b>Use ES6 import (Webpack or Rollup)</b><br/>
-```js
-import { router, route } from 'jqueryrouter';
-```
-
-<b>Using jQuery</b>
 ```js
 import $ from 'jquery';
 import 'jqueryrouter';
 
-$.route(...);
-$.router.set(...);
+$.route('/path/to/route', (e) => {
+    ...
+});
+$.route('#/path/to/route', (e) => {
+    ...
+});
 ```
 
-# How it works?
-<b>1. Create routes:</b><br/>
+## Trigger router event
+
 ```js
-$.route('/path/to/route1', function () { ... });
-$.route('/path/to/route2', function () { ... });
-$.route('/path/to/route3', function () { ... });
+$.router.set('/path/to/route');
+// OR
+$.router.set({
+    route: '/path/to/route'
+});
 ```
-<b>2. Trigger a route by calling <code>$.router.set</code></b><br/>
+
+<b>Note:</b> You need to attach handlers before you can trigger router events.
+
+## Hash routing check
+If normal and hash routes are same, it causes route handler to execute twice. Luckily you can add a check to prevent that:
+
 ```js
-$.router.set('/path/to/route1');
+$.route('...', (e) => {
+    if (e.hash) { ... }
+});
 ```
-The method changes current route and call the appropriate method that matches it.<br/><br/>
-<b>3. Execute routes on page load. Call router's <code>init</code> method for that magic:</b><br/>
+
+## Trigger route handlers on page load/reload
+To trigger route handlers on page load/reload, you need to call ``router.init`` method.
+
 ```js
 $.router.init();
 ```
-The method execute handler methods that matches the current route (without <code>$.router.set</code>). Alternatively, you can call <code>$.router.set(location.pathname);</code> on DOM ready.
+
+The ``init`` method keeps track of handlers which have been triggered. If a handler has been called before, it will not be called again.
+
+## Persisting data
+JQuery router supports data persistence via <b>query strings</b> and <b>route params</b>.<br>
+
+Query string:
 ```js
-$(function () {
-    ...
-    $.router.set(location.pathname);
+$.route('/path/to/route', (e, params, query) => {
+    console.log(query); // -> { h: 'Hello World' }
+});
+
+$.router.set({
+    route: '/path/to/route',
+    queryString: 'h=Hello World'
 });
 ```
-<b>4. Pass data to route handler:</b><br/>
+
+Route params:
+```js
+$.route('/path/:to/:route', (e, params, query) => {
+    console.log(params); // -> { to: 'value1', route: 'value2' }
+});
+
+$.router.set({
+    route: '/path/value1/value2'
+});
+```
+
+## Passing data directly
+JQuery router allows you to pass data directly to handler. However, this only works if route is triggered manually. In other words this data is never persisted.
+
 ```js
 $.router.set({
     route: '/path/to/route',
-    data: {
-        key1: 'value1',
-        key2: 'value2'
-    }
+    data: { ... } // Disclaimer: Data should be a valid object
 });
-...
-$.route('/path/to/route', function (data) {
-    console.log(data.key1); // 'value1'
-    console.log(data.key2); // 'value2'
-});
-```
-<b>5. Set route parameters:</b><br/>
-```js
-$.router.set('/path/to/route/hello/world');
-...
-$.route('/path/to/route/:param1/:param2', function (data, params) {
-    console.log(params.param1); // hello
-    console.log(params.param2); // world
-});
-```
-<b>6. Set query parameters:</b><br/>
-```js
-$.router.set({
-    route: '/path/to/route',
-    queryString: 'q=123&s=helloworld'
-});
-...
-$.route('/path/to/route', function (data, params, query) {
-    console.log(query.q); // 123
-    console.log(query.s); // 'helloworld'
-});
-```
-<b>7. Change current page path without updating history:</b><br/>
-```js
-var replaceMode = true;
-$.router.set('/path/to/route', replaceMode);
-```
-<b>8. Change current page path without calling handler function:</b><br/>
-```js
-...
-var doNotCallHandler = true;
-$.router.set('/path/to/route', replaceMode, doNotCallHandler);
-```
-<b>9. Set \# routes:</b><br/>
-```js
-$.router.set('#/path/to/route');
-...
-$.route('/path/to/route', function () {
-    console.log('Still works');
-});
-```
-This forces plugin to change URL hash instead of pathname.<br/>
-
-<b>10. Detach routes:</b><br/>
-For performance reasons, it's a good idea to detach routes when your application unmounts. As of version 1.3.0 we have added ``unroute`` method which allows us to remove attached handlers.
-
-```js
-$.unroute(); // Removes all routes
-$.unroute('/path/to/route'); // Removes all handlers attached to given route
-$.unroute('/path/to/route', handlerFn); // Removes handler function attached to the given route
 ```
 
 # Browser support
