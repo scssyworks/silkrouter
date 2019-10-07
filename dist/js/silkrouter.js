@@ -255,6 +255,7 @@
   var store = new ArgonStorage({
     compress: true
   });
+
   var libs = {
     getDataFromStore: function getDataFromStore(path, isHash) {
       var paths = assign(store.get('routeStore'));
