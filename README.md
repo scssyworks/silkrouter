@@ -2,7 +2,7 @@
 JQuery router is a SPA (Single Page Apps) router plugin for jQuery.
 
 # Upgrade to Silkrouter (Recommended)
-``Silkrouter`` is the next version of JQuery router (without jQuery). Refer to <a href="https://github.com/scssyworks/jqueryrouter/blob/master/MIGRATION.md">migration documentation</a> to migrate to newest version.
+``Silkrouter`` is the next version of JQuery router (without jQuery). Refer to <a href="https://github.com/scssyworks/silkrouter/blob/feature/ver2/MIGRATION.md">migration documentation</a> to migrate to newest version.
 
 # Installation
 
@@ -107,7 +107,7 @@ Jquery router has been tested in following browsers:
 <b>Mobile:</b> Chrome, Safari, Firefox
 
 # Debugging
-<a href="https://github.com/scssyworks/jqueryrouter/blob/master/DEBUGGING.md">Debugging</a>
+<a href="https://github.com/scssyworks/silkrouter/blob/feature/ver2/DEBUGGING.md">Debugging</a>
 
 # Demo
 https://jqueryrouter.herokuapp.com/
