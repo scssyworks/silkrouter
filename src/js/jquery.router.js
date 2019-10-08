@@ -58,7 +58,7 @@ function _loopFunc(ref, target) {
  */
 function _assign() {
     let i = 0;
-    const target = typeof arguments[0] !== 'object' || arguments[0] == null ? {} : arguments[0];
+    const target = arguments[0] && typeof arguments[0] === 'object' ? arguments[0] : {};
     for (i = 1; i < arguments.length; i++) {
         _loopFunc(arguments[i], target);
     }
@@ -388,7 +388,7 @@ const router = {
         return _setRoute.apply(this, arguments);
     },
     // Flag to check if history API is supported in current browser
-    historySupported: isHistorySupported
+    historySupported: !!isHistorySupported
 }
 
 /**

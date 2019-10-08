@@ -73,7 +73,7 @@
 
   function _assign() {
     var i = 0;
-    var target = _typeof(arguments[0]) !== 'object' || arguments[0] == null ? {} : arguments[0];
+    var target = arguments[0] && _typeof(arguments[0]) === 'object' ? arguments[0] : {};
 
     for (i = 1; i < arguments.length; i++) {
       _loopFunc(arguments[i], target);
@@ -437,7 +437,7 @@
       return _setRoute.apply(this, arguments);
     },
     // Flag to check if history API is supported in current browser
-    historySupported: isHistorySupported
+    historySupported: !!isHistorySupported
   };
   /**
    * Attaches a route handler
