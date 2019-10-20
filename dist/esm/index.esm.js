@@ -1,0 +1,1018 @@
+/**!
+ * Router plugin for single page applications with routes
+ * Released under MIT license
+ * @name Silk router
+ * @author Sachin Singh <contactsachinsingh@gmail.com>
+ * @version 3.4.3
+ * @license MIT
+ */
+const HASH_CHANGE = 'hashchange';
+const POP_STATE = 'popstate';
+const ROUTE_CHANGED = 'route.changed';
+const REG_ROUTE_PARAMS = /:[^\/]+/g;
+const REG_PATHNAME = /^\/(?=[^?]*)/;
+const REG_HASH_QUERY = /\?.+/;
+const INVALID_ROUTE = 'Route string is not a pure route';
+const CASE_INSENSITIVE_FLAG = '$$';
+
+const isArr = Array.isArray;
+function trim(str) {
+    return ((typeof str === 'string') ? str.trim() : '');
+}
+function isNumber(key) {
+    key = trim(`${key}`);
+    if (['null', 'undefined', ''].indexOf(key) > -1) return false;
+    return !isNaN(Number(key));
+}
+function isObject(value) {
+    return (value && typeof value === 'object' && !isArr(value));
+}
+function setDefault(value, defaultValue) {
+    return typeof value === 'undefined' ? defaultValue : value;
+}
+function toArray(arr) {
+    return Array.prototype.slice.call(arr);
+}
+function isValidRoute(route) {
+    return (typeof route === 'string' && REG_PATHNAME.test(route));
+}
+function isHashURL(URL) {
+    return typeof URL === 'string' && URL.charAt(0) === '#';
+}
+function isFunc(fn) {
+    return typeof fn === 'function';
+}
+function getPopStateEvent(type, data) {
+    return {
+        type,
+        state: { data }
+    };
+}
+
+const loc = window.location;
+
+function extractParams(expr, path) {
+    path = setDefault(path, loc.pathname);
+    const params = {};
+    if (REG_ROUTE_PARAMS.test(expr)) {
+        const pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
+        REG_ROUTE_PARAMS.lastIndex = 0;
+        if (pathRegex.test(path)) {
+            const keys = toArray(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(':', ''));
+            const values = toArray(path.match(pathRegex));
+            values.shift();
+            keys.forEach((key, index) => {
+                params[key] = values[index];
+            });
+        }
+    }
+    return params;
+}
+
+function buildQueryString(queryStringParts, key, obj) {
+    let isCurrObjArray = false;
+    if (isObject(obj) || (isCurrObjArray = isArr(obj))) {
+        Object.keys(obj).forEach(obKey => {
+            let qKey = isCurrObjArray ? '' : obKey;
+            buildQueryString(queryStringParts, `${key}[${qKey}]`, obj[obKey]);
+        });
+    } else if (['string', 'number', 'boolean', 'undefined', 'object'].indexOf(typeof obj) > -1) {
+        queryStringParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(obj)}`);
+    }
+}
+function toQueryString(obj) {
+    let queryStringParts = [];
+    if (isObject(obj) || isArr(obj)) {
+        Object.keys(obj).forEach(key => {
+            buildQueryString(queryStringParts, key, obj[key]);
+        });
+        return queryStringParts.join('&');
+    } else if (typeof obj === 'string') {
+        return obj;
+    }
+    return '';
+}
+
+function ifComplex(q) {
+    return (/\[/.test(q));
+}
+function deparam(qs, coerce) {
+    qs = trim(setDefault(qs, loc.search));
+    coerce = setDefault(coerce, false);
+    if (qs.charAt(0) === '?') {
+        qs = qs.replace('?', '');
+    }
+    const queryParamList = qs.split('&');
+    const queryObject = {};
+    if (qs) {
+        queryParamList.forEach((qq) => {
+            const qArr = qq.split('=').map(part => decodeURIComponent(part));
+            if (ifComplex(qArr[0])) {
+                complex.apply(this, [].concat(qArr).concat([queryObject, coerce]));
+            } else {
+                simple.apply(this, [qArr, queryObject, false, coerce]);
+            }
+        });
+    }
+    return queryObject;
+}
+function toObject(arr) {
+    var convertedObj = {};
+    if (isArr(arr)) {
+        arr.forEach((value, index) => {
+            convertedObj[index] = value;
+        });
+    }
+    return convertedObj;
+}
+function resolve(ob, isNextNumber) {
+    if (typeof ob === 'undefined') {
+        ob = [];
+    }
+    return isNextNumber ? ob : toObject(ob);
+}
+function resolveObj(ob, nextProp) {
+    if (isObject(ob)) return { ob };
+    if (isArr(ob) || typeof ob === 'undefined') return { ob: resolve(ob, isNumber(nextProp)) };
+    return { ob: [ob], push: ob !== null };
+}
+function complex(key, value, obj, doCoerce) {
+    doCoerce = setDefault(doCoerce, true);
+    const match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
+    if (match.length === 3) {
+        let prop = match[1];
+        let nextProp = match[2];
+        key = key.replace(/\[([^\[]*)\]/, '');
+        if (ifComplex(key)) {
+            if (nextProp === '') nextProp = '0';
+            key = key.replace(/[^\[]+/, nextProp);
+            complex(key, value, (obj[prop] = resolveObj(obj[prop], nextProp).ob), doCoerce);
+        } else if (nextProp) {
+            const r = resolveObj(obj[prop], nextProp);
+            obj[prop] = r.ob;
+            const coercedValue = doCoerce ? coerce(value) : value;
+            if (r.push) {
+                const tempObj = {};
+                tempObj[nextProp] = coercedValue;
+                obj[prop].push(tempObj);
+            } else {
+                obj[prop][nextProp] = coercedValue;
+            }
+        } else {
+            simple([match[1], value], obj, true);
+        }
+    }
+}
+function simple(qArr, queryObject, toArray, doCoerce) {
+    doCoerce = setDefault(doCoerce, true);
+    let key = qArr[0];
+    let value = qArr[1];
+    if (doCoerce) {
+        value = coerce(value);
+    }
+    if (key in queryObject) {
+        queryObject[key] = isArr(queryObject[key]) ? queryObject[key] : [queryObject[key]];
+        queryObject[key].push(value);
+    } else {
+        queryObject[key] = toArray ? [value] : value;
+    }
+}
+function coerce(value) {
+    if (value == null) return '';
+    if (typeof value !== 'string') return value;
+    value = trim(value);
+    if (isNumber(value)) return +value;
+    switch (value) {
+        case 'null': return null;
+        case 'undefined': return undefined;
+        case 'true': return true;
+        case 'false': return false;
+        case 'NaN': return NaN;
+        default: return value;
+    }
+}
+function lib() {
+    return deparam.apply(this, arguments);
+}
+
+function loopFunc(ref, target) {
+    if (isObject(ref)) {
+        Object.keys(ref).forEach(function (key) {
+            target[key] = ref[key];
+        });
+    }
+}
+function assign() {
+    const target = isObject(arguments[0]) ? arguments[0] : {};
+    for (let i = 1; i < arguments.length; i++) {
+        loopFunc(arguments[i], target);
+    }
+    return target;
+}
+
+function isObject$1(value) {
+    return value && typeof value === 'object';
+}
+function setDefault$1(value, defaultValue) {
+    if (typeof value === 'undefined') {
+        return defaultValue;
+    }
+    return value;
+}
+function trim$1(value) {
+    return (typeof value === 'string' ? value.trim() : '');
+}
+function loopFunc$1(ref, target) {
+    if (isObject$1(ref)) {
+        Object.keys(ref).forEach(function (key) {
+            target[key] = ref[key];
+        });
+    }
+}
+function assign$1() {
+    let i = 0;
+    const target = isObject$1(arguments[0]) ? arguments[0] : {};
+    for (i = 1; i < arguments.length; i++) {
+        loopFunc$1(arguments[i], target);
+    }
+    return target;
+}
+function each(arrayObj, callback) {
+    if (arrayObj && arrayObj.length) {
+        for (let index = 0; index < arrayObj.length; index += 1) {
+            if (typeof callback === 'function') {
+                const continueTheLoop = callback.apply(arrayObj, [arrayObj[index], index]);
+                if (typeof continueTheLoop === 'boolean') {
+                    if (continueTheLoop) {
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+function tryParse(value) {
+    try {
+        return JSON.parse(value);
+    } catch (e) {
+        return value;
+    }
+}
+
+const loc$1 = window.location;
+const ls = window.localStorage;
+const ss = window.sessionStorage;
+const hasOwn = Object.prototype.hasOwnProperty;
+
+const MAX_END_DATE = 'Thu, 31 Dec 2037 00:00:00 GMT';
+const COOKIE_DEL_DATE = 'Thu, 01 Jan 1970 00:00:00 UTC';
+const MILLISECOND_MULTIPLIER = (24 * 60 * 60 * 1000);
+const LOCAL_ENV = ['localhost', '0.0.0.0', '127.0.0.1', null];
+const types = {
+    SS: 'sessionStorage',
+    LS: 'localStorage',
+    CC: 'cookie'
+};
+
+function setCookie(key, value, expiryDays, path, domain, isSecure) {
+    if (key && typeof value !== 'undefined') {
+        path = setDefault$1(path, '/');
+        domain = setDefault$1(domain, loc$1.hostname);
+        let transformedValue = value;
+        if (typeof value === 'object' && value) {
+            transformedValue = JSON.stringify(value);
+        }
+        let expiryDate = new Date();
+        if (typeof expiryDate === 'number') {
+            if (expiryDays === Infinity) {
+                expiryDate = new Date(MAX_END_DATE);
+            } else {
+                expiryDate.setTime(expiryDate.getTime() + (expiryDays * MILLISECOND_MULTIPLIER));
+            }
+        }
+        const expires = expiryDays ? `; expires=${expiryDate.toUTCString()}` : '';
+        const cookiePath = `; path=${path.trim()}`;
+        const cookieDomain = (LOCAL_ENV.indexOf(domain) === -1) ? `; domain=${domain.trim()}` : '';
+        const secureFlag = (((typeof isSecure === 'boolean' && isSecure)
+            || (typeof isSecure === 'undefined')) && (loc$1.protocol === 'https:')) ? '; secure' : '';
+        document.cookie = `${key} = ${transformedValue}${expires}${cookieDomain}${cookiePath}${secureFlag}`;
+    }
+}
+function getCookie(key, trimResult) {
+    if (key) {
+        const cookieStr = decodeURIComponent(document.cookie);
+        let value = '';
+        each(cookieStr.split(';'), cookiePair => {
+            const keyPart = `${key}=`;
+            const indexOfKey = cookiePair.indexOf(keyPart);
+            if (indexOfKey > -1) {
+                value = cookiePair.substring((indexOfKey + keyPart.length), cookiePair.length);
+                if (trimResult) {
+                    value = trim$1(value);
+                }
+                return false;
+            }
+        });
+        return value;
+    }
+    return '';
+}
+function removeCookie(key, path, domain) {
+    const currentValue = getCookie.apply(this, [key]);
+    if (key && currentValue.length) {
+        path = setDefault$1(path, '/');
+        domain = setDefault$1(domain, loc$1.hostname);
+        const cookieDomain = LOCAL_ENV.indexOf(domain) === -1 ? `; domain=${domain.trim()}` : '';
+        const deletedCookieString = `${key}=; expires=${COOKIE_DEL_DATE}${cookieDomain}; path=${path}`;
+        document.cookie = deletedCookieString;
+        return !trim$1(getCookie.apply(this, [key])).length;
+    }
+    return false;
+}
+
+const f = String.fromCharCode;
+
+function _updateContext(context, bitsPerChar, getCharFromInt) {
+    if (hasOwn.call(context.context_dictionaryToCreate, context.context_w)) {
+        if (context.context_w.charCodeAt(0) < 256) {
+            for (let i = 0; i < context.context_numBits; i++) {
+                context.context_data_val = (context.context_data_val << 1);
+                if (context.context_data_position == bitsPerChar - 1) {
+                    context.context_data_position = 0;
+                    context.context_data.push(getCharFromInt(context.context_data_val));
+                    context.context_data_val = 0;
+                } else {
+                    context.context_data_position++;
+                }
+            }
+            context.value = context.context_w.charCodeAt(0);
+            for (let i = 0; i < 8; i++) {
+                context.context_data_val = (context.context_data_val << 1) | (context.value & 1);
+                if (context.context_data_position == bitsPerChar - 1) {
+                    context.context_data_position = 0;
+                    context.context_data.push(getCharFromInt(context.context_data_val));
+                    context.context_data_val = 0;
+                } else {
+                    context.context_data_position++;
+                }
+                context.value = context.value >> 1;
+            }
+        } else {
+            context.value = 1;
+            for (let i = 0; i < context.context_numBits; i++) {
+                context.context_data_val = (context.context_data_val << 1) | context.value;
+                if (context.context_data_position == bitsPerChar - 1) {
+                    context.context_data_position = 0;
+                    context.context_data.push(getCharFromInt(context.context_data_val));
+                    context.context_data_val = 0;
+                } else {
+                    context.context_data_position++;
+                }
+                context.value = 0;
+            }
+            context.value = context.context_w.charCodeAt(0);
+            for (let i = 0; i < 16; i++) {
+                context.context_data_val = (context.context_data_val << 1) | (context.value & 1);
+                if (context.context_data_position == bitsPerChar - 1) {
+                    context.context_data_position = 0;
+                    context.context_data.push(getCharFromInt(context.context_data_val));
+                    context.context_data_val = 0;
+                } else {
+                    context.context_data_position++;
+                }
+                context.value = context.value >> 1;
+            }
+        }
+        context.context_enlargeIn--;
+        if (context.context_enlargeIn == 0) {
+            context.context_enlargeIn = Math.pow(2, context.context_numBits);
+            context.context_numBits++;
+        }
+        delete context.context_dictionaryToCreate[context.context_w];
+    } else {
+        context.value = context.context_dictionary[context.context_w];
+        for (let i = 0; i < context.context_numBits; i++) {
+            context.context_data_val = (context.context_data_val << 1) | (context.value & 1);
+            if (context.context_data_position == bitsPerChar - 1) {
+                context.context_data_position = 0;
+                context.context_data.push(getCharFromInt(context.context_data_val));
+                context.context_data_val = 0;
+            } else {
+                context.context_data_position++;
+            }
+            context.value = context.value >> 1;
+        }
+    }
+    context.context_enlargeIn--;
+    if (context.context_enlargeIn == 0) {
+        context.context_enlargeIn = Math.pow(2, context.context_numBits);
+        context.context_numBits++;
+    }
+}
+function compress(uncompressed = '', bitsPerChar, getCharFromInt) {
+    if (uncompressed === null) {
+        return '';
+    }
+    const context = {
+        context_dictionary: {},
+        context_dictionaryToCreate: {},
+        context_data: [],
+        context_c: "",
+        context_wc: "",
+        context_w: "",
+        context_enlargeIn: 2,
+        context_dictSize: 3,
+        context_numBits: 2,
+        context_data_val: 0,
+        context_data_position: 0
+    };
+    let i = 0;
+    for (let ii = 0; ii < uncompressed.length; ii += 1) {
+        context.context_c = uncompressed.charAt(ii);
+        if (!hasOwn.call(context.context_dictionary, context.context_c)) {
+            context.context_dictionary[context.context_c] = context.context_dictSize++;
+            context.context_dictionaryToCreate[context.context_c] = true;
+        }
+        context.context_wc = context.context_w + context.context_c;
+        if (hasOwn.call(context.context_dictionary, context.context_wc)) {
+            context.context_w = context.context_wc;
+        } else {
+            _updateContext(context, bitsPerChar, getCharFromInt);
+            context.context_dictionary[context.context_wc] = context.context_dictSize++;
+            context.context_w = String(context.context_c);
+        }
+    }
+    if (context.context_w !== "") {
+        _updateContext(context, bitsPerChar, getCharFromInt);
+    }
+    context.value = 2;
+    for (i = 0; i < context.context_numBits; i++) {
+        context.context_data_val = (context.context_data_val << 1) | (context.value & 1);
+        if (context.context_data_position == bitsPerChar - 1) {
+            context.context_data_position = 0;
+            context.context_data.push(getCharFromInt(context.context_data_val));
+            context.context_data_val = 0;
+        } else {
+            context.context_data_position++;
+        }
+        context.value = context.value >> 1;
+    }
+    while (true) {
+        context.context_data_val = (context.context_data_val << 1);
+        if (context.context_data_position == bitsPerChar - 1) {
+            context.context_data.push(getCharFromInt(context.context_data_val));
+            break;
+        }
+        else context.context_data_position++;
+    }
+    return context.context_data.join('');
+}
+
+function decompress(length, resetValue, getNextValue) {
+    const dictionary = [];
+    const data = {
+        val: getNextValue(0),
+        position: resetValue,
+        index: 1
+    };
+    const result = [];
+    let next;
+    let enlargeIn = 4;
+    let dictSize = 4;
+    let numBits = 3;
+    let entry = "";
+    let w;
+    let resb;
+    let c;
+    for (let i = 0; i < 3; i += 1) {
+        dictionary[i] = i;
+    }
+    let bits = 0;
+    let maxpower = Math.pow(2, 2);
+    let power = 1;
+    while (power !== maxpower) {
+        resb = data.val & data.position;
+        data.position >>= 1;
+        if (data.position === 0) {
+            data.position = resetValue;
+            data.val = getNextValue(data.index++);
+        }
+        bits |= (resb > 0 ? 1 : 0) * power;
+        power <<= 1;
+    }
+    next = bits;
+    switch (next) {
+        case 0:
+            bits = 0;
+            maxpower = Math.pow(2, 8);
+            power = 1;
+            while (power !== maxpower) {
+                resb = data.val & data.position;
+                data.position >>= 1;
+                if (data.position === 0) {
+                    data.position = resetValue;
+                    data.val = getNextValue(data.index++);
+                }
+                bits |= (resb > 0 ? 1 : 0) * power;
+                power <<= 1;
+            }
+            c = f(bits);
+            break;
+        case 1:
+            bits = 0;
+            maxpower = Math.pow(2, 16);
+            power = 1;
+            while (power !== maxpower) {
+                resb = data.val & data.position;
+                data.position >>= 1;
+                if (data.position === 0) {
+                    data.position = resetValue;
+                    data.val = getNextValue(data.index++);
+                }
+                bits |= (resb > 0 ? 1 : 0) * power;
+                power <<= 1;
+            }
+            c = f(bits);
+            break;
+        case 2:
+            return "";
+    }
+    dictionary[3] = c;
+    w = c;
+    result.push(c);
+    while (true) {
+        if (data.index > length) {
+            return "";
+        }
+        bits = 0;
+        maxpower = Math.pow(2, numBits);
+        power = 1;
+        while (power !== maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position === 0) {
+                data.position = resetValue;
+                data.val = getNextValue(data.index++);
+            }
+            bits |= (resb > 0 ? 1 : 0) * power;
+            power <<= 1;
+        }
+        switch (c = bits) {
+            case 0:
+                bits = 0;
+                maxpower = Math.pow(2, 8);
+                power = 1;
+                while (power !== maxpower) {
+                    resb = data.val & data.position;
+                    data.position >>= 1;
+                    if (data.position === 0) {
+                        data.position = resetValue;
+                        data.val = getNextValue(data.index++);
+                    }
+                    bits |= (resb > 0 ? 1 : 0) * power;
+                    power <<= 1;
+                }
+                dictionary[dictSize++] = f(bits);
+                c = dictSize - 1;
+                enlargeIn--;
+                break;
+            case 1:
+                bits = 0;
+                maxpower = Math.pow(2, 16);
+                power = 1;
+                while (power !== maxpower) {
+                    resb = data.val & data.position;
+                    data.position >>= 1;
+                    if (data.position === 0) {
+                        data.position = resetValue;
+                        data.val = getNextValue(data.index++);
+                    }
+                    bits |= (resb > 0 ? 1 : 0) * power;
+                    power <<= 1;
+                }
+                dictionary[dictSize++] = f(bits);
+                c = dictSize - 1;
+                enlargeIn--;
+                break;
+            case 2:
+                return result.join('');
+        }
+        if (enlargeIn === 0) {
+            enlargeIn = Math.pow(2, numBits);
+            numBits++;
+        }
+        if (dictionary[c]) {
+            entry = dictionary[c];
+        } else {
+            if (c === dictSize) {
+                entry = w + w.charAt(0);
+            } else {
+                return null;
+            }
+        }
+        result.push(entry);
+        dictionary[dictSize++] = w + entry.charAt(0);
+        enlargeIn--;
+        w = entry;
+        if (enlargeIn === 0) {
+            enlargeIn = Math.pow(2, numBits);
+            numBits++;
+        }
+    }
+}
+
+function toUTF16(input = '') {
+    if (input === null) {
+        return '';
+    }
+    return compress(input, 15, (a) => f(a + 32)) + ' ';
+}
+function fromUTF16(compressed = '') {
+    if (compress === null) {
+        return '';
+    }
+    if (compress === '') {
+        return null;
+    }
+    return decompress(compressed.length, 16384, (index) => (compressed.charCodeAt(index) - 32));
+}
+
+function isAvailable() {
+    try {
+        ls.setItem('test', 'test');
+        ls.removeItem('test');
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+function setValue(key, value, isSession) {
+    if (key && typeof value !== 'undefined') {
+        if (typeof value === 'object' && value) {
+            value = JSON.stringify(value);
+        }
+        if (this.available) {
+            const storageObj = isSession ? ss : ls;
+            try {
+                storageObj.setItem(
+                    key,
+                    (this.config.compress ? toUTF16(value) : value)
+                );
+            } catch (e) {
+                setCookie(key, value, isSession ? undefined : Infinity);
+            }
+        } else {
+            setCookie(key, value, isSession ? undefined : Infinity);
+        }
+    }
+}
+function getAllMatched(key) {
+    const allValues = [];
+    try {
+        if (this.available) {
+            [ls, ss].forEach(storageType => {
+                if (hasOwn.call(storageType, key)) {
+                    const value = storageType.getItem(key);
+                    allValues.push({
+                        key,
+                        value: tryParse(this.config.compress ? fromUTF16(value) : value),
+                        type: types[storageType === ls ? 'LS' : 'SS']
+                    });
+                }
+            });
+        }
+        const value = getCookie(key);
+        if (value) {
+            allValues.push({
+                key,
+                value: tryParse(value),
+                type: types.CC
+            });
+        }
+    } catch (e) {
+        throw new TypeError(e.message);
+    }
+    return allValues;
+}
+function deleteKey(key) {
+    try {
+        let hasValues = false;
+        if (this.available) {
+            [ls, ss].forEach(storageType => {
+                hasValues = hasValues || !!storageType.getItem(key);
+            });
+            if (hasValues) {
+                [ls, ss].forEach(storageType => {
+                    storageType.removeItem(key);
+                });
+            }
+        }
+        const cookieRemoved = removeCookie(key);
+        return (hasValues || cookieRemoved);
+    } catch (e) {
+        return removeCookie(key);
+    }
+}
+class ArgonStorage {
+    constructor(config) {
+        this.config = Object.freeze(assign$1({ compress: false }, config));
+        this.available = isAvailable();
+    }
+    set() {
+        return setValue.apply(this, arguments);
+    }
+    get() {
+        const matched = this.getAll.apply(this, arguments).filter(obj => {
+            if (arguments[1]) {
+                return obj.type === types.SS;
+            }
+            return true;
+        });
+        if (matched.length > 0) {
+            return matched[0].value;
+        }
+        return;
+    }
+    getAll() {
+        return getAllMatched.apply(this, arguments);
+    }
+    remove() {
+        return deleteKey.apply(this, arguments);
+    }
+}
+
+const store = new ArgonStorage({
+    compress: true
+});
+
+const libs = {
+    getDataFromStore(path, isHash) {
+        const paths = assign(store.get('routeStore'));
+        return paths[`${isHash ? '#' : ''}${path}`];
+    },
+    setDataToStore(path, isHash, data) {
+        let paths = assign(store.get('routeStore'));
+        if (paths[path]) {
+            if (
+                !data
+                || (
+                    isObject(data)
+                    && Object.keys(data).length === 0
+                )
+            ) {
+                return false;
+            }
+        }
+        const newPath = {};
+        newPath[`${isHash ? '#' : ''}${path}`] = data;
+        paths = assign({}, paths, newPath);
+        return store.set('routeStore', paths, true);
+    },
+    handlers: [],
+    contains(fn) {
+        return !!this.handlers.filter(fn).length;
+    }
+};
+
+function resolveQuery(route, isHash, queryString, append) {
+    queryString = trim(queryString.substring((queryString.charAt(0) === '?' ? 1 : 0)));
+    if (!isHash) {
+        if (append) {
+            return `${route}${loc.search}${(queryString ? `&${queryString}` : '')}`;
+        }
+        return `${route}${(queryString ? `?${queryString}` : '')}`;
+    }
+    return `${loc.pathname}${loc.search}#${route}${queryString ? `?${queryString}` : ''}`;
+}
+
+function getQueryParams() {
+    const qsObject = lib();
+    let hashStringParams = {};
+    const hashQuery = loc.hash.match(REG_HASH_QUERY);
+    if (hashQuery) {
+        hashStringParams = assign({}, lib(hashQuery[0]));
+    }
+    return assign({}, qsObject, hashStringParams);
+}
+
+function testRoute(route, url, originalData) {
+    originalData = assign(originalData);
+    const isHash = isHashURL(url);
+    url = url.substring(isHash ? 1 : 0);
+    const path = url.split('?')[0];
+    if (!!Object.keys(originalData).length) {
+        libs.setDataToStore(path, isHash, originalData);
+    }
+    const data = libs.getDataFromStore(path, isHash);
+    const params = extractParams(route, url);
+    let hasMatch = Object.keys(params).length > 0 || (
+        isValidRoute(url) && ((route === url) || (route === '*'))
+    );
+    return {
+        hasMatch,
+        data,
+        params
+    };
+}
+
+function execListeners(eventName, rc, originalData) {
+    originalData = assign(originalData);
+    libs.handlers.forEach(ob => {
+        if (ob.eventName === eventName) {
+            let cRoute = ob.route;
+            let cCurrentPath = (rc.hash ? loc.hash : loc.pathname);
+            if (ob.isCaseInsensitive) {
+                cRoute = cRoute.toLowerCase();
+                cCurrentPath = cCurrentPath.toLowerCase();
+            }
+            const { hasMatch, data, params } = testRoute(
+                cRoute,
+                cCurrentPath,
+                originalData
+            );
+            if (hasMatch && (!ob.hash || (ob.hash && rc.hash))) {
+                ob.handler(assign({}, rc, {
+                    data,
+                    params,
+                    query: getQueryParams()
+                }));
+            }
+        }
+    });
+}
+
+function triggerRoute(ob) {
+    ob.type = ob.hash ? HASH_CHANGE : POP_STATE;
+    const originalData = setDefault(ob.originalData, {});
+    ob.originalEvent = setDefault(ob.originalEvent, getPopStateEvent(ob.type, originalData));
+    delete ob.originalData;
+    execListeners(
+        ROUTE_CHANGED,
+        ob,
+        originalData
+    );
+}
+
+function execRoute(route, replaceMode, noTrigger) {
+    let ro = assign(
+        { replaceMode, noTrigger },
+        (
+            typeof route === 'string'
+                ? { route }
+                : route
+        )
+    );
+    if (typeof ro.route === 'string') {
+        const hash = isHashURL(ro.route);
+        const routeParts = trim(ro.route).split('?');
+        let pureRoute = routeParts[0].substring(hash ? 1 : 0);
+        let queryString = trim(routeParts[1]);
+        queryString = toQueryString(queryString || trim(ro.queryString));
+        if (isValidRoute(pureRoute)) {
+            libs.setDataToStore(pureRoute, hash, ro.data);
+            const completeRoute = resolveQuery(pureRoute, hash, queryString, ro.appendQuery);
+            history[ro.replaceMode ? 'replaceState' : 'pushState']({ data: ro.data }, ro.title, completeRoute);
+            if (!ro.noTrigger) {
+                triggerRoute({
+                    route: `${hash ? '#' : ''}${pureRoute}`,
+                    hash
+                });
+            }
+        } else {
+            throw new Error(INVALID_ROUTE);
+        }
+    }
+}
+
+function bindGenericRoute(route, handler) {
+    if (libs.contains(ob => (ob.prevHandler === handler))) {
+        return;
+    }
+    bindRoute((e) => {
+        if (isFunc(handler)) {
+            if (route.indexOf(`${e.hash ? '#' : ''}${e.route.substring(e.hash ? 1 : 0)}`) > -1) {
+                handler.apply(this, [e]);
+            }
+        }
+    }, handler);
+}
+function bindRoute(route, handler, prevHandler) {
+    let caseIgnored = typeof route === 'string' && route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
+    if (isFunc(route)) {
+        prevHandler = handler;
+        handler = route;
+        route = '*';
+    }
+    if (isArr(route)) {
+        bindGenericRoute(route, handler);
+        return;
+    }
+    route = route.substring(caseIgnored ? CASE_INSENSITIVE_FLAG.length : 0);
+    const containsHash = isHashURL(route);
+    route = route.substring((containsHash ? 1 : 0));
+    if (
+        !libs.contains(ob => (ob.handler === handler && ob.route === route))
+        && isFunc(handler)
+    ) {
+        libs.handlers.push({
+            eventName: ROUTE_CHANGED,
+            handler,
+            prevHandler,
+            route,
+            hash: containsHash,
+            caseIgnored,
+            isCaseInsensitive: caseIgnored
+        });
+    }
+    const paths = containsHash ? [loc.hash] : [loc.pathname, loc.hash];
+    paths.filter(path => trim(path)).forEach(currentPath => {
+        let cRoute = caseIgnored ? route.toLowerCase() : route;
+        let cCurrentPath = caseIgnored ? currentPath.toLowerCase() : currentPath;
+        const containsHash = isHashURL(currentPath);
+        const tr = testRoute(cRoute, cCurrentPath);
+        if (tr.hasMatch && isFunc(handler)) {
+            const eventName = containsHash ? HASH_CHANGE : POP_STATE;
+            handler({
+                originalEvent: getPopStateEvent(eventName, tr.data),
+                route: currentPath,
+                hash: containsHash,
+                eventName,
+                data: tr.data,
+                params: tr.params,
+                query: getQueryParams(),
+                caseIgnored,
+                isCaseInsensitive: caseIgnored
+            });
+        }
+    });
+}
+
+function unbindRoute(route, handler) {
+    const prevLength = libs.handlers.length;
+    let isRouteList = isArr(route);
+    const args = toArray(arguments);
+    if (args.length === 0) {
+        libs.handlers.length = 0;
+        return prevLength;
+    }
+    if (isRouteList) {
+        route = '*';
+    }
+    libs.handlers = libs.handlers.filter(ob => {
+        if (args.length === 1 && typeof route === 'string' && !isRouteList) {
+            return ob.route !== route;
+        }
+        if (args.length === 1 && isFunc(route)) {
+            handler = route;
+            route = '*';
+        }
+        return !(ob.route === route && (
+            ob.handler === handler
+            || ob.prevHandler === handler
+        ));
+    });
+    return (prevLength - libs.handlers.length);
+}
+
+function initRouterEvents() {
+    window.addEventListener(`${POP_STATE}`, function (e) {
+        const pathParts = (`${loc.pathname}${loc.hash}`).split('#');
+        const defaultConfig = {
+            originalEvent: e,
+            originalData: assign(e.state && e.state.data)
+        };
+        triggerRoute(assign({}, defaultConfig, {
+            route: pathParts[0],
+            hash: false
+        }));
+        if (pathParts[1]) {
+            triggerRoute(assign({}, defaultConfig, {
+                route: `#${pathParts[1]}`,
+                hash: true
+            }));
+        }
+    });
+}
+
+const router = {
+    set() {
+        return execRoute.apply(this, arguments);
+    }
+};
+function route() {
+    return bindRoute.apply(this, arguments);
+}
+function routeIgnoreCase(firstArg) {
+    if (typeof firstArg === 'string') {
+        route.apply(this, [`${CASE_INSENSITIVE_FLAG}${firstArg}`, toArray(arguments).slice(1)]);
+    }
+}
+function unroute() {
+    return unbindRoute.apply(this, arguments);
+}
+initRouterEvents();
+
+export { lib as deparam, toQueryString as param, route, routeIgnoreCase, extractParams as routeParams, router, unroute };
+//# sourceMappingURL=index.esm.js.map

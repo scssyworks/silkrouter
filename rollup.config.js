@@ -15,70 +15,106 @@ const banner = `/**!
  * @license MIT
  */`;
 
+const commonConfig = {
+    input: 'src/js/silkrouter',
+    output: {
+        name: 'silkrouter',
+        sourcemap: true,
+        banner
+    },
+    plugins: [
+        resolve({
+            customResolveOptions: {
+                moduleDirectory: "node_modules"
+            }
+        }),
+        commonjs()
+    ]
+};
+
+// Dev config
+const devConfig = Object.assign({}, commonConfig, {
+    external: Object.keys(pkg.peerDependencies)
+});
+devConfig.output = Object.assign({}, commonConfig.output, {
+    file: 'dist/umd/index.js',
+    format: 'umd',
+    globals: {
+        'argon-storage': 'ArgonStorage'
+    },
+});
+devConfig.plugins = [
+    ...commonConfig.plugins,
+    babel({
+        exclude: "node_modules/**"
+    }),
+    cleanup({
+        maxEmptyLines: 0
+    })
+];
+
+// Esm config
+const esmConfig = Object.assign({}, commonConfig);
+esmConfig.output = Object.assign({}, commonConfig.output, {
+    file: 'dist/esm/index.esm.js',
+    format: 'esm'
+});
+esmConfig.plugins = [
+    ...commonConfig.plugins,
+    cleanup({
+        maxEmptyLines: 0
+    })
+];
+
+// Prod configurations
+const prodConfig = Object.assign({}, devConfig);
+prodConfig.output = Object.assign({}, devConfig.output, {
+    file: 'dist/umd/index.min.js',
+    sourcemap: false
+});
+prodConfig.plugins = [
+    ...commonConfig.plugins,
+    babel({
+        exclude: "node_modules/**"
+    }),
+    terser({
+        output: {
+            comments: function () {
+                const [, comment] = arguments;
+                if (comment.type === "comment2") {
+                    return /@preserve|@license|@cc_on/i.test(comment.value);
+                }
+                return false;
+            }
+        }
+    })
+];
+
+const prodEsmConfig = Object.assign({}, esmConfig);
+prodEsmConfig.output = Object.assign({}, esmConfig.output, {
+    file: 'dist/esm/index.esm.min.js',
+    sourcemap: false
+});
+prodEsmConfig.plugins = [
+    ...commonConfig.plugins,
+    terser({
+        output: {
+            comments: function () {
+                const [, comment] = arguments;
+                if (comment.type === "comment2") {
+                    return /@preserve|@license|@cc_on/i.test(comment.value);
+                }
+                return false;
+            }
+        }
+    })
+];
+
 export default [
-    {
-        input: "src/js/silkrouter.js",
-        external: Object.keys(pkg.peerDependencies),
-        output: {
-            file: "dist/js/silkrouter.js",
-            format: "umd",
-            name: "silkrouter",
-            sourcemap: true,
-            globals: {
-                'argon-storage': 'ArgonStorage'
-            },
-            banner
-        },
-        plugins: [
-            resolve({
-                customResolveOptions: {
-                    moduleDirectory: "node_modules"
-                }
-            }),
-            commonjs(),
-            babel({
-                exclude: "node_modules/**"
-            }),
-            cleanup({
-                maxEmptyLines: 0
-            })
-        ]
-    },
-    {
-        input: "src/js/silkrouter.js",
-        external: Object.keys(pkg.peerDependencies),
-        output: {
-            file: "dist/js/silkrouter.min.js",
-            format: "umd",
-            name: "silkrouter",
-            globals: {
-                'argon-storage': 'ArgonStorage'
-            },
-            banner
-        },
-        plugins: [
-            resolve({
-                customResolveOptions: {
-                    moduleDirectory: "node_modules"
-                }
-            }),
-            commonjs(),
-            babel({
-                exclude: "node_modules/**"
-            }),
-            terser({
-                output: {
-                    comments: function () {
-                        const [, comment] = arguments;
-                        if (comment.type === "comment2") {
-                            return /@preserve|@license|@cc_on/i.test(comment.value);
-                        }
-                        return false;
-                    }
-                }
-            })
-        ]
-    },
+    devConfig,
+    esmConfig,
+    prodConfig,
+    prodEsmConfig,
     {
         input: "src/js/demo/demo.js",
         output: {
@@ -105,4 +141,4 @@ export default [
             terser()
         ]
     }
-]
+];

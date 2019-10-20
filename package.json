@@ -2,9 +2,12 @@
   "name": "silkrouter",
   "version": "3.4.3",
   "description": "Silk router is a library for implementing single page applications",
-  "main": "dist/js/silkrouter.js",
-  "module": "src/js/silkrouter.js",
+  "main": "dist/umd/index.js",
+  "module": "dist/esm/index.esm.js",
   "types": "src/typings/silkrouter.d.ts",
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "start": "node server.js",
     "buildAndStart": "npm run build && npm run start",
@@ -32,17 +35,17 @@
     "argon-storage": "^2.0.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.6.2",
-    "@babel/preset-env": "^7.6.2",
-    "@types/jest": "^24.0.18",
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
+    "@types/jest": "^24.0.19",
     "argon-storage": "^2.0.1",
     "bootstrap": "^4.3.1",
     "ejs": "^2.7.1",
     "express": "^4.17.1",
     "jest": "^24.9.0",
     "jquery": "^3.4.1",
-    "popper.js": "^1.15.0",
-    "rollup": "^1.22.0",
+    "popper.js": "^1.16.0",
+    "rollup": "^1.25.0",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-cleanup": "^3.1.1",
     "rollup-plugin-commonjs": "^10.1.0",

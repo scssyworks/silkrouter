@@ -3,7 +3,7 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <contactsachinsingh@gmail.com>
- * @version 3.4.2
+ * @version 3.4.3
  * @license MIT
  */
 (function (global, factory) {
@@ -522,4 +522,4 @@
   Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
-//# sourceMappingURL=silkrouter.js.map
+//# sourceMappingURL=index.js.map
