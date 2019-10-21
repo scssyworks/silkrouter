@@ -296,10 +296,11 @@
     if (keys(originalData).length) {
       libs.setDataToStore(path, isHash, originalData);
     }
+    var params = extractParams(route, url);
     return {
       hasMatch: keys(params).length > 0 || isValidRoute(url) && (route === url || route === '*'),
       data: libs.getDataFromStore(path, isHash),
-      params: extractParams(route, url)
+      params: params
     };
   }
 

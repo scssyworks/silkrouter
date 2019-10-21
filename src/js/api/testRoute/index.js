@@ -18,11 +18,12 @@ export default function testRoute(route, url, originalData) {
     if (keys(originalData).length) {
         libs.setDataToStore(path, isHash, originalData);
     }
+    const params = extractParams(route, url);
     return {
         hasMatch: keys(params).length > 0 || (
             isValidRoute(url) && ((route === url) || (route === '*'))
         ),
         data: libs.getDataFromStore(path, isHash),
-        params: extractParams(route, url)
+        params
     };
 }
