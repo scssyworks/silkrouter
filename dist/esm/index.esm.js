@@ -22,12 +22,15 @@ function trim(str) {
 function isNumber(key) {
     key = trim(`${key}`);
     if (['null', 'undefined', ''].indexOf(key) > -1) return false;
-    return !isNaN(Number(key));
+    return !isNaN(+key);
 }
 function isObject(value) {
-    return (value && typeof value === 'object' && !isArr(value));
+    return value && typeof value === 'object';
 }
-function setDefault(value, defaultValue) {
+function isPureObject(value) {
+    return isObject(value) && !isArr(value);
+}
+function def(value, defaultValue) {
     return typeof value === 'undefined' ? defaultValue : value;
 }
 function toArray(arr) {
@@ -48,11 +51,14 @@ function getPopStateEvent(type, data) {
         state: { data }
     };
 }
+function keys(obj) {
+    return obj ? Object.keys(obj) : [];
+}
 
 const loc = window.location;
 
 function extractParams(expr, path) {
-    path = setDefault(path, loc.pathname);
+    path = def(path, loc.pathname);
     const params = {};
     if (REG_ROUTE_PARAMS.test(expr)) {
         const pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
@@ -69,49 +75,39 @@ function extractParams(expr, path) {
     return params;
 }
 
-function buildQueryString(queryStringParts, key, obj) {
-    let isCurrObjArray = false;
-    if (isObject(obj) || (isCurrObjArray = isArr(obj))) {
-        Object.keys(obj).forEach(obKey => {
-            let qKey = isCurrObjArray ? '' : obKey;
-            buildQueryString(queryStringParts, `${key}[${qKey}]`, obj[obKey]);
+function buildQuery(qsList, key, obj) {
+    if (isObject(obj)) {
+        keys(obj).forEach(obKey => {
+            buildQuery(qsList, `${key}[${isArr(obj) ? '' : obKey}]`, obj[obKey]);
         });
-    } else if (['string', 'number', 'boolean', 'undefined', 'object'].indexOf(typeof obj) > -1) {
-        queryStringParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(obj)}`);
+    } else if (typeof obj !== 'function') {
+        qsList.push(`${encodeURIComponent(key)}=${encodeURIComponent(obj)}`);
     }
 }
 function toQueryString(obj) {
-    let queryStringParts = [];
-    if (isObject(obj) || isArr(obj)) {
-        Object.keys(obj).forEach(key => {
-            buildQueryString(queryStringParts, key, obj[key]);
+    let qsList = [];
+    if (isObject(obj)) {
+        keys(obj).forEach(key => {
+            buildQuery(qsList, key, obj[key]);
         });
-        return queryStringParts.join('&');
-    } else if (typeof obj === 'string') {
-        return obj;
+        return qsList.join('&');
     }
-    return '';
+    return typeof obj === 'string' ? obj : '';
 }
 
 function ifComplex(q) {
     return (/\[/.test(q));
 }
 function deparam(qs, coerce) {
-    qs = trim(setDefault(qs, loc.search));
-    coerce = setDefault(coerce, false);
+    qs = trim(def(qs, loc.search));
     if (qs.charAt(0) === '?') {
         qs = qs.replace('?', '');
     }
-    const queryParamList = qs.split('&');
     const queryObject = {};
     if (qs) {
-        queryParamList.forEach((qq) => {
+        qs.split('&').forEach((qq) => {
             const qArr = qq.split('=').map(part => decodeURIComponent(part));
-            if (ifComplex(qArr[0])) {
-                complex.apply(this, [].concat(qArr).concat([queryObject, coerce]));
-            } else {
-                simple.apply(this, [qArr, queryObject, false, coerce]);
-            }
+            (ifComplex(qArr[0]) ? complex : simple).apply(this, [].concat(qArr, [queryObject, def(coerce, false), false]));
         });
     }
     return queryObject;
@@ -126,32 +122,29 @@ function toObject(arr) {
     return convertedObj;
 }
 function resolve(ob, isNextNumber) {
-    if (typeof ob === 'undefined') {
-        ob = [];
-    }
-    return isNextNumber ? ob : toObject(ob);
+    return isNextNumber ? (typeof ob === 'undefined' ? [] : ob) : toObject(ob);
 }
 function resolveObj(ob, nextProp) {
-    if (isObject(ob)) return { ob };
+    if (isPureObject(ob)) return { ob };
     if (isArr(ob) || typeof ob === 'undefined') return { ob: resolve(ob, isNumber(nextProp)) };
     return { ob: [ob], push: ob !== null };
 }
-function complex(key, value, obj, doCoerce) {
-    doCoerce = setDefault(doCoerce, true);
+function complex(key, value, obj, coercion) {
+    coercion = def(coercion, true);
     const match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
     if (match.length === 3) {
-        let prop = match[1];
+        const prop = match[1];
         let nextProp = match[2];
         key = key.replace(/\[([^\[]*)\]/, '');
         if (ifComplex(key)) {
             if (nextProp === '') nextProp = '0';
             key = key.replace(/[^\[]+/, nextProp);
-            complex(key, value, (obj[prop] = resolveObj(obj[prop], nextProp).ob), doCoerce);
+            complex(key, value, (obj[prop] = resolveObj(obj[prop], nextProp).ob), coercion);
         } else if (nextProp) {
-            const r = resolveObj(obj[prop], nextProp);
-            obj[prop] = r.ob;
-            const coercedValue = doCoerce ? coerce(value) : value;
-            if (r.push) {
+            const resolved = resolveObj(obj[prop], nextProp);
+            obj[prop] = resolved.ob;
+            const coercedValue = coercion ? coerce(value) : value;
+            if (resolved.push) {
                 const tempObj = {};
                 tempObj[nextProp] = coercedValue;
                 obj[prop].push(tempObj);
@@ -159,15 +152,12 @@ function complex(key, value, obj, doCoerce) {
                 obj[prop][nextProp] = coercedValue;
             }
         } else {
-            simple([match[1], value], obj, true);
+            simple(prop, value, obj, coercion, true);
         }
     }
 }
-function simple(qArr, queryObject, toArray, doCoerce) {
-    doCoerce = setDefault(doCoerce, true);
-    let key = qArr[0];
-    let value = qArr[1];
-    if (doCoerce) {
+function simple(key, value, queryObject, coercion, toArray) {
+    if (def(coercion, true)) {
         value = coerce(value);
     }
     if (key in queryObject) {
@@ -180,8 +170,7 @@ function simple(qArr, queryObject, toArray, doCoerce) {
 function coerce(value) {
     if (value == null) return '';
     if (typeof value !== 'string') return value;
-    value = trim(value);
-    if (isNumber(value)) return +value;
+    if (isNumber(value = trim(value))) return +value;
     switch (value) {
         case 'null': return null;
         case 'undefined': return undefined;
@@ -197,7 +186,7 @@ function lib() {
 
 function loopFunc(ref, target) {
     if (isObject(ref)) {
-        Object.keys(ref).forEach(function (key) {
+        keys(ref).forEach(function (key) {
             target[key] = ref[key];
         });
     }
@@ -213,7 +202,7 @@ function assign() {
 function isObject$1(value) {
     return value && typeof value === 'object';
 }
-function setDefault$1(value, defaultValue) {
+function setDefault(value, defaultValue) {
     if (typeof value === 'undefined') {
         return defaultValue;
     }
@@ -278,8 +267,8 @@ const types = {
 
 function setCookie(key, value, expiryDays, path, domain, isSecure) {
     if (key && typeof value !== 'undefined') {
-        path = setDefault$1(path, '/');
-        domain = setDefault$1(domain, loc$1.hostname);
+        path = setDefault(path, '/');
+        domain = setDefault(domain, loc$1.hostname);
         let transformedValue = value;
         if (typeof value === 'object' && value) {
             transformedValue = JSON.stringify(value);
@@ -322,8 +311,8 @@ function getCookie(key, trimResult) {
 function removeCookie(key, path, domain) {
     const currentValue = getCookie.apply(this, [key]);
     if (key && currentValue.length) {
-        path = setDefault$1(path, '/');
-        domain = setDefault$1(domain, loc$1.hostname);
+        path = setDefault(path, '/');
+        domain = setDefault(domain, loc$1.hostname);
         const cookieDomain = LOCAL_ENV.indexOf(domain) === -1 ? `; domain=${domain.trim()}` : '';
         const deletedCookieString = `${key}=; expires=${COOKIE_DEL_DATE}${cookieDomain}; path=${path}`;
         document.cookie = deletedCookieString;
@@ -747,7 +736,10 @@ const store = new ArgonStorage({
     compress: true
 });
 
-const libs = {
+function Libs() {
+    this.handlers = [];
+}
+assign(Libs.prototype, {
     getDataFromStore(path, isHash) {
         const paths = assign(store.get('routeStore'));
         return paths[`${isHash ? '#' : ''}${path}`];
@@ -758,62 +750,57 @@ const libs = {
             if (
                 !data
                 || (
-                    isObject(data)
-                    && Object.keys(data).length === 0
+                    isPureObject(data)
+                    && keys(data).length === 0
                 )
-            ) {
-                return false;
-            }
+            ) { return false; }
         }
         const newPath = {};
         newPath[`${isHash ? '#' : ''}${path}`] = data;
         paths = assign({}, paths, newPath);
         return store.set('routeStore', paths, true);
     },
-    handlers: [],
     contains(fn) {
         return !!this.handlers.filter(fn).length;
+    },
+    remove(item) {
+        this.handlers.splice(this.handlers.indexOf(item), 1).length;
     }
-};
+});
+const libs = new Libs();
 
 function resolveQuery(route, isHash, queryString, append) {
-    queryString = trim(queryString.substring((queryString.charAt(0) === '?' ? 1 : 0)));
+    queryString = trim(queryString.substring(+(queryString.charAt(0) === '?')));
+    const search = (append || '') && loc.search;
     if (!isHash) {
-        if (append) {
-            return `${route}${loc.search}${(queryString ? `&${queryString}` : '')}`;
-        }
-        return `${route}${(queryString ? `?${queryString}` : '')}`;
+        return `${route}${search}${queryString ? `${search ? '&' : '?'}${queryString}` : ''}`;
     }
-    return `${loc.pathname}${loc.search}#${route}${queryString ? `?${queryString}` : ''}`;
+    return `${loc.pathname}${search}#${route}${queryString ? `?${queryString}` : ''}`;
 }
 
 function getQueryParams() {
-    const qsObject = lib();
-    let hashStringParams = {};
     const hashQuery = loc.hash.match(REG_HASH_QUERY);
-    if (hashQuery) {
-        hashStringParams = assign({}, lib(hashQuery[0]));
-    }
-    return assign({}, qsObject, hashStringParams);
+    return assign({}, lib(), (
+        hashQuery
+            ? assign({}, lib(hashQuery[0]))
+            : {}
+    ));
 }
 
 function testRoute(route, url, originalData) {
-    originalData = assign(originalData);
     const isHash = isHashURL(url);
-    url = url.substring(isHash ? 1 : 0);
+    url = url.substring(+isHash);
     const path = url.split('?')[0];
-    if (!!Object.keys(originalData).length) {
+    originalData = assign(originalData);
+    if (keys(originalData).length) {
         libs.setDataToStore(path, isHash, originalData);
     }
-    const data = libs.getDataFromStore(path, isHash);
-    const params = extractParams(route, url);
-    let hasMatch = Object.keys(params).length > 0 || (
-        isValidRoute(url) && ((route === url) || (route === '*'))
-    );
     return {
-        hasMatch,
-        data,
-        params
+        hasMatch: keys(params).length > 0 || (
+            isValidRoute(url) && ((route === url) || (route === '*'))
+        ),
+        data: libs.getDataFromStore(path, isHash),
+        params: extractParams(route, url)
     };
 }
 
@@ -821,21 +808,16 @@ function execListeners(eventName, rc, originalData) {
     originalData = assign(originalData);
     libs.handlers.forEach(ob => {
         if (ob.eventName === eventName) {
-            let cRoute = ob.route;
-            let cCurrentPath = (rc.hash ? loc.hash : loc.pathname);
-            if (ob.isCaseInsensitive) {
-                cRoute = cRoute.toLowerCase();
-                cCurrentPath = cCurrentPath.toLowerCase();
-            }
-            const { hasMatch, data, params } = testRoute(
-                cRoute,
-                cCurrentPath,
+            const currentPath = loc[rc.hash ? 'hash' : 'pathname'];
+            const tr = testRoute(
+                (ob.isCaseInsensitive ? ob.route.toLowerCase() : ob.route),
+                (ob.isCaseInsensitive ? currentPath.toLowerCase() : currentPath),
                 originalData
             );
-            if (hasMatch && (!ob.hash || (ob.hash && rc.hash))) {
+            if (tr.hasMatch && (!ob.hash || (ob.hash && rc.hash))) {
                 ob.handler(assign({}, rc, {
-                    data,
-                    params,
+                    data: tr.data,
+                    params: tr.params,
                     query: getQueryParams()
                 }));
             }
@@ -845,8 +827,8 @@ function execListeners(eventName, rc, originalData) {
 
 function triggerRoute(ob) {
     ob.type = ob.hash ? HASH_CHANGE : POP_STATE;
-    const originalData = setDefault(ob.originalData, {});
-    ob.originalEvent = setDefault(ob.originalEvent, getPopStateEvent(ob.type, originalData));
+    const originalData = def(ob.originalData, {});
+    ob.originalEvent = def(ob.originalEvent, getPopStateEvent(ob.type, originalData));
     delete ob.originalData;
     execListeners(
         ROUTE_CHANGED,
@@ -867,9 +849,8 @@ function execRoute(route, replaceMode, noTrigger) {
     if (typeof ro.route === 'string') {
         const hash = isHashURL(ro.route);
         const routeParts = trim(ro.route).split('?');
-        let pureRoute = routeParts[0].substring(hash ? 1 : 0);
-        let queryString = trim(routeParts[1]);
-        queryString = toQueryString(queryString || trim(ro.queryString));
+        const pureRoute = routeParts[0].substring(+hash);
+        const queryString = toQueryString(trim(routeParts[1]) || trim(ro.queryString));
         if (isValidRoute(pureRoute)) {
             libs.setDataToStore(pureRoute, hash, ro.data);
             const completeRoute = resolveQuery(pureRoute, hash, queryString, ro.appendQuery);
@@ -881,22 +862,19 @@ function execRoute(route, replaceMode, noTrigger) {
                 });
             }
         } else {
-            throw new Error(INVALID_ROUTE);
+            throw new TypeError(INVALID_ROUTE);
         }
     }
 }
 
 function bindGenericRoute(route, handler) {
-    if (libs.contains(ob => (ob.prevHandler === handler))) {
-        return;
-    }
-    bindRoute((e) => {
-        if (isFunc(handler)) {
-            if (route.indexOf(`${e.hash ? '#' : ''}${e.route.substring(e.hash ? 1 : 0)}`) > -1) {
+    if (!libs.contains(ob => (ob.prevHandler === handler))) {
+        bindRoute((e) => {
+            if (isFunc(handler) && route.indexOf(`${e.hash ? '#' : ''}${e.route.substring(+e.hash)}`) > -1) {
                 handler.apply(this, [e]);
             }
-        }
-    }, handler);
+        }, handler);
+    }
 }
 function bindRoute(route, handler, prevHandler) {
     let caseIgnored = typeof route === 'string' && route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
@@ -906,12 +884,11 @@ function bindRoute(route, handler, prevHandler) {
         route = '*';
     }
     if (isArr(route)) {
-        bindGenericRoute(route, handler);
-        return;
+        return bindGenericRoute(route, handler);
     }
     route = route.substring(caseIgnored ? CASE_INSENSITIVE_FLAG.length : 0);
     const containsHash = isHashURL(route);
-    route = route.substring((containsHash ? 1 : 0));
+    route = route.substring(+containsHash);
     if (
         !libs.contains(ob => (ob.handler === handler && ob.route === route))
         && isFunc(handler)
@@ -928,10 +905,11 @@ function bindRoute(route, handler, prevHandler) {
     }
     const paths = containsHash ? [loc.hash] : [loc.pathname, loc.hash];
     paths.filter(path => trim(path)).forEach(currentPath => {
-        let cRoute = caseIgnored ? route.toLowerCase() : route;
-        let cCurrentPath = caseIgnored ? currentPath.toLowerCase() : currentPath;
         const containsHash = isHashURL(currentPath);
-        const tr = testRoute(cRoute, cCurrentPath);
+        const tr = testRoute(
+            (caseIgnored ? route.toLowerCase() : route),
+            (caseIgnored ? currentPath.toLowerCase() : currentPath)
+        );
         if (tr.hasMatch && isFunc(handler)) {
             const eventName = containsHash ? HASH_CHANGE : POP_STATE;
             handler({
@@ -957,39 +935,41 @@ function unbindRoute(route, handler) {
         libs.handlers.length = 0;
         return prevLength;
     }
-    if (isRouteList) {
-        route = '*';
-    }
-    libs.handlers = libs.handlers.filter(ob => {
-        if (args.length === 1 && typeof route === 'string' && !isRouteList) {
-            return ob.route !== route;
+    route = isRouteList ? '*' : route;
+    libs.handlers.forEach(ob => {
+        let test = ob.route === route;
+        const singleArg = args.length === 1;
+        if (!(singleArg && typeof route === 'string' && !isRouteList)) {
+            if (singleArg && isFunc(route)) {
+                handler = route;
+                route = '*';
+            }
+            test = test && (
+                ob.handler === handler
+                || ob.prevHandler === handler
+            );
         }
-        if (args.length === 1 && isFunc(route)) {
-            handler = route;
-            route = '*';
+        if (test) {
+            libs.remove(ob);
         }
-        return !(ob.route === route && (
-            ob.handler === handler
-            || ob.prevHandler === handler
-        ));
     });
     return (prevLength - libs.handlers.length);
 }
 
 function initRouterEvents() {
     window.addEventListener(`${POP_STATE}`, function (e) {
-        const pathParts = (`${loc.pathname}${loc.hash}`).split('#');
+        const paths = (`${loc.pathname}${loc.hash}`).split('#');
         const defaultConfig = {
             originalEvent: e,
             originalData: assign(e.state && e.state.data)
         };
         triggerRoute(assign({}, defaultConfig, {
-            route: pathParts[0],
+            route: paths[0],
             hash: false
         }));
-        if (pathParts[1]) {
+        if (paths[1]) {
             triggerRoute(assign({}, defaultConfig, {
-                route: `#${pathParts[1]}`,
+                route: `#${paths[1]}`,
                 hash: true
             }));
         }

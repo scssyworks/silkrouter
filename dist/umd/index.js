@@ -44,12 +44,15 @@
   function isNumber(key) {
     key = trim("".concat(key));
     if (['null', 'undefined', ''].indexOf(key) > -1) return false;
-    return !isNaN(Number(key));
+    return !isNaN(+key);
   }
   function isObject(value) {
-    return value && _typeof(value) === 'object' && !isArr(value);
+    return value && _typeof(value) === 'object';
   }
-  function setDefault(value, defaultValue) {
+  function isPureObject(value) {
+    return isObject(value) && !isArr(value);
+  }
+  function def(value, defaultValue) {
     return typeof value === 'undefined' ? defaultValue : value;
   }
   function toArray(arr) {
@@ -72,11 +75,14 @@
       }
     };
   }
+  function keys(obj) {
+    return obj ? Object.keys(obj) : [];
+  }
 
   var loc = window.location;
 
   function extractParams(expr, path) {
-    path = setDefault(path, loc.pathname);
+    path = def(path, loc.pathname);
     var params = {};
     if (REG_ROUTE_PARAMS.test(expr)) {
       var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
@@ -95,28 +101,24 @@
     return params;
   }
 
-  function buildQueryString(queryStringParts, key, obj) {
-    var isCurrObjArray = false;
-    if (isObject(obj) || (isCurrObjArray = isArr(obj))) {
-      Object.keys(obj).forEach(function (obKey) {
-        var qKey = isCurrObjArray ? '' : obKey;
-        buildQueryString(queryStringParts, "".concat(key, "[").concat(qKey, "]"), obj[obKey]);
+  function buildQuery(qsList, key, obj) {
+    if (isObject(obj)) {
+      keys(obj).forEach(function (obKey) {
+        buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? '' : obKey, "]"), obj[obKey]);
       });
-    } else if (['string', 'number', 'boolean', 'undefined', 'object'].indexOf(_typeof(obj)) > -1) {
-      queryStringParts.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
+    } else if (typeof obj !== 'function') {
+      qsList.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
     }
   }
   function toQueryString(obj) {
-    var queryStringParts = [];
-    if (isObject(obj) || isArr(obj)) {
-      Object.keys(obj).forEach(function (key) {
-        buildQueryString(queryStringParts, key, obj[key]);
+    var qsList = [];
+    if (isObject(obj)) {
+      keys(obj).forEach(function (key) {
+        buildQuery(qsList, key, obj[key]);
       });
-      return queryStringParts.join('&');
-    } else if (typeof obj === 'string') {
-      return obj;
+      return qsList.join('&');
     }
-    return '';
+    return typeof obj === 'string' ? obj : '';
   }
 
   function ifComplex(q) {
@@ -124,23 +126,17 @@
   }
   function deparam(qs, coerce) {
     var _this = this;
-    qs = trim(setDefault(qs, loc.search));
-    coerce = setDefault(coerce, false);
+    qs = trim(def(qs, loc.search));
     if (qs.charAt(0) === '?') {
       qs = qs.replace('?', '');
     }
-    var queryParamList = qs.split('&');
     var queryObject = {};
     if (qs) {
-      queryParamList.forEach(function (qq) {
+      qs.split('&').forEach(function (qq) {
         var qArr = qq.split('=').map(function (part) {
           return decodeURIComponent(part);
         });
-        if (ifComplex(qArr[0])) {
-          complex.apply(_this, [].concat(qArr).concat([queryObject, coerce]));
-        } else {
-          simple.apply(_this, [qArr, queryObject, false, coerce]);
-        }
+        (ifComplex(qArr[0]) ? complex : simple).apply(_this, [].concat(qArr, [queryObject, def(coerce, false), false]));
       });
     }
     return queryObject;
@@ -155,13 +151,10 @@
     return convertedObj;
   }
   function resolve(ob, isNextNumber) {
-    if (typeof ob === 'undefined') {
-      ob = [];
-    }
-    return isNextNumber ? ob : toObject(ob);
+    return isNextNumber ? typeof ob === 'undefined' ? [] : ob : toObject(ob);
   }
   function resolveObj(ob, nextProp) {
-    if (isObject(ob)) return {
+    if (isPureObject(ob)) return {
       ob: ob
     };
     if (isArr(ob) || typeof ob === 'undefined') return {
@@ -172,8 +165,8 @@
       push: ob !== null
     };
   }
-  function complex(key, value, obj, doCoerce) {
-    doCoerce = setDefault(doCoerce, true);
+  function complex(key, value, obj, coercion) {
+    coercion = def(coercion, true);
     var match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
     if (match.length === 3) {
       var prop = match[1];
@@ -182,12 +175,12 @@
       if (ifComplex(key)) {
         if (nextProp === '') nextProp = '0';
         key = key.replace(/[^\[]+/, nextProp);
-        complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, doCoerce);
+        complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, coercion);
       } else if (nextProp) {
-        var r = resolveObj(obj[prop], nextProp);
-        obj[prop] = r.ob;
-        var coercedValue = doCoerce ? coerce(value) : value;
-        if (r.push) {
+        var resolved = resolveObj(obj[prop], nextProp);
+        obj[prop] = resolved.ob;
+        var coercedValue = coercion ? coerce(value) : value;
+        if (resolved.push) {
           var tempObj = {};
           tempObj[nextProp] = coercedValue;
           obj[prop].push(tempObj);
@@ -195,15 +188,12 @@
           obj[prop][nextProp] = coercedValue;
         }
       } else {
-        simple([match[1], value], obj, true);
+        simple(prop, value, obj, coercion, true);
       }
     }
   }
-  function simple(qArr, queryObject, toArray, doCoerce) {
-    doCoerce = setDefault(doCoerce, true);
-    var key = qArr[0];
-    var value = qArr[1];
-    if (doCoerce) {
+  function simple(key, value, queryObject, coercion, toArray) {
+    if (def(coercion, true)) {
       value = coerce(value);
     }
     if (key in queryObject) {
@@ -216,8 +206,7 @@
   function coerce(value) {
     if (value == null) return '';
     if (typeof value !== 'string') return value;
-    value = trim(value);
-    if (isNumber(value)) return +value;
+    if (isNumber(value = trim(value))) return +value;
     switch (value) {
       case 'null':
         return null;
@@ -239,7 +228,7 @@
 
   function loopFunc(ref, target) {
     if (isObject(ref)) {
-      Object.keys(ref).forEach(function (key) {
+      keys(ref).forEach(function (key) {
         target[key] = ref[key];
       });
     }
@@ -256,7 +245,10 @@
     compress: true
   });
 
-  var libs = {
+  function Libs() {
+    this.handlers = [];
+  }
+  assign(Libs.prototype, {
     getDataFromStore: function getDataFromStore(path, isHash) {
       var paths = assign(store.get('routeStore'));
       return paths["".concat(isHash ? '#' : '').concat(path)];
@@ -264,7 +256,7 @@
     setDataToStore: function setDataToStore(path, isHash, data) {
       var paths = assign(store.get('routeStore'));
       if (paths[path]) {
-        if (!data || isObject(data) && Object.keys(data).length === 0) {
+        if (!data || isPureObject(data) && keys(data).length === 0) {
           return false;
         }
       }
@@ -273,48 +265,41 @@
       paths = assign({}, paths, newPath);
       return store.set('routeStore', paths, true);
     },
-    handlers: [],
     contains: function contains(fn) {
       return !!this.handlers.filter(fn).length;
+    },
+    remove: function remove(item) {
+      this.handlers.splice(this.handlers.indexOf(item), 1).length;
     }
-  };
+  });
+  var libs = new Libs();
 
   function resolveQuery(route, isHash, queryString, append) {
-    queryString = trim(queryString.substring(queryString.charAt(0) === '?' ? 1 : 0));
+    queryString = trim(queryString.substring(+(queryString.charAt(0) === '?')));
+    var search = (append || '') && loc.search;
     if (!isHash) {
-      if (append) {
-        return "".concat(route).concat(loc.search).concat(queryString ? "&".concat(queryString) : '');
-      }
-      return "".concat(route).concat(queryString ? "?".concat(queryString) : '');
+      return "".concat(route).concat(search).concat(queryString ? "".concat(search ? '&' : '?').concat(queryString) : '');
     }
-    return "".concat(loc.pathname).concat(loc.search, "#").concat(route).concat(queryString ? "?".concat(queryString) : '');
+    return "".concat(loc.pathname).concat(search, "#").concat(route).concat(queryString ? "?".concat(queryString) : '');
   }
 
   function getQueryParams() {
-    var qsObject = lib();
-    var hashStringParams = {};
     var hashQuery = loc.hash.match(REG_HASH_QUERY);
-    if (hashQuery) {
-      hashStringParams = assign({}, lib(hashQuery[0]));
-    }
-    return assign({}, qsObject, hashStringParams);
+    return assign({}, lib(), hashQuery ? assign({}, lib(hashQuery[0])) : {});
   }
 
   function testRoute(route, url, originalData) {
-    originalData = assign(originalData);
     var isHash = isHashURL(url);
-    url = url.substring(isHash ? 1 : 0);
+    url = url.substring(+isHash);
     var path = url.split('?')[0];
-    if (!!Object.keys(originalData).length) {
+    originalData = assign(originalData);
+    if (keys(originalData).length) {
       libs.setDataToStore(path, isHash, originalData);
     }
-    var data = libs.getDataFromStore(path, isHash);
-    var params = extractParams(route, url);
-    var hasMatch = Object.keys(params).length > 0 || isValidRoute(url) && (route === url || route === '*');
     return {
-      hasMatch: hasMatch,
-      data: data,
-      params: params
+      hasMatch: keys(params).length > 0 || isValidRoute(url) && (route === url || route === '*'),
+      data: libs.getDataFromStore(path, isHash),
+      params: extractParams(route, url)
     };
   }
 
@@ -322,20 +307,12 @@
     originalData = assign(originalData);
     libs.handlers.forEach(function (ob) {
       if (ob.eventName === eventName) {
-        var cRoute = ob.route;
-        var cCurrentPath = rc.hash ? loc.hash : loc.pathname;
-        if (ob.isCaseInsensitive) {
-          cRoute = cRoute.toLowerCase();
-          cCurrentPath = cCurrentPath.toLowerCase();
-        }
-        var _testRoute = testRoute(cRoute, cCurrentPath, originalData),
-            hasMatch = _testRoute.hasMatch,
-            data = _testRoute.data,
-            params = _testRoute.params;
-        if (hasMatch && (!ob.hash || ob.hash && rc.hash)) {
+        var currentPath = loc[rc.hash ? 'hash' : 'pathname'];
+        var tr = testRoute(ob.isCaseInsensitive ? ob.route.toLowerCase() : ob.route, ob.isCaseInsensitive ? currentPath.toLowerCase() : currentPath, originalData);
+        if (tr.hasMatch && (!ob.hash || ob.hash && rc.hash)) {
           ob.handler(assign({}, rc, {
-            data: data,
-            params: params,
+            data: tr.data,
+            params: tr.params,
             query: getQueryParams()
           }));
         }
@@ -345,8 +322,8 @@
 
   function triggerRoute(ob) {
     ob.type = ob.hash ? HASH_CHANGE : POP_STATE;
-    var originalData = setDefault(ob.originalData, {});
-    ob.originalEvent = setDefault(ob.originalEvent, getPopStateEvent(ob.type, originalData));
+    var originalData = def(ob.originalData, {});
+    ob.originalEvent = def(ob.originalEvent, getPopStateEvent(ob.type, originalData));
     delete ob.originalData;
     execListeners(ROUTE_CHANGED, ob, originalData);
   }
@@ -361,9 +338,8 @@
     if (typeof ro.route === 'string') {
       var hash = isHashURL(ro.route);
       var routeParts = trim(ro.route).split('?');
-      var pureRoute = routeParts[0].substring(hash ? 1 : 0);
-      var queryString = trim(routeParts[1]);
-      queryString = toQueryString(queryString || trim(ro.queryString));
+      var pureRoute = routeParts[0].substring(+hash);
+      var queryString = toQueryString(trim(routeParts[1]) || trim(ro.queryString));
       if (isValidRoute(pureRoute)) {
         libs.setDataToStore(pureRoute, hash, ro.data);
         var completeRoute = resolveQuery(pureRoute, hash, queryString, ro.appendQuery);
@@ -377,25 +353,22 @@
           });
         }
       } else {
-        throw new Error(INVALID_ROUTE);
+        throw new TypeError(INVALID_ROUTE);
       }
     }
   }
 
   function bindGenericRoute(route, handler) {
     var _this = this;
-    if (libs.contains(function (ob) {
+    if (!libs.contains(function (ob) {
       return ob.prevHandler === handler;
     })) {
-      return;
-    }
-    bindRoute(function (e) {
-      if (isFunc(handler)) {
-        if (route.indexOf("".concat(e.hash ? '#' : '').concat(e.route.substring(e.hash ? 1 : 0))) > -1) {
+      bindRoute(function (e) {
+        if (isFunc(handler) && route.indexOf("".concat(e.hash ? '#' : '').concat(e.route.substring(+e.hash))) > -1) {
           handler.apply(_this, [e]);
         }
-      }
-    }, handler);
+      }, handler);
+    }
   }
   function bindRoute(route, handler, prevHandler) {
     var caseIgnored = typeof route === 'string' && route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
@@ -405,12 +378,11 @@
       route = '*';
     }
     if (isArr(route)) {
-      bindGenericRoute(route, handler);
-      return;
+      return bindGenericRoute(route, handler);
     }
     route = route.substring(caseIgnored ? CASE_INSENSITIVE_FLAG.length : 0);
     var containsHash = isHashURL(route);
-    route = route.substring(containsHash ? 1 : 0);
+    route = route.substring(+containsHash);
     if (!libs.contains(function (ob) {
       return ob.handler === handler && ob.route === route;
     }) && isFunc(handler)) {
@@ -428,10 +400,8 @@
     paths.filter(function (path) {
       return trim(path);
     }).forEach(function (currentPath) {
-      var cRoute = caseIgnored ? route.toLowerCase() : route;
-      var cCurrentPath = caseIgnored ? currentPath.toLowerCase() : currentPath;
       var containsHash = isHashURL(currentPath);
-      var tr = testRoute(cRoute, cCurrentPath);
+      var tr = testRoute(caseIgnored ? route.toLowerCase() : route, caseIgnored ? currentPath.toLowerCase() : currentPath);
       if (tr.hasMatch && isFunc(handler)) {
         var eventName = containsHash ? HASH_CHANGE : POP_STATE;
         handler({
@@ -457,36 +427,38 @@
       libs.handlers.length = 0;
       return prevLength;
     }
-    if (isRouteList) {
-      route = '*';
-    }
-    libs.handlers = libs.handlers.filter(function (ob) {
-      if (args.length === 1 && typeof route === 'string' && !isRouteList) {
-        return ob.route !== route;
+    route = isRouteList ? '*' : route;
+    libs.handlers.forEach(function (ob) {
+      var test = ob.route === route;
+      var singleArg = args.length === 1;
+      if (!(singleArg && typeof route === 'string' && !isRouteList)) {
+        if (singleArg && isFunc(route)) {
+          handler = route;
+          route = '*';
+        }
+        test = test && (ob.handler === handler || ob.prevHandler === handler);
       }
-      if (args.length === 1 && isFunc(route)) {
-        handler = route;
-        route = '*';
+      if (test) {
+        libs.remove(ob);
       }
-      return !(ob.route === route && (ob.handler === handler || ob.prevHandler === handler));
     });
     return prevLength - libs.handlers.length;
   }
 
   function initRouterEvents() {
     window.addEventListener("".concat(POP_STATE), function (e) {
-      var pathParts = "".concat(loc.pathname).concat(loc.hash).split('#');
+      var paths = "".concat(loc.pathname).concat(loc.hash).split('#');
       var defaultConfig = {
         originalEvent: e,
         originalData: assign(e.state && e.state.data)
       };
       triggerRoute(assign({}, defaultConfig, {
-        route: pathParts[0],
+        route: paths[0],
         hash: false
       }));
-      if (pathParts[1]) {
+      if (paths[1]) {
         triggerRoute(assign({}, defaultConfig, {
-          route: "#".concat(pathParts[1]),
+          route: "#".concat(paths[1]),
           hash: true
         }));
       }

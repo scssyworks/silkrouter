@@ -15,22 +15,23 @@ export default function unbindRoute(route, handler) {
         libs.handlers.length = 0;
         return prevLength;
     }
-    if (isRouteList) {
-        route = '*';
-    }
-    libs.handlers = libs.handlers.filter(ob => {
-        if (args.length === 1 && typeof route === 'string' && !isRouteList) {
-            return ob.route !== route;
+    route = isRouteList ? '*' : route;
+    libs.handlers.forEach(ob => {
+        let test = ob.route === route;
+        const singleArg = args.length === 1;
+        if (!(singleArg && typeof route === 'string' && !isRouteList)) {
+            if (singleArg && isFunc(route)) {
+                handler = route;
+                route = '*';
+            }
+            test = test && (
+                ob.handler === handler
+                || ob.prevHandler === handler
+            );
         }
-        // Check for generic route
-        if (args.length === 1 && isFunc(route)) {
-            handler = route;
-            route = '*'; // Generic route
+        if (test) {
+            libs.remove(ob);
         }
-        return !(ob.route === route && (
-            ob.handler === handler
-            || ob.prevHandler === handler
-        ));
     });
     return (prevLength - libs.handlers.length);
 }

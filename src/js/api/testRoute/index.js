@@ -1,6 +1,6 @@
 import { libs } from '../../utils/libs';
 import { extractParams } from '../../utils/params';
-import { isValidRoute, isHashURL } from '../../utils/utils';
+import { isValidRoute, isHashURL, keys } from '../../utils/utils';
 import { assign } from '../../utils/assign';
 
 /**
@@ -11,21 +11,18 @@ import { assign } from '../../utils/assign';
  * @param {object} params Parameters
  */
 export default function testRoute(route, url, originalData) {
-    originalData = assign(originalData);
     const isHash = isHashURL(url);
-    url = url.substring(isHash ? 1 : 0);
+    url = url.substring(+isHash);
     const path = url.split('?')[0];
-    if (!!Object.keys(originalData).length) {
-        libs.setDataToStore(path, isHash, originalData); // Sync store with event data.
+    originalData = assign(originalData);
+    if (keys(originalData).length) {
+        libs.setDataToStore(path, isHash, originalData);
     }
-    const data = libs.getDataFromStore(path, isHash);
-    const params = extractParams(route, url);
-    let hasMatch = Object.keys(params).length > 0 || (
-        isValidRoute(url) && ((route === url) || (route === '*'))
-    );
     return {
-        hasMatch,
-        data,
-        params
+        hasMatch: keys(params).length > 0 || (
+            isValidRoute(url) && ((route === url) || (route === '*'))
+        ),
+        data: libs.getDataFromStore(path, isHash),
+        params: extractParams(route, url)
     };
 }

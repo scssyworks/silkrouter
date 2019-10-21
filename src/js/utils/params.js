@@ -1,5 +1,5 @@
 import { REG_ROUTE_PARAMS } from './constants';
-import { toArray, setDefault } from './utils';
+import { toArray, def } from './utils';
 import { loc } from './vars';
 
 /**
@@ -10,7 +10,7 @@ import { loc } from './vars';
  * @returns {object}
  */
 export function extractParams(expr, path) {
-    path = setDefault(path, loc.pathname);
+    path = def(path, loc.pathname);
     const params = {};
     if (REG_ROUTE_PARAMS.test(expr)) {
         const pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));

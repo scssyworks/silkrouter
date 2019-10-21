@@ -1,21 +1,19 @@
-import { isArr, isObject } from './utils';
+import { isArr, keys, isObject } from './utils';
 
 /**
  * Builds query string recursively
  * @private
- * @param {string[]} queryStringParts List of query string key value pairs
+ * @param {string[]} qsList List of query string key value pairs
  * @param {*} key Key
  * @param {*} obj Value
  */
-function buildQueryString(queryStringParts, key, obj) {
-    let isCurrObjArray = false;
-    if (isObject(obj) || (isCurrObjArray = isArr(obj))) {
-        Object.keys(obj).forEach(obKey => {
-            let qKey = isCurrObjArray ? '' : obKey;
-            buildQueryString(queryStringParts, `${key}[${qKey}]`, obj[obKey]);
+function buildQuery(qsList, key, obj) {
+    if (isObject(obj)) {
+        keys(obj).forEach(obKey => {
+            buildQuery(qsList, `${key}[${isArr(obj) ? '' : obKey}]`, obj[obKey]);
         });
-    } else if (['string', 'number', 'boolean', 'undefined', 'object'].indexOf(typeof obj) > -1) {
-        queryStringParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(obj)}`);
+    } else if (typeof obj !== 'function') {
+        qsList.push(`${encodeURIComponent(key)}=${encodeURIComponent(obj)}`);
     }
 }
 
@@ -26,14 +24,12 @@ function buildQueryString(queryStringParts, key, obj) {
  * @returns {string}
  */
 export function toQueryString(obj) {
-    let queryStringParts = [];
-    if (isObject(obj) || isArr(obj)) {
-        Object.keys(obj).forEach(key => {
-            buildQueryString(queryStringParts, key, obj[key]);
+    let qsList = [];
+    if (isObject(obj)) {
+        keys(obj).forEach(key => {
+            buildQuery(qsList, key, obj[key]);
         });
-        return queryStringParts.join('&');
-    } else if (typeof obj === 'string') {
-        return obj;
+        return qsList.join('&');
     }
-    return '';
+    return typeof obj === 'string' ? obj : '';
 }

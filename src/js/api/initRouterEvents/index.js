@@ -9,18 +9,18 @@ import { assign } from '../../utils/assign';
  */
 export default function initRouterEvents() {
     window.addEventListener(`${POP_STATE}`, function (e) {
-        const pathParts = (`${loc.pathname}${loc.hash}`).split('#');
+        const paths = (`${loc.pathname}${loc.hash}`).split('#');
         const defaultConfig = {
             originalEvent: e,
             originalData: assign(e.state && e.state.data)
         };
         triggerRoute(assign({}, defaultConfig, {
-            route: pathParts[0],
+            route: paths[0],
             hash: false
         }));
-        if (pathParts[1]) {
+        if (paths[1]) {
             triggerRoute(assign({}, defaultConfig, {
-                route: `#${pathParts[1]}`,
+                route: `#${paths[1]}`,
                 hash: true
             }));
         }

@@ -25,9 +25,8 @@ export default function execRoute(route, replaceMode, noTrigger) {
     if (typeof ro.route === 'string') {
         const hash = isHashURL(ro.route);
         const routeParts = trim(ro.route).split('?');
-        let pureRoute = routeParts[0].substring(hash ? 1 : 0);
-        let queryString = trim(routeParts[1]);
-        queryString = toQueryString(queryString || trim(ro.queryString));
+        const pureRoute = routeParts[0].substring(+hash);
+        const queryString = toQueryString(trim(routeParts[1]) || trim(ro.queryString));
         if (isValidRoute(pureRoute)) {
             libs.setDataToStore(pureRoute, hash, ro.data);
             const completeRoute = resolveQuery(pureRoute, hash, queryString, ro.appendQuery);
@@ -39,7 +38,7 @@ export default function execRoute(route, replaceMode, noTrigger) {
                 });
             }
         } else {
-            throw new Error(INVALID_ROUTE);
+            throw new TypeError(INVALID_ROUTE);
         }
     }
 }

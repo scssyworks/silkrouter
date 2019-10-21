@@ -20,15 +20,23 @@ export function trim(str) {
 export function isNumber(key) {
     key = trim(`${key}`);
     if (['null', 'undefined', ''].indexOf(key) > -1) return false;
-    return !isNaN(Number(key));
+    return !isNaN(+key);
+}
+
+/**
+ * Checks if value is an object
+ * @param {*} value Any type of value
+ */
+export function isObject(value) {
+    return value && typeof value === 'object';
 }
 
 /**
  * Checks if key is a true object
  * @param {*} value Any type of value
  */
-export function isObject(value) {
-    return (value && typeof value === 'object' && !isArr(value));
+export function isPureObject(value) {
+    return isObject(value) && !isArr(value);
 }
 
 /**
@@ -36,7 +44,7 @@ export function isObject(value) {
  * @param {*} value Any value
  * @param {*} defaultValue Default value if value is undefined
  */
-export function setDefault(value, defaultValue) {
+export function def(value, defaultValue) {
     return typeof value === 'undefined' ? defaultValue : value;
 }
 
@@ -84,4 +92,12 @@ export function getPopStateEvent(type, data) {
         type,
         state: { data }
     };
+}
+
+/**
+ * Safely returns object keys
+ * @param {object} obj Object
+ */
+export function keys(obj) {
+    return obj ? Object.keys(obj) : [];
 }
