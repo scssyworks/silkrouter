@@ -101,3 +101,34 @@ export function getPopStateEvent(type, data) {
 export function keys(obj) {
     return obj ? Object.keys(obj) : [];
 }
+
+/**
+ * Checks if key is present in provided object
+ * @param {object} ob Object
+ * @param {*} key Key
+ */
+export function hasOwn(ob, key) {
+    return Object.prototype.hasOwnProperty.call(ob, key);
+}
+
+/**
+ * Loops over an array like object
+ * @param {object} arrayObj Array or array like object
+ * @param {function} callback Callback function
+ */
+export function each(arrayObj, callback) {
+    if (arrayObj && arrayObj.length) {
+        for (let index = 0; index < arrayObj.length; index += 1) {
+            if (typeof callback === 'function') {
+                const continueTheLoop = callback.apply(arrayObj, [arrayObj[index], index]);
+                if (typeof continueTheLoop === 'boolean') {
+                    if (continueTheLoop) {
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}

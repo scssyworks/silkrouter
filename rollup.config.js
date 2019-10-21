@@ -33,15 +33,10 @@ const commonConfig = {
 };
 
 // Dev config
-const devConfig = Object.assign({}, commonConfig, {
-    external: Object.keys(pkg.peerDependencies)
-});
+const devConfig = Object.assign({}, commonConfig);
 devConfig.output = Object.assign({}, commonConfig.output, {
     file: 'dist/umd/index.js',
-    format: 'umd',
-    globals: {
-        'argon-storage': 'ArgonStorage'
-    },
+    format: 'umd'
 });
 devConfig.plugins = [
     ...commonConfig.plugins,

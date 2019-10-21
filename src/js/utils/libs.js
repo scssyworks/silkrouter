@@ -24,7 +24,7 @@ assign(Libs.prototype, {
         const newPath = {};
         newPath[`${isHash ? '#' : ''}${path}`] = data;
         paths = assign({}, paths, newPath);
-        return store.set('routeStore', paths, true);
+        return store.set('routeStore', paths);
     },
     contains(fn) {
         return !!this.handlers.filter(fn).length;
