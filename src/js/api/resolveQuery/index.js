@@ -9,12 +9,10 @@ import { trim } from '../../utils/utils';
  * @param {boolean} appendQString Append query string flag
  */
 export default function resolveQuery(route, isHash, queryString, append) {
-    queryString = trim(queryString.substring((queryString.charAt(0) === '?' ? 1 : 0)));
+    queryString = trim(queryString.substring(+(queryString.charAt(0) === '?')));
+    const search = (append || '') && loc.search;
     if (!isHash) {
-        if (append) {
-            return `${route}${loc.search}${(queryString ? `&${queryString}` : '')}`;
-        }
-        return `${route}${(queryString ? `?${queryString}` : '')}`;
+        return `${route}${search}${queryString ? `${search ? '&' : '?'}${queryString}` : ''}`;
     }
-    return `${loc.pathname}${loc.search}#${route}${queryString ? `?${queryString}` : ''}`;
+    return `${loc.pathname}${search}#${route}${queryString ? `?${queryString}` : ''}`;
 }

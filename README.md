@@ -3,15 +3,12 @@
 # Silkrouter
 Silkrouter is an SPA (Single Page Apps) routing library.
 
-# Disclaimer
-If you are upgrading from version 3.2.0, your apps might stop working as we have migrated from ``lzstorage`` to ``argon-storage``. <b>Apologies for this breaking change!</b>
-
 # Install
 
 ### NPM
 <b>Stable release</b>
 ```sh
-npm install --save silkrouter argon-storage
+npm install --save silkrouter
 ```
 
 ### CDN
@@ -21,14 +18,11 @@ npm install --save silkrouter argon-storage
 
 ### JQuery version
 ```sh
-npm install --save jqueryrouter@2.2.3
+npm install --save jqueryrouter@2.2.5
 ```
 
 ### Notes
 1. JQuery version supports IE9 and other legacy browsers. For more details please <a href="https://www.npmjs.com/package/jqueryrouter">click here</a>.
-
-### Peer dependencies
-<a href="https://www.npmjs.com/package/argon-storage">Argon Storage</a>
 
 # How to use Silk Router?
 

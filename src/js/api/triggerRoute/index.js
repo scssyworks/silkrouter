@@ -1,6 +1,6 @@
 import { ROUTE_CHANGED, HASH_CHANGE, POP_STATE } from '../../utils/constants';
 import trigger from '../trigger';
-import { setDefault, getPopStateEvent } from '../../utils/utils';
+import { def, getPopStateEvent } from '../../utils/utils';
 
 /**
  * Triggers "route.changed" event
@@ -14,8 +14,8 @@ import { setDefault, getPopStateEvent } from '../../utils/utils';
  */
 export default function triggerRoute(ob) {
     ob.type = ob.hash ? HASH_CHANGE : POP_STATE;
-    const originalData = setDefault(ob.originalData, {});
-    ob.originalEvent = setDefault(ob.originalEvent, getPopStateEvent(ob.type, originalData));
+    const originalData = def(ob.originalData, {});
+    ob.originalEvent = def(ob.originalEvent, getPopStateEvent(ob.type, originalData));
     delete ob.originalData;
     trigger(
         ROUTE_CHANGED,

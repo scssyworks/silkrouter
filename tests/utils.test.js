@@ -1,4 +1,4 @@
-import { isArr, trim, isNumber, isObject, setDefault, toArray, isValidRoute } from '../src/js/utils/utils';
+import { isArr, trim, isNumber, isObject, def, toArray, isValidRoute } from '../src/js/utils/utils';
 
 describe('Utils module', () => {
     test('Function isArr should test if a passed argument is an array', () => {
@@ -28,11 +28,11 @@ describe('Utils module', () => {
     test('Function isObject should validate to false if given argument is not a valid object', () => {
         expect(isObject('Hello World')).toBeFalsy();
     });
-    test('Function setDefault should set passed value if the value is not undefined', () => {
-        expect(setDefault('test', 'hello')).toBe('test');
+    test('Function "def" should set passed value if the value is not undefined', () => {
+        expect(def('test', 'hello')).toBe('test');
     });
-    test('Function setDefault should set default value if the value is undefined', () => {
-        expect(setDefault(undefined, 'hello')).toBe('hello');
+    test('Function "def" should set default value if the value is undefined', () => {
+        expect(def(undefined, 'hello')).toBe('hello');
     });
     test('Function toArray should convert an array like object to proper array', () => {
         function arrayTest() {

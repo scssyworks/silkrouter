@@ -14,21 +14,16 @@ export default function execListeners(eventName, rc, originalData) {
     originalData = assign(originalData);
     libs.handlers.forEach(ob => {
         if (ob.eventName === eventName) {
-            let cRoute = ob.route;
-            let cCurrentPath = (rc.hash ? loc.hash : loc.pathname);
-            if (ob.isCaseInsensitive) {
-                cRoute = cRoute.toLowerCase();
-                cCurrentPath = cCurrentPath.toLowerCase();
-            }
-            const { hasMatch, data, params } = testRoute(
-                cRoute,
-                cCurrentPath,
+            const currentPath = loc[rc.hash ? 'hash' : 'pathname'];
+            const tr = testRoute(
+                (ob.isCaseInsensitive ? ob.route.toLowerCase() : ob.route),
+                (ob.isCaseInsensitive ? currentPath.toLowerCase() : currentPath),
                 originalData
             );
-            if (hasMatch && (!ob.hash || (ob.hash && rc.hash))) {
+            if (tr.hasMatch && (!ob.hash || (ob.hash && rc.hash))) {
                 ob.handler(assign({}, rc, {
-                    data,
-                    params,
+                    data: tr.data,
+                    params: tr.params,
                     query: getQueryParams()
                 }));
             }

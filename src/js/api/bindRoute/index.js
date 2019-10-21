@@ -12,16 +12,13 @@ import getQueryParams from '../getQueryParams';
  * @param {*} handler Handler function
  */
 function bindGenericRoute(route, handler) {
-    if (libs.contains(ob => (ob.prevHandler === handler))) {
-        return;
-    }
-    bindRoute((e) => {
-        if (isFunc(handler)) {
-            if (route.indexOf(`${e.hash ? '#' : ''}${e.route.substring(e.hash ? 1 : 0)}`) > -1) {
+    if (!libs.contains(ob => (ob.prevHandler === handler))) {
+        bindRoute((e) => {
+            if (isFunc(handler) && route.indexOf(`${e.hash ? '#' : ''}${e.route.substring(+e.hash)}`) > -1) {
                 handler.apply(this, [e]);
             }
-        }
-    }, handler);
+        }, handler);
+    }
 }
 
 /**
@@ -39,12 +36,11 @@ export default function bindRoute(route, handler, prevHandler) {
         route = '*';
     }
     if (isArr(route)) {
-        bindGenericRoute(route, handler);
-        return;
+        return bindGenericRoute(route, handler);
     }
     route = route.substring(caseIgnored ? CASE_INSENSITIVE_FLAG.length : 0);
     const containsHash = isHashURL(route);
-    route = route.substring((containsHash ? 1 : 0));
+    route = route.substring(+containsHash);
     // Attach handler
     if (
         !libs.contains(ob => (ob.handler === handler && ob.route === route))
@@ -63,10 +59,11 @@ export default function bindRoute(route, handler, prevHandler) {
     // Execute handler if matches current route (Replaces init method in version 2.0)
     const paths = containsHash ? [loc.hash] : [loc.pathname, loc.hash];
     paths.filter(path => trim(path)).forEach(currentPath => {
-        let cRoute = caseIgnored ? route.toLowerCase() : route;
-        let cCurrentPath = caseIgnored ? currentPath.toLowerCase() : currentPath;
         const containsHash = isHashURL(currentPath);
-        const tr = testRoute(cRoute, cCurrentPath);
+        const tr = testRoute(
+            (caseIgnored ? route.toLowerCase() : route),
+            (caseIgnored ? currentPath.toLowerCase() : currentPath)
+        );
         if (tr.hasMatch && isFunc(handler)) {
             const eventName = containsHash ? HASH_CHANGE : POP_STATE;
             handler({

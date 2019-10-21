@@ -1,5 +1,5 @@
 import { loc } from './vars';
-import { isArr, trim, isNumber, isObject, setDefault } from './utils';
+import { isArr, trim, isNumber, isPureObject, def } from './utils';
 
 /**
  * Checks if query parameter key is a complex notation
@@ -14,21 +14,15 @@ function ifComplex(q) {
  * @param {string} qs query string argument (defaults to url query string)
  */
 function deparam(qs, coerce) {
-    qs = trim(setDefault(qs, loc.search));
-    coerce = setDefault(coerce, false);
+    qs = trim(def(qs, loc.search));
     if (qs.charAt(0) === '?') {
         qs = qs.replace('?', '');
     }
-    const queryParamList = qs.split('&');
     const queryObject = {};
     if (qs) {
-        queryParamList.forEach((qq) => {
+        qs.split('&').forEach((qq) => {
             const qArr = qq.split('=').map(part => decodeURIComponent(part));
-            if (ifComplex(qArr[0])) {
-                complex.apply(this, [].concat(qArr).concat([queryObject, coerce]));
-            } else {
-                simple.apply(this, [qArr, queryObject, false, coerce]);
-            }
+            (ifComplex(qArr[0]) ? complex : simple).apply(this, [].concat(qArr, [queryObject, def(coerce, false), false]));
         });
     }
     return queryObject;
@@ -54,10 +48,7 @@ function toObject(arr) {
  * @param {boolean} isNumber flag to test if next key is number
  */
 function resolve(ob, isNextNumber) {
-    if (typeof ob === 'undefined') {
-        ob = [];
-    }
-    return isNextNumber ? ob : toObject(ob);
+    return isNextNumber ? (typeof ob === 'undefined' ? [] : ob) : toObject(ob);
 }
 
 /**
@@ -66,7 +57,7 @@ function resolve(ob, isNextNumber) {
  * @param {string} nextProp reference property in current object
  */
 function resolveObj(ob, nextProp) {
-    if (isObject(ob)) return { ob };
+    if (isPureObject(ob)) return { ob };
     if (isArr(ob) || typeof ob === 'undefined') return { ob: resolve(ob, isNumber(nextProp)) };
     return { ob: [ob], push: ob !== null };
 }
@@ -77,22 +68,22 @@ function resolveObj(ob, nextProp) {
  * @param {string} value 
  * @param {Object} obj 
  */
-function complex(key, value, obj, doCoerce) {
-    doCoerce = setDefault(doCoerce, true);
+function complex(key, value, obj, coercion) {
+    coercion = def(coercion, true);
     const match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
     if (match.length === 3) {
-        let prop = match[1];
+        const prop = match[1];
         let nextProp = match[2];
         key = key.replace(/\[([^\[]*)\]/, '');
         if (ifComplex(key)) {
             if (nextProp === '') nextProp = '0';
             key = key.replace(/[^\[]+/, nextProp);
-            complex(key, value, (obj[prop] = resolveObj(obj[prop], nextProp).ob), doCoerce);
+            complex(key, value, (obj[prop] = resolveObj(obj[prop], nextProp).ob), coercion);
         } else if (nextProp) {
-            const r = resolveObj(obj[prop], nextProp);
-            obj[prop] = r.ob;
-            const coercedValue = doCoerce ? coerce(value) : value;
-            if (r.push) {
+            const resolved = resolveObj(obj[prop], nextProp);
+            obj[prop] = resolved.ob;
+            const coercedValue = coercion ? coerce(value) : value;
+            if (resolved.push) {
                 const tempObj = {};
                 tempObj[nextProp] = coercedValue;
                 obj[prop].push(tempObj);
@@ -100,7 +91,7 @@ function complex(key, value, obj, doCoerce) {
                 obj[prop][nextProp] = coercedValue;
             }
         } else {
-            simple([match[1], value], obj, true);
+            simple(prop, value, obj, coercion, true);
         }
     }
 }
@@ -111,11 +102,8 @@ function complex(key, value, obj, doCoerce) {
  * @param {Object} queryObject 
  * @param {boolean} toArray 
  */
-function simple(qArr, queryObject, toArray, doCoerce) {
-    doCoerce = setDefault(doCoerce, true);
-    let key = qArr[0];
-    let value = qArr[1];
-    if (doCoerce) {
+function simple(key, value, queryObject, coercion, toArray) {
+    if (def(coercion, true)) {
         value = coerce(value);
     }
     if (key in queryObject) {
@@ -133,8 +121,7 @@ function simple(qArr, queryObject, toArray, doCoerce) {
 function coerce(value) {
     if (value == null) return '';
     if (typeof value !== 'string') return value;
-    value = trim(value);
-    if (isNumber(value)) return +value;
+    if (isNumber(value = trim(value))) return +value;
     switch (value) {
         case 'null': return null;
         case 'undefined': return undefined;

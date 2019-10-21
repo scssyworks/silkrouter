@@ -8,11 +8,10 @@ import { REG_HASH_QUERY } from '../../utils/constants';
  * @private
  */
 export default function getQueryParams() {
-    const qsObject = deparam();
-    let hashStringParams = {};
     const hashQuery = loc.hash.match(REG_HASH_QUERY);
-    if (hashQuery) {
-        hashStringParams = assign({}, deparam(hashQuery[0]));
-    }
-    return assign({}, qsObject, hashStringParams);
+    return assign({}, deparam(), (
+        hashQuery
+            ? assign({}, deparam(hashQuery[0]))
+            : {}
+    ));
 }
