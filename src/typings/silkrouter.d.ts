@@ -31,4 +31,4 @@ declare namespace Router {
     }
 }
 
-export = { router, route, unroute, deparam, param, routeParams };
+export { router, route, unroute, deparam, param, routeParams };

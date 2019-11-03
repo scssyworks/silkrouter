@@ -3,7 +3,7 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <contactsachinsingh@gmail.com>
- * @version 3.4.5
+ * @version 3.4.6
  * @license MIT
  */
 (function (global, factory) {
@@ -98,6 +98,7 @@
   }
 
   var loc = window.location;
+  var f = String.fromCharCode;
 
   function extractParams(expr, path) {
     path = def(path, loc.pathname);
@@ -315,9 +316,7 @@
     _updateContextNumBits(context);
   }
   function compress(uncompressed, bitsPerChar, getCharFromInt) {
-    if (uncompressed == null) {
-      return '';
-    }
+    if (uncompressed == null) return '';
     var context = {
       context_dictionary: {},
       context_dictionaryToCreate: {},
@@ -365,8 +364,6 @@
     }
     return context.context_data.join('');
   }
-
-  var f = String.fromCharCode;
 
   function _commonRep3(data, maxpower, resetValue, getNextValue) {
     var bits = 0;
@@ -456,20 +453,14 @@
   }
 
   function toUTF16(input) {
-    if (input == null) {
-      return '';
-    }
+    if (input == null) return '';
     return compress(input, 15, function (a) {
       return f(a + 32);
     }) + ' ';
   }
   function fromUTF16(compressed) {
-    if (compressed == null) {
-      return '';
-    }
-    if (compressed === '') {
-      return null;
-    }
+    if (compressed == null) return '';
+    if (compressed === '') return null;
     return decompress(compressed.length, 16384, function (index) {
       return compressed.charCodeAt(index) - 32;
     });
@@ -669,7 +660,7 @@
     }
   }
   function bindRoute(route, handler, prevHandler) {
-    var caseIgnored = typeof route === 'string' && route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
+    var isCaseInsensitive = typeof route === 'string' && route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
     if (isFunc(route)) {
       prevHandler = handler;
       handler = route;
@@ -678,7 +669,7 @@
     if (isArr(route)) {
       return bindGenericRoute(route, handler);
     }
-    route = route.substring(caseIgnored ? CASE_INSENSITIVE_FLAG.length : 0);
+    route = route.substring(isCaseInsensitive ? CASE_INSENSITIVE_FLAG.length : 0);
     var containsHash = isHashURL(route);
     route = route.substring(+containsHash);
     if (!libs.contains(function (ob) {
@@ -690,8 +681,7 @@
         prevHandler: prevHandler,
         route: route,
         hash: containsHash,
-        caseIgnored: caseIgnored,
-        isCaseInsensitive: caseIgnored
+        isCaseInsensitive: isCaseInsensitive
       });
     }
     var paths = containsHash ? [loc.hash] : [loc.pathname, loc.hash];
@@ -699,7 +689,7 @@
       return trim(path);
     }).forEach(function (currentPath) {
       var containsHash = isHashURL(currentPath);
-      var tr = testRoute(caseIgnored ? route.toLowerCase() : route, caseIgnored ? currentPath.toLowerCase() : currentPath);
+      var tr = testRoute(isCaseInsensitive ? route.toLowerCase() : route, isCaseInsensitive ? currentPath.toLowerCase() : currentPath);
       if (tr.hasMatch && isFunc(handler)) {
         var eventName = containsHash ? HASH_CHANGE : POP_STATE;
         handler({
@@ -710,8 +700,7 @@
           data: tr.data,
           params: tr.params,
           query: getQueryParams(),
-          caseIgnored: caseIgnored,
-          isCaseInsensitive: caseIgnored
+          isCaseInsensitive: isCaseInsensitive
         });
       }
     });
@@ -720,6 +709,7 @@
   function unbindRoute(route, handler) {
     var prevLength = libs.handlers.length;
     var isRouteList = isArr(route);
+    if (isRouteList && !handler) return 0;
     var args = toArray(arguments);
     if (args.length === 0) {
       libs.handlers.length = 0;

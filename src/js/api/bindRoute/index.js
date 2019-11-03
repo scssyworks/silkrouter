@@ -29,7 +29,7 @@ function bindGenericRoute(route, handler) {
  */
 export default function bindRoute(route, handler, prevHandler) {
     // Resolve generic route
-    let caseIgnored = typeof route === 'string' && route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
+    let isCaseInsensitive = typeof route === 'string' && route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
     if (isFunc(route)) {
         prevHandler = handler;
         handler = route;
@@ -38,7 +38,7 @@ export default function bindRoute(route, handler, prevHandler) {
     if (isArr(route)) {
         return bindGenericRoute(route, handler);
     }
-    route = route.substring(caseIgnored ? CASE_INSENSITIVE_FLAG.length : 0);
+    route = route.substring(isCaseInsensitive ? CASE_INSENSITIVE_FLAG.length : 0);
     const containsHash = isHashURL(route);
     route = route.substring(+containsHash);
     // Attach handler
@@ -52,8 +52,7 @@ export default function bindRoute(route, handler, prevHandler) {
             prevHandler,
             route,
             hash: containsHash,
-            caseIgnored,
-            isCaseInsensitive: caseIgnored
+            isCaseInsensitive
         });
     }
     // Execute handler if matches current route (Replaces init method in version 2.0)
@@ -61,8 +60,8 @@ export default function bindRoute(route, handler, prevHandler) {
     paths.filter(path => trim(path)).forEach(currentPath => {
         const containsHash = isHashURL(currentPath);
         const tr = testRoute(
-            (caseIgnored ? route.toLowerCase() : route),
-            (caseIgnored ? currentPath.toLowerCase() : currentPath)
+            (isCaseInsensitive ? route.toLowerCase() : route),
+            (isCaseInsensitive ? currentPath.toLowerCase() : currentPath)
         );
         if (tr.hasMatch && isFunc(handler)) {
             const eventName = containsHash ? HASH_CHANGE : POP_STATE;
@@ -74,8 +73,7 @@ export default function bindRoute(route, handler, prevHandler) {
                 data: tr.data,
                 params: tr.params,
                 query: getQueryParams(),
-                caseIgnored,
-                isCaseInsensitive: caseIgnored
+                isCaseInsensitive
             });
         }
     });

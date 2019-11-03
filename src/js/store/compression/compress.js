@@ -59,9 +59,7 @@ function _updateContext(context, bitsPerChar, getCharFromInt) {
 }
 
 function compress(uncompressed, bitsPerChar, getCharFromInt) {
-    if (uncompressed == null) {
-        return '';
-    }
+    if (uncompressed == null) return '';
     const context = {
         context_dictionary: {},
         context_dictionaryToCreate: {},

@@ -3,7 +3,7 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <contactsachinsingh@gmail.com>
- * @version 3.4.5
+ * @version 3.4.6
  * @license MIT
  */
 const HASH_CHANGE = 'hashchange';
@@ -76,6 +76,7 @@ function each(arrayObj, callback) {
 }
 
 const loc = window.location;
+const f = String.fromCharCode;
 
 function extractParams(expr, path) {
     path = def(path, loc.pathname);
@@ -275,9 +276,7 @@ function _updateContext(context, bitsPerChar, getCharFromInt) {
     _updateContextNumBits(context);
 }
 function compress(uncompressed, bitsPerChar, getCharFromInt) {
-    if (uncompressed == null) {
-        return '';
-    }
+    if (uncompressed == null) return '';
     const context = {
         context_dictionary: {},
         context_dictionaryToCreate: {},
@@ -326,8 +325,6 @@ function compress(uncompressed, bitsPerChar, getCharFromInt) {
     }
     return context.context_data.join('');
 }
-
-const f = String.fromCharCode;
 
 function _commonRep3(data, maxpower, resetValue, getNextValue) {
     let bits = 0;
@@ -417,18 +414,12 @@ function decompress(length, resetValue, getNextValue) {
 }
 
 function toUTF16(input) {
-    if (input == null) {
-        return '';
-    }
+    if (input == null) return '';
     return compress(input, 15, (a) => f(a + 32)) + ' ';
 }
 function fromUTF16(compressed) {
-    if (compressed == null) {
-        return '';
-    }
-    if (compressed === '') {
-        return null;
-    }
+    if (compressed == null) return '';
+    if (compressed === '') return null;
     return decompress(compressed.length, 16384, (index) => (compressed.charCodeAt(index) - 32));
 }
 
@@ -641,7 +632,7 @@ function bindGenericRoute(route, handler) {
     }
 }
 function bindRoute(route, handler, prevHandler) {
-    let caseIgnored = typeof route === 'string' && route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
+    let isCaseInsensitive = typeof route === 'string' && route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
     if (isFunc(route)) {
         prevHandler = handler;
         handler = route;
@@ -650,7 +641,7 @@ function bindRoute(route, handler, prevHandler) {
     if (isArr(route)) {
         return bindGenericRoute(route, handler);
     }
-    route = route.substring(caseIgnored ? CASE_INSENSITIVE_FLAG.length : 0);
+    route = route.substring(isCaseInsensitive ? CASE_INSENSITIVE_FLAG.length : 0);
     const containsHash = isHashURL(route);
     route = route.substring(+containsHash);
     if (
@@ -663,16 +654,15 @@ function bindRoute(route, handler, prevHandler) {
             prevHandler,
             route,
             hash: containsHash,
-            caseIgnored,
-            isCaseInsensitive: caseIgnored
+            isCaseInsensitive
         });
     }
     const paths = containsHash ? [loc.hash] : [loc.pathname, loc.hash];
     paths.filter(path => trim(path)).forEach(currentPath => {
         const containsHash = isHashURL(currentPath);
         const tr = testRoute(
-            (caseIgnored ? route.toLowerCase() : route),
-            (caseIgnored ? currentPath.toLowerCase() : currentPath)
+            (isCaseInsensitive ? route.toLowerCase() : route),
+            (isCaseInsensitive ? currentPath.toLowerCase() : currentPath)
         );
         if (tr.hasMatch && isFunc(handler)) {
             const eventName = containsHash ? HASH_CHANGE : POP_STATE;
@@ -684,8 +674,7 @@ function bindRoute(route, handler, prevHandler) {
                 data: tr.data,
                 params: tr.params,
                 query: getQueryParams(),
-                caseIgnored,
-                isCaseInsensitive: caseIgnored
+                isCaseInsensitive
             });
         }
     });
@@ -694,6 +683,7 @@ function bindRoute(route, handler, prevHandler) {
 function unbindRoute(route, handler) {
     const prevLength = libs.handlers.length;
     let isRouteList = isArr(route);
+    if (isRouteList && !handler) return 0;
     const args = toArray(arguments);
     if (args.length === 0) {
         libs.handlers.length = 0;

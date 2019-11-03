@@ -10,6 +10,7 @@ import { isArr, isFunc, toArray } from '../../utils/utils';
 export default function unbindRoute(route, handler) {
     const prevLength = libs.handlers.length;
     let isRouteList = isArr(route);
+    if (isRouteList && !handler) return 0; // Fix for accidently removing all generic routes if there is no handler for list route
     const args = toArray(arguments);
     if (args.length === 0) {
         libs.handlers.length = 0;
