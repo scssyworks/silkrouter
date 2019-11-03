@@ -6,7 +6,8 @@
   "module": "dist/esm/index.esm.js",
   "types": "src/typings/silkrouter.d.ts",
   "files": [
-    "dist/"
+    "dist/esm/",
+    "dist/umd/"
   ],
   "scripts": {
     "start": "node server.js",

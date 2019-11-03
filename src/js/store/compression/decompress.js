@@ -1,4 +1,4 @@
-import { f } from './fromCharCode';
+import { f } from '../../utils/vars';
 
 function _commonRep3(data, maxpower, resetValue, getNextValue) {
     let bits = 0;
