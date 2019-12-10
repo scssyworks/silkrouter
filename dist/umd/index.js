@@ -3,14 +3,14 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <contactsachinsingh@gmail.com>
- * @version 3.4.6
+ * @version 3.4.7
  * @license MIT
  */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = global || self, factory(global.silkrouter = {}));
-}(this, function (exports) { 'use strict';
+}(this, (function (exports) { 'use strict';
 
   var HASH_CHANGE = 'hashchange';
   var POP_STATE = 'popstate';
@@ -781,5 +781,5 @@
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));
 //# sourceMappingURL=index.js.map
