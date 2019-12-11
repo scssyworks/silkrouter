@@ -2,7 +2,7 @@
 JQuery router is a SPA (Single Page Apps) router plugin for jQuery.
 
 # Upgrade to Silkrouter (Recommended)
-``Silkrouter`` is the next version of JQuery router (without jQuery). Refer to <a href="https://github.com/scssyworks/silkrouter/blob/feature/ver2/MIGRATION.md">migration documentation</a> to migrate to newest version.
+``Silkrouter`` is latest recommended version. Refer to <a href="https://github.com/scssyworks/silkrouter/blob/feature/ver2/MIGRATION.md">migration documentation</a> to migrate to this version.
 
 # Installation
 
@@ -15,7 +15,7 @@ npm install --save jqueryrouter deparam.js jquery
 Using CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@2.2.4/dist/js/jquery.router.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@2.2.6/dist/js/jquery.router.min.js"></script>
 ```
 
 # How to use?
