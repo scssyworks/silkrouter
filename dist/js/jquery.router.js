@@ -2,7 +2,7 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('jquery'), require('deparam.js')) :
   typeof define === 'function' && define.amd ? define(['exports', 'jquery', 'deparam.js'], factory) :
   (global = global || self, factory(global.jqueryrouter = {}, global.jQuery, global.deparam));
-}(this, function (exports, $, deparam) { 'use strict';
+}(this, (function (exports, $, deparam) { 'use strict';
 
   $ = $ && $.hasOwnProperty('default') ? $['default'] : $;
   deparam = deparam && deparam.hasOwnProperty('default') ? deparam['default'] : deparam;
@@ -474,5 +474,5 @@
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));
 //# sourceMappingURL=jquery.router.js.map
