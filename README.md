@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/index.esm.min.js?label=gzipped) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/index.esm.js?label=unminified)
+[![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/index.esm.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/index.esm.js?label=unminified)
 
 # Silkrouter
 Silkrouter is an SPA (Single Page Apps) routing library.
@@ -18,7 +18,7 @@ npm install --save silkrouter
 
 ### JQuery version
 ```sh
-npm install --save jqueryrouter@2.2.5
+npm install --save jqueryrouter@2.2.6
 ```
 
 ### Notes
