@@ -46,6 +46,7 @@ function decompress(length, resetValue, getNextValue) {
     dictionary[3] = c;
     w = c;
     result.push(c);
+    // eslint-disable-next-line
     while (true) {
         if (data.index > length) {
             return '';

@@ -70,14 +70,14 @@ function resolveObj(ob, nextProp) {
  */
 function complex(key, value, obj, coercion) {
     coercion = def(coercion, true);
-    const match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
+    const match = key.match(/([^[]+)\[([^[]*)\]/) || [];
     if (match.length === 3) {
         const prop = match[1];
         let nextProp = match[2];
-        key = key.replace(/\[([^\[]*)\]/, '');
+        key = key.replace(/\[([^[]*)\]/, '');
         if (ifComplex(key)) {
             if (nextProp === '') nextProp = '0';
-            key = key.replace(/[^\[]+/, nextProp);
+            key = key.replace(/[^[]+/, nextProp);
             complex(key, value, (obj[prop] = resolveObj(obj[prop], nextProp).ob), coercion);
         } else if (nextProp) {
             const resolved = resolveObj(obj[prop], nextProp);

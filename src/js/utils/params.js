@@ -13,7 +13,7 @@ export function extractParams(expr, path) {
     path = def(path, loc.pathname);
     const params = {};
     if (REG_ROUTE_PARAMS.test(expr)) {
-        const pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
+        const pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^/\\]+/g, "([^\\/]+)"));
         REG_ROUTE_PARAMS.lastIndex = 0;
         if (pathRegex.test(path)) {
             const keys = toArray(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(':', ''));
