@@ -3,7 +3,7 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <contactsachinsingh@gmail.com>
- * @version 3.4.9
+ * @version 3.4.10
  * @license MIT
  */
 const HASH_CHANGE = 'hashchange';
