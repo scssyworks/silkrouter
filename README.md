@@ -18,7 +18,7 @@ npm install --save silkrouter
 
 ### JQuery version
 ```sh
-npm install --save jqueryrouter@2.2.6
+npm install --save jqueryrouter@2.2.7
 ```
 
 ### Notes
@@ -124,7 +124,7 @@ route((e) => {
 });
 ```
 
-## Ignore route case
+## Ignore case
 
 ### [Experimental]
 
@@ -134,6 +134,34 @@ routeIgnoreCase('/mandatory/route/string', (e) => {
 });
 
 router.set('/MandATorY/RoUte/StriNg');
+```
+
+## Get a list of attached routes
+
+```js
+route('/path/to/route1', () => { ... });
+route('/path/to/route2/:data', () => { ... });
+route(() => { ... });
+
+console.log(router.list()); // ['/path/to/route1', '/path/to/route2/:data', '*'] <-- Unique list
+```
+
+## Test if current path will match an existing route
+
+```js
+route('/path/to/route', e => {
+    console.log(router.includes(router.list(), e.route)); // Returns 'true' if e.route matches a route in route list 
+});
+```
+
+## Get route parameters using "routeParams"
+
+```js
+import { route, routeParams } from 'silkrouter';
+...
+route(e => {
+    const paramsMap = routeParams('/test/:var1/:var2', e.route); // Returns {var1: "hello", var2: "world"} for "/test/hello/world"
+});
 ```
 
 ## Detach routes
