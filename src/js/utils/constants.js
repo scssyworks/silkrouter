@@ -8,5 +8,6 @@ export const REG_ROUTE_PARAMS = /:[^\/]+/g;
 export const REG_PATHNAME = /^\/(?=[^?]*)/;
 export const REG_HASH_QUERY = /\?.+/;
 export const INVALID_ROUTE = 'Route string is not a pure route';
+export const INVALID_LIST = 'Provide a valid list of routes';
 export const CASE_INSENSITIVE_FLAG = '$$';
 export const LOCAL_ENV = ['localhost', '0.0.0.0', '127.0.0.1', null];

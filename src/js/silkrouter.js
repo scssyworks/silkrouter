@@ -7,6 +7,8 @@ import bindRoute from './api/bindRoute';
 import unbindRoute from './api/unbindRoute';
 import initRouterEvents from './api/initRouterEvents';
 import { toArray } from './utils/utils';
+import includesRoute from './api/includesRoute';
+import { libs } from './utils/libs';
 
 /**
  * @namespace router
@@ -23,6 +25,19 @@ const router = {
      */
     set() {
         return execRoute.apply(this, arguments);
+    },
+    includes() {
+        return includesRoute.apply(this, arguments);
+    },
+    list() {
+        const routeList = [];
+        libs.handlers.forEach(handler => {
+            let route = `${handler.hash ? '#' : ''}${handler.route}`;
+            if (routeList.indexOf(route) === -1) {
+                routeList.push(route);
+            }
+        });
+        return routeList;
     }
 }
 

@@ -7,7 +7,8 @@
   "types": "src/typings/silkrouter.d.ts",
   "files": [
     "dist/esm/",
-    "dist/umd/"
+    "dist/umd/",
+    "src/typings/"
   ],
   "scripts": {
     "build": "rollup -c",
@@ -49,11 +50,11 @@
   },
   "homepage": "https://github.com/scssyworks/silkrouter#readme",
   "devDependencies": {
-    "@babel/core": "^7.8.0",
-    "@babel/preset-env": "^7.8.2",
+    "@babel/core": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
     "@rollup/plugin-commonjs": "^11.0.1",
     "@rollup/plugin-node-resolve": "^6.1.0",
-    "@types/jest": "^24.0.25",
+    "@types/jest": "^24.9.0",
     "bootstrap": "^4.4.1",
     "ejs": "^2.7.4",
     "express": "^4.17.1",

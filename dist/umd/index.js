@@ -19,6 +19,7 @@
   var REG_PATHNAME = /^\/(?=[^?]*)/;
   var REG_HASH_QUERY = /\?.+/;
   var INVALID_ROUTE = 'Route string is not a pure route';
+  var INVALID_LIST = 'Provide a valid list of routes';
   var CASE_INSENSITIVE_FLAG = '$$';
   var LOCAL_ENV = ['localhost', '0.0.0.0', '127.0.0.1', null];
 
@@ -753,9 +754,38 @@
     });
   }
 
+  function includesRoute(list, route) {
+    route = trim(route);
+    if (!Array.isArray(list)) {
+      throw new TypeError(INVALID_LIST);
+    }
+    var result = false;
+    for (var index = 0; index < list.length; index++) {
+      var listItem = trim(list[index]);
+      if (['*', route].indexOf(listItem) > -1 || !!Object.keys(extractParams(listItem, route)).length) {
+        result = true;
+        break;
+      }
+    }
+    return result;
+  }
+
   var router = {
     set: function set() {
       return execRoute.apply(this, arguments);
+    },
+    includes: function includes() {
+      return includesRoute.apply(this, arguments);
+    },
+    list: function list() {
+      var routeList = [];
+      libs.handlers.forEach(function (handler) {
+        var route = "".concat(handler.hash ? '#' : '').concat(handler.route);
+        if (routeList.indexOf(route) === -1) {
+          routeList.push(route);
+        }
+      });
+      return routeList;
     }
   };
   function route() {

@@ -1,10 +1,7 @@
 declare namespace router {
-    namespace api {
-        function trigger(eventName: string, routeConfig: object, originalData: object): void;
-        function extractParams(path: string): object;
-        function toQueryString(query: object): string;
-    }
     function set(route: Router.RouterOptions, replaceMode: boolean, noTrigger: boolean): void;
+    function list(): string[];
+    function includes(routeList: string[], route: string): boolean;
 }
 
 declare function route(route: string, handler: Function): void;
