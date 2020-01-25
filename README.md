@@ -26,7 +26,7 @@ npm install --save jqueryrouter@2.2.7
 
 # How to use Silk Router?
 
-Silkrouter follows a familiar concept. If you have worked with custom events, it should get started with ``silkrouter`` in no time.
+Silkrouter follows a familiar concept. If you have worked with custom events, you should get started with ``silkrouter`` in no time.
 
 ## Import dependencies
 
