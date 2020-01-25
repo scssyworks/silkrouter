@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/index.esm.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/index.esm.js?label=unminified)
 
 # Silkrouter
-Silkrouter is an SPA (Single Page Apps) routing library.
+Silkrouter is a routing library for single page applications.
 
 # Install
 
@@ -26,7 +26,7 @@ npm install --save jqueryrouter@2.2.7
 
 # How to use Silk Router?
 
-Silkrouter follows a very simple concept. If you are familiar with custom events, it wouldn't take you much time to learn ``silkrouter``.
+Silkrouter follows a familiar concept. If you have worked with custom events, you should get started with ``silkrouter`` in no time.
 
 ## Import dependencies
 
@@ -34,24 +34,24 @@ Silkrouter follows a very simple concept. If you are familiar with custom events
 import { router, route, unroute } from 'silkrouter';
 ```
 
-## Attach route listeners
+## Add listeners
 
 ```js
-route('/path/to/route', (e) => { ... }); // For normal and hash routing (Use "e.hash" flag to differentiate)
-route('#/path/to/route', (e) => { ... }); // For hash routing
-route((e) => { ... }); // Generic route -> Listens to everything
+route('/path/to/route', (e) => { ... }); // Supports both primary and hash routing (Use "e.hash" to differentiate)
+route('#/path/to/route', (e) => { ... }); // Supports hash routing
+route((e) => { ... }); // A generic route listens to every route change
 ```
 
-## Trigger a route change event
+## Trigger an event
 
 ```js
 router.set('/path/to/route');
 router.set('#/path/to/route'); // <-- Triggers hash route
 ```
 
-## Complex examples:
+## Complex examples
 
-### Setting query string
+### Set query string parameters
 
 ```js
 route('/path/to/route', (e) => {
@@ -65,7 +65,7 @@ router.set({
 });
 ```
 
-### Preserve existing query string
+### Preserve an existing query string
 
 ```js
 router.set({
@@ -75,7 +75,7 @@ router.set({
 });
 ```
 
-### Using route parameters
+### Use parameters within route
 
 ```js
 route('/path/:to/:route', (e) => {
@@ -86,7 +86,7 @@ route('/path/:to/:route', (e) => {
 router.set('/path/hello/world');
 ```
 
-### Pass data
+### Pass data directly to a handler
 
 ```js
 route('/path/to/route', (e) => {
@@ -99,7 +99,7 @@ router.set({
 });
 ```
 
-## Handle multiple routes
+## Multi-routing concepts
 
 Silkrouter has several options to handle multiple routes.
 
@@ -112,7 +112,7 @@ route([
 ], (e) => { ... });
 ```
 
-### Generic routes
+### Generic routing
 
 ```js
 route((e) => {
@@ -120,6 +120,33 @@ route((e) => {
         case '/route1': ...;
         case '#/route2': ...;
         default: ...; // Handle error route here
+    }
+});
+```
+
+### Handle errors
+
+Version 3.5.0 adds a new feature which makes error handling much easier than before.
+
+1. Add routes
+
+```js
+// Routes
+route('/path/1', () => { ... });
+route('/path/2/:var1', () => { ... });
+route('/path/3/:var2/:var3', () => { ... });
+```
+
+2. Add error route
+
+```js
+// Error page handling using generic route
+route(e => {
+    if (!router.includes(
+        router.list().filter(r => r !== '*'), // Ignore current route using "filter"
+        e.route
+    )) {
+        // Handler error page
     }
 });
 ```
@@ -135,26 +162,9 @@ routeIgnoreCase('/mandatory/route/string', (e) => {
 
 router.set('/MandATorY/RoUte/StriNg');
 ```
+## Helper methods
 
-## Get a list of attached routes
-
-```js
-route('/path/to/route1', () => { ... });
-route('/path/to/route2/:data', () => { ... });
-route(() => { ... });
-
-console.log(router.list()); // ['/path/to/route1', '/path/to/route2/:data', '*'] <-- Unique list
-```
-
-## Test if current path will match an existing route
-
-```js
-route('/path/to/route', e => {
-    console.log(router.includes(router.list(), e.route)); // Returns 'true' if e.route matches a route in route list 
-});
-```
-
-## Get route parameters using "routeParams"
+### Handle route parameters using "routeParams"
 
 ```js
 import { route, routeParams } from 'silkrouter';
@@ -164,9 +174,20 @@ route(e => {
 });
 ```
 
-## Detach routes
+### Handle query strings using "param" and "deparam"
 
-Detaching routes is simple:
+Param creates are query string from an object. Deparam just reverses it.
+
+```js
+import { param, deparam } from 'silkrouter';
+...
+const qs = param({ a: 10, b: 20 }); // -> a=10&b=20
+const qsObject = deparam(qs); // -> { a: "10", b: "20" }
+// Deparam with coerced values
+const qsObCoerced = deparam(qs, true); // -> {a: 10, b: 20}
+```
+
+## Detach listeners
 
 ```js
 unroute(); // Removes all listeners
