@@ -1,21 +1,8 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-  typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (global = global || self, factory(global.silkrouter = {}));
-}(this, (function (exports) { 'use strict';
-
-  /**
-   * Router constants
-   */
-  var HASH_CHANGE = 'hashchange';
-  var POP_STATE = 'popstate';
-  var ROUTE_CHANGED = 'route.changed';
-  var REG_ROUTE_PARAMS = /:[^\/]+/g;
-  var REG_PATHNAME = /^\/(?=[^?]*)/;
-  var REG_HASH_QUERY = /\?.+/;
-  var INVALID_ROUTE = 'Route string is not a pure route';
-  var CASE_INSENSITIVE_FLAG = '$$';
-  var LOCAL_ENV = ['localhost', '0.0.0.0', '127.0.0.1', null];
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'rxjs'], factory) :
+  (global = global || self, factory(global.silkrouter = {}, global.rxjs));
+}(this, (function (exports, rxjs) { 'use strict';
 
   function _typeof(obj) {
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -30,6 +17,81 @@
 
     return _typeof(obj);
   }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function _slicedToArray(arr, i) {
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+  }
+
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr)) return arr;
+  }
+
+  function _iterableToArrayLimit(arr, i) {
+    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
+      return;
+    }
+
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"] != null) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance");
+  }
+
+  /**
+   * Router constants
+   */
+  var POP_STATE = 'popstate';
+  var REG_ROUTE_PARAMS = /:[^/]+/g;
+  var REG_PATHNAME = /^\/(?=[^?]*)/;
+  var HISTORY_UNSUPPORTED = 'Current browser does not support history object';
+  var INVALID_ROUTE = 'Route string is not a pure route';
+  var LOCAL_ENV = ['localhost', '0.0.0.0', '127.0.0.1', null];
+  var VIRTUAL_PUSHSTATE = 'vpushstate';
 
   /**
    * Shorthand for Array.isArray
@@ -97,37 +159,6 @@
     return typeof route === 'string' && REG_PATHNAME.test(route);
   }
   /**
-   * Checks if the URL is a hash URL
-   * @private
-   * @param {string} URL URL string
-   */
-
-  function isHashURL(URL) {
-    return typeof URL === 'string' && URL.charAt(0) === '#';
-  }
-  /**
-   * Checks if input value is a function
-   * @param {function} fn Input function
-   */
-
-  function isFunc(fn) {
-    return typeof fn === 'function';
-  }
-  /**
-   * Returns an empty PopStateEvent object
-   * @param {string} type Type of event
-   * @param {*} data Any type of data
-   */
-
-  function getPopStateEvent(type, data) {
-    return {
-      type: type,
-      state: {
-        data: data
-      }
-    };
-  }
-  /**
    * Safely returns object keys
    * @param {object} obj Object
    */
@@ -168,255 +199,6 @@
     }
   }
 
-  var loc = window.location;
-  var f = String.fromCharCode;
-
-  /**
-   * Parses current path and returns params object
-   * @private
-   * @param {string} expr Route expression
-   * @param {string} path URL path
-   * @returns {object}
-   */
-
-  function extractParams(expr, path) {
-    path = def(path, loc.pathname);
-    var params = {};
-
-    if (REG_ROUTE_PARAMS.test(expr)) {
-      var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^\/\\]+/g, "([^\\/]+)"));
-      REG_ROUTE_PARAMS.lastIndex = 0;
-
-      if (pathRegex.test(path)) {
-        var keys = toArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
-          return key.replace(':', '');
-        });
-        var values = toArray(path.match(pathRegex));
-        values.shift();
-        keys.forEach(function (key, index) {
-          params[key] = values[index];
-        });
-      }
-    }
-
-    return params;
-  }
-
-  /**
-   * Builds query string recursively
-   * @private
-   * @param {string[]} qsList List of query string key value pairs
-   * @param {*} key Key
-   * @param {*} obj Value
-   */
-
-  function buildQuery(qsList, key, obj) {
-    if (isObject(obj)) {
-      keys(obj).forEach(function (obKey) {
-        buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? '' : obKey, "]"), obj[obKey]);
-      });
-    } else if (typeof obj !== 'function') {
-      qsList.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
-    }
-  }
-  /**
-   * Converts an object to a query string
-   * @private
-   * @param {object} obj Object which should be converted to a string
-   * @returns {string}
-   */
-
-
-  function toQueryString(obj) {
-    var qsList = [];
-
-    if (isObject(obj)) {
-      keys(obj).forEach(function (key) {
-        buildQuery(qsList, key, obj[key]);
-      });
-      return qsList.join('&');
-    }
-
-    return typeof obj === 'string' ? obj : '';
-  }
-
-  /**
-   * Checks if query parameter key is a complex notation
-   * @param {string} q 
-   */
-
-  function ifComplex(q) {
-    return /\[/.test(q);
-  }
-  /**
-   * Converts query string to JavaScript object
-   * @param {string} qs query string argument (defaults to url query string)
-   */
-
-
-  function deparam(qs, coerce) {
-    var _this = this;
-
-    qs = trim(def(qs, loc.search));
-
-    if (qs.charAt(0) === '?') {
-      qs = qs.replace('?', '');
-    }
-
-    var queryObject = {};
-
-    if (qs) {
-      qs.split('&').forEach(function (qq) {
-        var qArr = qq.split('=').map(function (part) {
-          return decodeURIComponent(part);
-        });
-        (ifComplex(qArr[0]) ? complex : simple).apply(_this, [].concat(qArr, [queryObject, def(coerce, false), false]));
-      });
-    }
-
-    return queryObject;
-  }
-  /**
-   * Converts an array to an object
-   * @param {array} arr 
-   */
-
-
-  function toObject(arr) {
-    var convertedObj = {};
-
-    if (isArr(arr)) {
-      arr.forEach(function (value, index) {
-        convertedObj[index] = value;
-      });
-    }
-
-    return convertedObj;
-  }
-  /**
-   * Resolves an array to object if required
-   * @param {array} ob An array object
-   * @param {boolean} isNumber flag to test if next key is number
-   */
-
-
-  function resolve(ob, isNextNumber) {
-    return isNextNumber ? typeof ob === 'undefined' ? [] : ob : toObject(ob);
-  }
-  /**
-   * Resolves the target object for next iteration
-   * @param {Object} ob current reference object
-   * @param {string} nextProp reference property in current object
-   */
-
-
-  function resolveObj(ob, nextProp) {
-    if (isPureObject(ob)) return {
-      ob: ob
-    };
-    if (isArr(ob) || typeof ob === 'undefined') return {
-      ob: resolve(ob, isNumber(nextProp))
-    };
-    return {
-      ob: [ob],
-      push: ob !== null
-    };
-  }
-  /**
-   * Handles complex query parameters
-   * @param {string} key 
-   * @param {string} value 
-   * @param {Object} obj 
-   */
-
-
-  function complex(key, value, obj, coercion) {
-    coercion = def(coercion, true);
-    var match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
-
-    if (match.length === 3) {
-      var prop = match[1];
-      var nextProp = match[2];
-      key = key.replace(/\[([^\[]*)\]/, '');
-
-      if (ifComplex(key)) {
-        if (nextProp === '') nextProp = '0';
-        key = key.replace(/[^\[]+/, nextProp);
-        complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, coercion);
-      } else if (nextProp) {
-        var resolved = resolveObj(obj[prop], nextProp);
-        obj[prop] = resolved.ob;
-        var coercedValue = coercion ? coerce(value) : value;
-
-        if (resolved.push) {
-          var tempObj = {};
-          tempObj[nextProp] = coercedValue;
-          obj[prop].push(tempObj);
-        } else {
-          obj[prop][nextProp] = coercedValue;
-        }
-      } else {
-        simple(prop, value, obj, coercion, true);
-      }
-    }
-  }
-  /**
-   * Handles simple query
-   * @param {array} qArr 
-   * @param {Object} queryObject 
-   * @param {boolean} toArray 
-   */
-
-
-  function simple(key, value, queryObject, coercion, toArray) {
-    if (def(coercion, true)) {
-      value = coerce(value);
-    }
-
-    if (key in queryObject) {
-      queryObject[key] = isArr(queryObject[key]) ? queryObject[key] : [queryObject[key]];
-      queryObject[key].push(value);
-    } else {
-      queryObject[key] = toArray ? [value] : value;
-    }
-  }
-  /**
-   * Restores values to their original type
-   * @param {string} value undefined or string value
-   */
-
-
-  function coerce(value) {
-    if (value == null) return '';
-    if (typeof value !== 'string') return value;
-    if (isNumber(value = trim(value))) return +value;
-
-    switch (value) {
-      case 'null':
-        return null;
-
-      case 'undefined':
-        return undefined;
-
-      case 'true':
-        return true;
-
-      case 'false':
-        return false;
-
-      case 'NaN':
-        return NaN;
-
-      default:
-        return value;
-    }
-  } // Library encapsulation
-
-
-  function lib() {
-    return deparam.apply(this, arguments);
-  }
-
   /**
    * Inner loop function for assign
    * @private
@@ -447,6 +229,62 @@
 
     return target;
   }
+
+  // Polyfill custom event
+  if (typeof window.CustomEvent === 'undefined') {
+    var CustomEvent = function CustomEvent(event, params) {
+      params = params || {
+        bubbles: false,
+        cancelable: false,
+        detail: undefined
+      };
+      var evt = document.createEvent('CustomEvent');
+      evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+      return evt;
+    };
+
+    CustomEvent.prototype = window.Event.prototype;
+    window.CustomEvent = CustomEvent;
+  } // Internal function
+
+
+  function isValidTarget(target) {
+    return target instanceof NodeList || target instanceof HTMLCollection || Array.isArray(target);
+  } // Internal function
+
+
+  function each$1(ob, callback) {
+    for (var i = 0; i < ob.length; i++) {
+      callback(ob[i], i);
+    }
+  }
+  /**
+   * Function to trigger custom event
+   * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
+   * @param {string} eventType Event type
+   * @param {any[]} data Data to be passed to handler
+   */
+
+
+  function trigger(target, eventType, data) {
+    if (target instanceof Node) {
+      target = [target];
+    }
+
+    if (isValidTarget(target) && typeof eventType === 'string') {
+      each$1(target, function (el) {
+        var customEvent = new window.CustomEvent(eventType, {
+          bubbles: true,
+          cancelable: true,
+          detail: data || []
+        });
+        el.dispatchEvent(customEvent);
+      });
+    }
+  }
+
+  var loc = window.location;
+  var f = String.fromCharCode;
 
   function _update(context, bitsPerChar, getCharFromInt) {
     if (context.context_data_position == bitsPerChar - 1) {
@@ -575,6 +413,7 @@
 
       context.value = context.value >> 1;
     } // Flush the last char
+    // eslint-disable-next-line
 
 
     while (true) {
@@ -643,7 +482,7 @@
 
     dictionary[3] = c;
     w = c;
-    result.push(c);
+    result.push(c); // eslint-disable-next-line
 
     while (true) {
       if (data.index > length) {
@@ -805,389 +644,709 @@
     }
   };
 
-  function Libs() {
-    this.handlers = [];
-  }
+  var StorageLib =
+  /*#__PURE__*/
+  function () {
+    function StorageLib() {
+      _classCallCheck(this, StorageLib);
+    }
 
-  assign(Libs.prototype, {
-    getDataFromStore: function getDataFromStore(path, isHash) {
-      var paths = assign(store.get('routeStore'));
-      return paths["".concat(isHash ? '#' : '').concat(path)];
-    },
-    setDataToStore: function setDataToStore(path, isHash, data) {
-      var paths = assign(store.get('routeStore'));
-
-      if (paths[path]) {
-        if (!data || isPureObject(data) && keys(data).length === 0) {
-          return false;
-        }
+    _createClass(StorageLib, [{
+      key: "getDataFromStore",
+      value: function getDataFromStore(path) {
+        var paths = assign(store.get('routeStore'));
+        return paths[path];
       }
+    }, {
+      key: "setDataToStore",
+      value: function setDataToStore(path, data) {
+        var paths = assign(store.get('routeStore'));
 
-      var newPath = {};
-      newPath["".concat(isHash ? '#' : '').concat(path)] = data;
-      paths = assign({}, paths, newPath);
-      return store.set('routeStore', paths);
-    },
-    contains: function contains(fn) {
-      return !!this.handlers.filter(fn).length;
-    },
-    remove: function remove(item) {
-      this.handlers.splice(this.handlers.indexOf(item), 1).length;
-    }
-  });
-  var libs = new Libs();
+        if (paths[path]) {
+          if (!data || isPureObject(data) && keys(data).length === 0) return false;
+        }
 
-  /**
-   * Adds a query string
-   * @private
-   * @param {string} route Route string
-   * @param {string} qString Query string
-   * @param {boolean} appendQString Append query string flag
-   */
+        var newPath = {};
+        newPath[path] = data;
+        paths = assign({}, paths, newPath);
+        return store.set('routeStore', paths);
+      }
+    }]);
 
-  function resolveQuery(route, isHash, queryString, append) {
-    queryString = trim(queryString.substring(+(queryString.charAt(0) === '?')));
-    var search = (append || '') && loc.search;
+    return StorageLib;
+  }();
 
-    if (!isHash) {
-      return "".concat(route).concat(search).concat(queryString ? "".concat(search ? '&' : '?').concat(queryString) : '');
-    }
+  var libs = new StorageLib();
 
-    return "".concat(loc.pathname).concat(search, "#").concat(route).concat(queryString ? "?".concat(queryString) : '');
-  }
+  var RouterEvent = function RouterEvent(routeInfo, routerInstance, currentEvent) {
+    _classCallCheck(this, RouterEvent);
 
-  /**
-   * Converts current query string into an object
-   * @private
-   */
+    // Set relevant parameters
+    var _routerInstance$confi = routerInstance.config,
+        location = _routerInstance$confi.location,
+        preservePath = _routerInstance$confi.preservePath;
 
-  function getQueryParams() {
-    var hashQuery = loc.hash.match(REG_HASH_QUERY);
-    return assign({}, lib(), hashQuery ? assign({}, lib(hashQuery[0])) : {});
-  }
+    var _routeInfo = _slicedToArray(routeInfo, 2),
+        routeObject = _routeInfo[0],
+        originalEvent = _routeInfo[1];
 
-  /**
-   * Compares route with current URL
-   * @private
-   * @param {string} route Route string
-   * @param {string} url Current url
-   * @param {object} params Parameters
-   */
+    this.route = routeObject.path;
+    this.hashRouting = routeObject.hash;
+    this.routerInstance = routerInstance;
+    this.virtualEvent = currentEvent || {};
+    this.originalEvent = originalEvent || {};
+    this.path = trim(location.pathname);
+    this.hash = location.hash;
+    this.search = trim(location.search.substring(1));
+    this.hashSearch = trim(location.hash && location.hash.split('?')[1]); // Extract data
 
-  function testRoute(route, url, originalData) {
-    var isHash = isHashURL(url);
-    url = url.substring(+isHash);
-    var path = url.split('?')[0];
-    originalData = assign(originalData);
+    var path = routeObject.path;
 
-    if (keys(originalData).length) {
-      libs.setDataToStore(path, isHash, originalData);
-    }
+    if (this.hashRouting) {
+      path = "#".concat(path);
 
-    var params = extractParams(route, url);
-    return {
-      hasMatch: keys(params).length > 0 || isValidRoute(url) && (route === url || route === '*'),
-      data: libs.getDataFromStore(path, isHash),
-      params: params
+      if (preservePath) {
+        path = "".concat(location.pathname).concat(path);
+      }
+    } // Set route data to store
+
+
+    libs.setDataToStore(path, this.originalEvent.state && this.originalEvent.state.data); // Get current data from store
+
+    this.data = libs.getDataFromStore(path);
+  };
+
+  function collate(routerInstance) {
+    return function (observable) {
+      return new rxjs.Observable(function (subscriber) {
+        var subn = observable.subscribe({
+          next: function next(event) {
+            subscriber.next(new RouterEvent(event.detail, routerInstance, event));
+          },
+          error: function error() {
+            subscriber.error.apply(subscriber, arguments);
+          },
+          complete: function complete() {
+            subscriber.complete();
+          }
+        });
+        return function () {
+          subn.unsubscribe();
+        };
+      });
     };
   }
 
-  /**
-   * Triggers a router event
-   * @private
-   * @param {string} eventName Name of route event
-   * @param {object} params Parameters
-   */
+  function bindRouterEvents() {
+    var _this$config = this.config,
+        context = _this$config.context,
+        location = _this$config.location,
+        hashRouting = _this$config.hashRouting;
+    this.popStateSubscription = rxjs.fromEvent(window, POP_STATE).subscribe(function (e) {
+      var path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
 
-  function execListeners(eventName, rc, originalData) {
-    originalData = assign(originalData);
-    libs.handlers.forEach(function (ob) {
-      if (ob.eventName === eventName) {
-        var currentPath = loc[rc.hash ? 'hash' : 'pathname'];
-        var tr = testRoute(ob.isCaseInsensitive ? ob.route.toLowerCase() : ob.route, ob.isCaseInsensitive ? currentPath.toLowerCase() : currentPath, originalData);
-
-        if (tr.hasMatch && (!ob.hash || ob.hash && rc.hash)) {
-          ob.handler(assign({}, rc, {
-            data: tr.data,
-            params: tr.params,
-            query: getQueryParams()
-          }));
-        }
+      if (path) {
+        trigger(context, VIRTUAL_PUSHSTATE, [{
+          path: path,
+          hash: hashRouting
+        }, e]);
       }
     });
+    this.listeners = rxjs.fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate(this));
+
+    if (hashRouting && !location.hash) {
+      this.set('/', true, false); // Replace current hash path without executing anythings
+    }
   }
 
   /**
-   * Triggers "route.changed" event
+   * Builds query string recursively
    * @private
-   * @param {object} config Route event configuration
-   * @param {object} config.originalEvent Original "popstate" event object
-   * @param {string} config.route route string
-   * @param {string} config.type Type of event
-   * @param {boolean} config.hash Flag that determines type of event expected
-   * @param {object} config.originalData Original data persisted by history API
+   * @param {string[]} qsList List of query string key value pairs
+   * @param {*} key Key
+   * @param {*} obj Value
    */
 
-  function triggerRoute(ob) {
-    ob.type = ob.hash ? HASH_CHANGE : POP_STATE;
-    var originalData = def(ob.originalData, {});
-    ob.originalEvent = def(ob.originalEvent, getPopStateEvent(ob.type, originalData));
-    delete ob.originalData;
-    execListeners(ROUTE_CHANGED, ob, originalData);
+  function buildQuery(qsList, key, obj) {
+    if (isObject(obj)) {
+      keys(obj).forEach(function (obKey) {
+        buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? '' : obKey, "]"), obj[obKey]);
+      });
+    } else if (typeof obj !== 'function') {
+      qsList.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
+    }
+  }
+  /**
+   * Converts an object to a query string
+   * @private
+   * @param {object} obj Object which should be converted to a string
+   * @returns {string}
+   */
+
+
+  function toQueryString(obj) {
+    var qsList = [];
+
+    if (isObject(obj)) {
+      keys(obj).forEach(function (key) {
+        buildQuery(qsList, key, obj[key]);
+      });
+      return qsList.join('&');
+    }
+
+    return typeof obj === 'string' ? obj : '';
   }
 
   /**
-   * Set route for given view
-   * @private
-   * @param {string|object} oRoute Route string or object
-   * @param {boolean} replaceMode Replace mode
-   * @param {boolean} noTrigger Do not trigger handler
+   * Checks if query parameter key is a complex notation
+   * @param {string} q 
    */
 
-  function execRoute(route, replaceMode, noTrigger) {
-    var ro = assign({
-      replaceMode: replaceMode,
-      noTrigger: noTrigger
+  function ifComplex(q) {
+    return /\[/.test(q);
+  }
+  /**
+   * Converts query string to JavaScript object
+   * @param {string} qs query string argument (defaults to url query string)
+   */
+
+
+  function deparam(qs, coerce) {
+    var _this = this;
+
+    qs = trim(def(qs, loc.search));
+
+    if (qs.charAt(0) === '?') {
+      qs = qs.replace('?', '');
+    }
+
+    var queryObject = {};
+
+    if (qs) {
+      qs.split('&').forEach(function (qq) {
+        var qArr = qq.split('=').map(function (part) {
+          return decodeURIComponent(part);
+        });
+        (ifComplex(qArr[0]) ? complex : simple).apply(_this, [].concat(qArr, [queryObject, def(coerce, false), false]));
+      });
+    }
+
+    return queryObject;
+  }
+  /**
+   * Converts an array to an object
+   * @param {array} arr 
+   */
+
+
+  function toObject(arr) {
+    var convertedObj = {};
+
+    if (isArr(arr)) {
+      arr.forEach(function (value, index) {
+        convertedObj[index] = value;
+      });
+    }
+
+    return convertedObj;
+  }
+  /**
+   * Resolves an array to object if required
+   * @param {array} ob An array object
+   * @param {boolean} isNumber flag to test if next key is number
+   */
+
+
+  function resolve(ob, isNextNumber) {
+    return isNextNumber ? typeof ob === 'undefined' ? [] : ob : toObject(ob);
+  }
+  /**
+   * Resolves the target object for next iteration
+   * @param {Object} ob current reference object
+   * @param {string} nextProp reference property in current object
+   */
+
+
+  function resolveObj(ob, nextProp) {
+    if (isPureObject(ob)) return {
+      ob: ob
+    };
+    if (isArr(ob) || typeof ob === 'undefined') return {
+      ob: resolve(ob, isNumber(nextProp))
+    };
+    return {
+      ob: [ob],
+      push: ob !== null
+    };
+  }
+  /**
+   * Handles complex query parameters
+   * @param {string} key 
+   * @param {string} value 
+   * @param {Object} obj 
+   */
+
+
+  function complex(key, value, obj, coercion) {
+    coercion = def(coercion, true);
+    var match = key.match(/([^[]+)\[([^[]*)\]/) || [];
+
+    if (match.length === 3) {
+      var prop = match[1];
+      var nextProp = match[2];
+      key = key.replace(/\[([^[]*)\]/, '');
+
+      if (ifComplex(key)) {
+        if (nextProp === '') nextProp = '0';
+        key = key.replace(/[^[]+/, nextProp);
+        complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, coercion);
+      } else if (nextProp) {
+        var resolved = resolveObj(obj[prop], nextProp);
+        obj[prop] = resolved.ob;
+        var coercedValue = coercion ? coerce(value) : value;
+
+        if (resolved.push) {
+          var tempObj = {};
+          tempObj[nextProp] = coercedValue;
+          obj[prop].push(tempObj);
+        } else {
+          obj[prop][nextProp] = coercedValue;
+        }
+      } else {
+        simple(prop, value, obj, coercion, true);
+      }
+    }
+  }
+  /**
+   * Handles simple query
+   * @param {array} qArr 
+   * @param {Object} queryObject 
+   * @param {boolean} toArray 
+   */
+
+
+  function simple(key, value, queryObject, coercion, toArray) {
+    if (def(coercion, true)) {
+      value = coerce(value);
+    }
+
+    if (key in queryObject) {
+      queryObject[key] = isArr(queryObject[key]) ? queryObject[key] : [queryObject[key]];
+      queryObject[key].push(value);
+    } else {
+      queryObject[key] = toArray ? [value] : value;
+    }
+  }
+  /**
+   * Restores values to their original type
+   * @param {string} value undefined or string value
+   */
+
+
+  function coerce(value) {
+    if (value == null) return '';
+    if (typeof value !== 'string') return value;
+    if (isNumber(value = trim(value))) return +value;
+
+    switch (value) {
+      case 'null':
+        return null;
+
+      case 'undefined':
+        return undefined;
+
+      case 'true':
+        return true;
+
+      case 'false':
+        return false;
+
+      case 'NaN':
+        return NaN;
+
+      default:
+        return value;
+    }
+  } // Library encapsulation
+
+
+  function lib() {
+    return deparam.apply(this, arguments);
+  }
+
+  /**
+   * Resolves and analyzes existing query string
+   * @private
+   * @param {string} queryString Query string
+   * @param {string} hashRouting Flag to test if hash routing is enabled
+   */
+
+  function resolveQuery(queryString, hashRouting) {
+    var location = this.config.location;
+    var search = trim(location.search && location.search.substring(1));
+    var existingQuery = hashRouting ? trim(location.hash.split('?')[1]) : trim(search);
+    if (!existingQuery) return queryString;
+    return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
+  }
+
+  function set$1(route) {
+    var replace = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    var exec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+    var _this$config = this.config,
+        preservePath = _this$config.preservePath,
+        hashRouting = _this$config.hashRouting,
+        location = _this$config.location,
+        history = _this$config.history;
+    var routeObject = assign({
+      replace: replace,
+      exec: exec
     }, typeof route === 'string' ? {
       route: route
     } : route);
+    replace = routeObject.replace;
+    exec = routeObject.exec;
+    var routeStr = routeObject.route,
+        queryString = routeObject.queryString;
+    var preserveQuery = routeObject.preserveQuery,
+        data = routeObject.data,
+        _routeObject$pageTitl = routeObject.pageTitle,
+        pageTitle = _routeObject$pageTitl === void 0 ? document.querySelector('head title').textContent : _routeObject$pageTitl;
+    var routeParts = routeStr.split('?'); // Check if query string is an object
 
-    if (typeof ro.route === 'string') {
-      var hash = isHashURL(ro.route);
-      var routeParts = trim(ro.route).split('?');
-      var pureRoute = routeParts[0].substring(+hash);
-      var queryString = toQueryString(trim(routeParts[1]) || trim(ro.queryString));
+    if (isObject(queryString)) {
+      queryString = toQueryString(queryString);
+    } // Resolve to URL query string if it's not explicitly passed
 
-      if (isValidRoute(pureRoute)) {
-        libs.setDataToStore(pureRoute, hash, ro.data);
-        var completeRoute = resolveQuery(pureRoute, hash, queryString, ro.appendQuery);
-        history[ro.replaceMode ? 'replaceState' : 'pushState']({
-          data: ro.data
-        }, ro.title, completeRoute);
 
-        if (!ro.noTrigger) {
-          triggerRoute({
-            route: "".concat(hash ? '#' : '').concat(pureRoute),
-            hash: hash
-          });
+    queryString = trim(queryString ? queryString : routeParts[1]);
+    routeStr = trim(routeParts[0]); // Check if query preservation is required. Resolve query accordingly
+
+    if (preserveQuery) {
+      queryString = resolveQuery.apply(this, [queryString, hashRouting]);
+    }
+
+    if (isValidRoute(routeStr)) {
+      var unmodifiedRoute = routeStr;
+
+      if (hashRouting) {
+        routeStr = "#".concat(routeStr); // Path preservation should only work for hash routing
+
+        if (preservePath) {
+          routeStr = "".concat(location.pathname).concat(routeStr);
         }
-      } else {
-        throw new TypeError(INVALID_ROUTE);
+      } // Sync data to store before appending query string. Query string should have no effect on stored data
+
+
+      libs.setDataToStore(routeStr, data); // Append query string
+
+      routeStr = "".concat(routeStr).concat(queryString ? "?".concat(queryString) : '');
+      history[replace ? 'replaceState' : 'pushState']({
+        data: data
+      }, pageTitle, routeStr);
+
+      if (exec && unmodifiedRoute) {
+        trigger(this.config.context, VIRTUAL_PUSHSTATE, [{
+          path: unmodifiedRoute,
+          hash: hashRouting
+        }]);
       }
+    } else {
+      throw new TypeError(INVALID_ROUTE);
     }
+
+    return this;
   }
 
-  /**
-   * Binds generic route if route is passed as a list of URLs
-   * @private
-   * @param {string[]} route Array of routes
-   * @param {*} handler Handler function
-   */
+  function callOnce(routerInstance, isDone) {
+    var _routerInstance$confi = routerInstance.config,
+        hashRouting = _routerInstance$confi.hashRouting,
+        location = _routerInstance$confi.location;
+    var path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
+    return function (observable) {
+      return new rxjs.Observable(function (subscriber) {
+        var subn = observable.subscribe({
+          next: function next() {
+            subscriber.next.apply(subscriber, arguments);
+          },
+          error: function error() {
+            subscriber.error.apply(subscriber, arguments);
+          },
+          complete: function complete() {
+            subscriber.complete();
+          }
+        });
 
-  function bindGenericRoute(route, handler) {
-    var _this = this;
+        if (!isDone) {
+          isDone = true;
 
-    if (!libs.contains(function (ob) {
-      return ob.prevHandler === handler;
-    })) {
-      bindRoute(function (e) {
-        if (isFunc(handler) && route.indexOf("".concat(e.hash ? '#' : '').concat(e.route.substring(+e.hash))) > -1) {
-          handler.apply(_this, [e]);
+          if (path) {
+            subscriber.next(new RouterEvent([{
+              path: path,
+              hash: hashRouting
+            }], routerInstance));
+          }
         }
-      }, handler);
-    }
+
+        return function () {
+          subn.unsubscribe();
+        };
+      });
+    };
   }
+
+  var Router =
+  /*#__PURE__*/
+  function () {
+    function Router() {
+      var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      _classCallCheck(this, Router);
+
+      if (!window.history.pushState) {
+        throw new Error(HISTORY_UNSUPPORTED);
+      }
+
+      config = assign({
+        hashRouting: false,
+        // Switch to hash routing
+        preservePath: false,
+        // Works for hash routing
+        context: document.body,
+        // To change the context of "vpushstate" event
+        location: window.location,
+        // Should remain unchanged
+        history: window.history // History object
+
+      }, config);
+      this.config = Object.freeze(config);
+      this.__paths__ = [];
+      bindRouterEvents.apply(this);
+    }
+
+    _createClass(Router, [{
+      key: "pipe",
+      value: function pipe() {
+        var _this$listeners;
+
+        return (_this$listeners = this.listeners).pipe.apply(_this$listeners, [callOnce(this)].concat(Array.prototype.slice.call(arguments)));
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe() {
+        var _this$listeners$pipe;
+
+        return (_this$listeners$pipe = this.listeners.pipe(callOnce(this))).subscribe.apply(_this$listeners$pipe, arguments);
+      }
+    }, {
+      key: "set",
+      value: function set() {
+        return set$1.apply(this, arguments);
+      }
+    }, {
+      key: "destroy",
+      value: function destroy(callback) {
+        if (typeof callback === 'function') {
+          callback();
+        }
+
+        this.popStateSubscription.unsubscribe(); // Unsubscribe popstate event
+
+        this.__paths__.length = 0;
+      }
+    }]);
+
+    return Router;
+  }();
+
   /**
-   * Attaches a route handler function
+   * Parses current path and returns params object
    * @private
-   * @param {string} route Route string
-   * @param {function} handler Callback function
+   * @param {string} expr Route expression
+   * @param {string} path URL path
+   * @returns {object}
    */
 
+  function extractParams(expr, path) {
+    path = def(path, loc.pathname);
+    var params = {};
 
-  function bindRoute(route, handler, prevHandler) {
-    // Resolve generic route
-    var isCaseInsensitive = typeof route === 'string' && route.indexOf(CASE_INSENSITIVE_FLAG) === 0;
+    if (REG_ROUTE_PARAMS.test(expr)) {
+      var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^/\\]+/g, "([^\\/]+)"));
+      REG_ROUTE_PARAMS.lastIndex = 0;
 
-    if (isFunc(route)) {
-      prevHandler = handler;
-      handler = route;
-      route = '*';
-    }
-
-    if (isArr(route)) {
-      return bindGenericRoute(route, handler);
-    }
-
-    route = route.substring(isCaseInsensitive ? CASE_INSENSITIVE_FLAG.length : 0);
-    var containsHash = isHashURL(route);
-    route = route.substring(+containsHash); // Attach handler
-
-    if (!libs.contains(function (ob) {
-      return ob.handler === handler && ob.route === route;
-    }) && isFunc(handler)) {
-      libs.handlers.push({
-        eventName: ROUTE_CHANGED,
-        handler: handler,
-        prevHandler: prevHandler,
-        route: route,
-        hash: containsHash,
-        isCaseInsensitive: isCaseInsensitive
-      });
-    } // Execute handler if matches current route (Replaces init method in version 2.0)
-
-
-    var paths = containsHash ? [loc.hash] : [loc.pathname, loc.hash];
-    paths.filter(function (path) {
-      return trim(path);
-    }).forEach(function (currentPath) {
-      var containsHash = isHashURL(currentPath);
-      var tr = testRoute(isCaseInsensitive ? route.toLowerCase() : route, isCaseInsensitive ? currentPath.toLowerCase() : currentPath);
-
-      if (tr.hasMatch && isFunc(handler)) {
-        var eventName = containsHash ? HASH_CHANGE : POP_STATE;
-        handler({
-          originalEvent: getPopStateEvent(eventName, tr.data),
-          route: currentPath,
-          hash: containsHash,
-          eventName: eventName,
-          data: tr.data,
-          params: tr.params,
-          query: getQueryParams(),
-          isCaseInsensitive: isCaseInsensitive
+      if (pathRegex.test(path)) {
+        var keys = toArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
+          return key.replace(':', '');
+        });
+        var values = toArray(path.match(pathRegex));
+        values.shift();
+        keys.forEach(function (key, index) {
+          params[key] = values[index];
         });
       }
-    });
-  }
-
-  /**
-   * Unbinds route handlers
-   * @private
-   * @param {string} route Route string
-   * @param {function} handler Callback function
-   */
-
-  function unbindRoute(route, handler) {
-    var prevLength = libs.handlers.length;
-    var isRouteList = isArr(route);
-    if (isRouteList && !handler) return 0; // Fix for accidently removing all generic routes if there is no handler for list route
-
-    var args = toArray(arguments);
-
-    if (args.length === 0) {
-      libs.handlers.length = 0;
-      return prevLength;
     }
 
-    route = isRouteList ? '*' : route;
-    libs.handlers.forEach(function (ob) {
-      var test = ob.route === route;
-      var singleArg = args.length === 1;
-
-      if (!(singleArg && typeof route === 'string' && !isRouteList)) {
-        if (singleArg && isFunc(route)) {
-          handler = route;
-          route = '*';
-        }
-
-        test = test && (ob.handler === handler || ob.prevHandler === handler);
-      }
-
-      if (test) {
-        libs.remove(ob);
-      }
-    });
-    return prevLength - libs.handlers.length;
+    return params;
   }
 
   /**
-   * Initializes router events
-   * @private
+   * Operator to compare a specific route
+   * @param {string} routeStr Route string
+   * @param {Router} routerInstance Current router object [optional]
+   * @param {boolean} ignoreCase Ignore case in route string
    */
 
-  function initRouterEvents() {
-    window.addEventListener("".concat(POP_STATE), function (e) {
-      var paths = "".concat(loc.pathname).concat(loc.hash).split('#');
-      var defaultConfig = {
-        originalEvent: e,
-        originalData: assign(e.state && e.state.data)
-      };
-      triggerRoute(assign({}, defaultConfig, {
-        route: paths[0],
-        hash: false
-      }));
-
-      if (paths[1]) {
-        triggerRoute(assign({}, defaultConfig, {
-          route: "#".concat(paths[1]),
-          hash: true
-        }));
-      }
-    });
-  }
-
-  /**
-   * @namespace router
-   * @public
-   * @type {object}
-   */
-
-  var router = {
-    /**
-     * Sets a route url
-     * @public
-     * @param {string|object} route Route object or URL
-     * @param {boolean} replaceMode Flag to enable replace mode
-     * @param {boolean} noTrigger Flag to disable handler while changing route
-     */
-    set: function set() {
-      return execRoute.apply(this, arguments);
+  function route(routeStr, routerInstance, ignoreCase) {
+    if (typeof routerInstance === 'boolean') {
+      ignoreCase = routerInstance;
+      routerInstance = undefined;
     }
-  };
-  /**
-   * Attaches a route handler
-   * @public
-   * @param {string|function} route Route string or handler function (in case of generic route)
-   * @param {function} handler Handler function
-   */
 
-  function route() {
-    return bindRoute.apply(this, arguments);
-  }
-  /**
-   * Attaches case insensitive route handler
-   * @public
-   * @param {string|function} route Route string or handler function (in case of generic route)
-   * @param {function} handler Handler function
-   */
+    routeStr = trim(routeStr);
 
+    if (routerInstance instanceof Router) {
+      var paths = routerInstance.__paths__;
 
-  function routeIgnoreCase(firstArg) {
-    if (typeof firstArg === 'string') {
-      route.apply(this, ["".concat(CASE_INSENSITIVE_FLAG).concat(firstArg), toArray(arguments).slice(1)]);
+      if (paths.indexOf(routeStr) === -1) {
+        paths.push(routeStr);
+      }
     }
+
+    return function (observable) {
+      return new rxjs.Observable(function (subscriber) {
+        var subn = observable.subscribe({
+          next: function next(event) {
+            var incomingRoute = event.route;
+
+            if (isValidRoute(routeStr)) {
+              if (ignoreCase) {
+                routeStr = routeStr.toLowerCase();
+                incomingRoute = incomingRoute.toLowerCase();
+              }
+
+              var params = extractParams(routeStr, incomingRoute);
+              var paramsLength = Object.keys(params).length;
+
+              if (incomingRoute === routeStr || paramsLength > 0) {
+                if (paramsLength > 0) {
+                  event.params = params;
+                }
+
+                subscriber.next(event);
+              }
+            } else {
+              subscriber.error(new Error(INVALID_ROUTE));
+            }
+          },
+          error: function error() {
+            subscriber.error.apply(subscriber, arguments);
+          },
+          complete: function complete() {
+            subscriber.complete();
+          }
+        });
+        return function () {
+          if (routerInstance instanceof Router) {
+            var _paths = routerInstance.__paths__;
+
+            var existingRouteIndex = _paths.indexOf(routeStr);
+
+            if (existingRouteIndex > -1) {
+              _paths.splice(existingRouteIndex, 1);
+            }
+          }
+
+          subn.unsubscribe();
+        };
+      });
+    };
   }
   /**
-   * Detaches a route handler
-   * @public
-   * @param {string|function} route Route string or handler function (in case of generic route)
-   * @param {function} handler Handler function
+   * Converts search and hashSearch strings to object
+   * @param {boolean} coerce Flag to enable value typecast
    */
 
+  function deparam$1() {
+    var coerce = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    return function (observable) {
+      return new rxjs.Observable(function (subscriber) {
+        var subn = observable.subscribe({
+          next: function next(event) {
+            try {
+              event.search = lib(event.search, coerce);
+              event.hashSearch = lib(event.hashSearch, coerce);
+              subscriber.next(event);
+            } catch (e) {
+              subscriber.error(e);
+            }
+          },
+          error: function error() {
+            subscriber.error.apply(subscriber, arguments);
+          },
+          complete: function complete() {
+            subscriber.complete();
+          }
+        });
+        return function () {
+          subn.unsubscribe();
+        };
+      });
+    };
+  }
+  /**
+   * Modifies current subscriber to detect errors
+   * @param {Router} routerInstance Current router object
+   */
 
-  function unroute() {
-    return unbindRoute.apply(this, arguments);
+  function noMatch(routerInstance) {
+    return function (observable) {
+      return new rxjs.Observable(function (subscriber) {
+        var subn = observable.subscribe({
+          next: function next(event) {
+            if (routerInstance instanceof Router) {
+              var paths = routerInstance.__paths__;
+
+              if (paths.length > 0) {
+                var currentRoute = event.route;
+                var match = false;
+
+                for (var i = 0; i < paths.length; i++) {
+                  if (paths[i] === currentRoute || Object.keys(extractParams(paths[i], currentRoute)).length) {
+                    match = true;
+                    break;
+                  }
+                }
+
+                if (match) {
+                  event.isErrorRoute = true;
+                  subscriber.next(event);
+                }
+              }
+            }
+          },
+          error: function error() {
+            subscriber.error.apply(subscriber, arguments);
+          },
+          complete: function complete() {
+            subscriber.complete();
+          }
+        });
+        return function () {
+          subn.unsubscribe();
+        };
+      });
+    };
   }
 
-  initRouterEvents();
+  var index = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    route: route,
+    deparam: deparam$1,
+    noMatch: noMatch
+  });
 
-  exports.deparam = lib;
-  exports.param = toQueryString;
-  exports.route = route;
-  exports.routeIgnoreCase = routeIgnoreCase;
-  exports.routeParams = extractParams;
-  exports.router = router;
-  exports.unroute = unroute;
+  exports.Router = Router;
+  exports.operators = index;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

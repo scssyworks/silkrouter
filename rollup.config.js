@@ -5,6 +5,9 @@ import { terser } from "rollup-plugin-terser";
 import { eslint } from 'rollup-plugin-eslint';
 import serve from 'rollup-plugin-serve';
 import livereload from 'rollup-plugin-livereload';
+import pkg from './package.json';
+
+const rxjs = 'rxjs';
 
 const commonConfig = {
     input: 'src/js/index.js',
@@ -16,17 +19,24 @@ const commonConfig = {
         resolve({
             customResolveOptions: {
                 moduleDirectory: 'node_modules'
-            }
+            },
+            preferBuiltins: true
         }),
-        commonjs()
+        commonjs({
+            namedExports: {
+                uuid: ['v4']
+            }
+        })
     ]
 };
 
 // ESM config
 const esmConfig = Object.assign({}, commonConfig);
+esmConfig.external = [...Object.keys(pkg.peerDependencies)];
 esmConfig.output = Object.assign({}, commonConfig.output, {
     file: 'dist/esm/silkrouter.esm.js',
-    format: 'esm'
+    format: 'esm',
+    globals: { rxjs }
 });
 
 // ESM prod config
@@ -42,9 +52,11 @@ esmProdConfig.plugins = [
 
 // UMD config
 const umdConfig = Object.assign({}, commonConfig);
+umdConfig.external = [...Object.keys(pkg.peerDependencies)];
 umdConfig.output = Object.assign({}, commonConfig.output, {
     file: 'dist/umd/silkrouter.js',
-    format: 'umd'
+    format: 'umd',
+    globals: { rxjs }
 });
 umdConfig.plugins = [
     ...commonConfig.plugins,

@@ -1,3 +1,3 @@
-import { router, route } from '../src/js';
+import { Router } from '../src/js';
 
-console.log(router, route);
+window.Router = Router;

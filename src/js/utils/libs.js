@@ -2,36 +2,23 @@ import { assign } from './assign';
 import { isPureObject, keys } from './utils';
 import { store } from '../store';
 
-function Libs() {
-    this.handlers = [];
-}
-assign(Libs.prototype, {
-    getDataFromStore(path, isHash) {
+class StorageLib {
+    getDataFromStore(path) {
         const paths = assign(store.get('routeStore'));
-        return paths[`${isHash ? '#' : ''}${path}`];
-    },
-    setDataToStore(path, isHash, data) {
+        return paths[path];
+    }
+    setDataToStore(path, data) {
         let paths = assign(store.get('routeStore'));
         if (paths[path]) {
-            if (
-                !data
-                || (
-                    isPureObject(data)
-                    && keys(data).length === 0
-                )
-            ) { return false; }
+            if (!data
+                || (isPureObject(data) && keys(data).length === 0)
+            ) return false;
         }
         const newPath = {};
-        newPath[`${isHash ? '#' : ''}${path}`] = data;
+        newPath[path] = data;
         paths = assign({}, paths, newPath);
         return store.set('routeStore', paths);
-    },
-    contains(fn) {
-        return !!this.handlers.filter(fn).length;
-    },
-    remove(item) {
-        this.handlers.splice(this.handlers.indexOf(item), 1).length;
     }
-});
+}
 
-export const libs = new Libs();
+export const libs = new StorageLib();
