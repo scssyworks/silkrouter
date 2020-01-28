@@ -99,6 +99,7 @@ function compress(uncompressed, bitsPerChar, getCharFromInt) {
         context.value = context.value >> 1;
     }
     // Flush the last char
+    // eslint-disable-next-line
     while (true) {
         context.context_data_val = (context.context_data_val << 1);
         if (context.context_data_position == bitsPerChar - 1) {

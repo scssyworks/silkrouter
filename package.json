@@ -1,73 +1,71 @@
 {
   "name": "silkrouter",
-  "version": "3.5.2",
-  "description": "Silkrouter is a routing library for single page applications",
-  "main": "dist/umd/index.js",
-  "module": "dist/esm/index.esm.js",
+  "version": "4.0.0-alpha.0",
+  "description": "Silk router is an app routing library",
+  "main": "dist/umd/silkrouter.js",
+  "module": "dist/esm/silkrouter.esm.js",
   "types": "src/typings/silkrouter.d.ts",
-  "files": [
-    "dist/esm/",
-    "dist/umd/",
-    "src/typings/"
-  ],
   "scripts": {
-    "build": "rollup -c",
+    "start": "rollup -c --watch --environment SERVE:true",
+    "build": "npm run test && rollup -c",
     "test": "jest tests/*"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/scssyworks/silkrouter.git"
-  },
-  "keywords": [
-    "router",
-    "routing",
-    "pushState",
-    "popstate",
-    "hashchange",
-    "hash",
-    "hash-routing",
-    "silk-router",
-    "hash routing",
-    "silk router",
-    "SPA",
-    "single page applications",
-    "single-page-application",
-    "single page app",
-    "single-page-app",
-    "single",
-    "page",
-    "application",
-    "applications",
-    "apps",
-    "app",
-    "plugin",
-    "library"
-  ],
-  "author": "Sachin Singh",
+  "author": "scssyworks",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/scssyworks/silkrouter/issues"
-  },
-  "homepage": "https://github.com/scssyworks/silkrouter#readme",
   "devDependencies": {
     "@babel/core": "^7.8.3",
     "@babel/preset-env": "^7.8.3",
     "@rollup/plugin-commonjs": "^11.0.1",
     "@rollup/plugin-node-resolve": "^6.1.0",
     "@types/jest": "^24.9.1",
+    "babel-eslint": "^10.0.3",
     "jest": "^24.9.0",
-    "rollup": "^1.29.1",
+    "rollup": "^1.30.1",
     "rollup-plugin-babel": "^4.3.3",
-    "rollup-plugin-cleanup": "^3.1.1",
-    "rollup-plugin-terser": "^5.2.0"
+    "rollup-plugin-eslint": "^7.0.0",
+    "rollup-plugin-livereload": "^1.0.4",
+    "rollup-plugin-serve": "^1.0.1",
+    "rollup-plugin-terser": "^5.2.0",
+    "rxjs": "^6.5.4"
   },
-  "jest": {
-    "verbose": true,
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "src/js/utils/*.js",
-      "src/js/silkrouter.js"
-    ],
-    "coverageDirectory": "coverage/"
+  "keywords": [
+    "router",
+    "routing",
+    "single page apps",
+    "single page application",
+    "SPA",
+    "silk",
+    "silk router",
+    "history",
+    "browser",
+    "url",
+    "hash",
+    "hash routing",
+    "pushState",
+    "popstate",
+    "hashchange",
+    "observables",
+    "observer",
+    "subscriber",
+    "subscribe",
+    "subscription",
+    "rxjs",
+    "reactivex"
+  ],
+  "files": [
+    "dist/umd/",
+    "dist/esm/",
+    "src/typings/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scssyworks/silkrouter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/scssyworks/silkrouter/issues"
+  },
+  "homepage": "https://github.com/scssyworks/silkrouter#readme",
+  "peerDependencies": {
+    "rxjs": "^6.5.4"
   }
 }

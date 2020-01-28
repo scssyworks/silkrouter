@@ -1,166 +1,168 @@
 [![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/index.esm.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/index.esm.js?label=unminified)
 
-# Silkrouter
-Silkrouter is a routing library for single page applications.
+**Silk router version 4 is here. If you are searching for version 3 documentation (current version), please click the link below:**
+https://github.com/scssyworks/silkrouter/blob/master/READMEv3.md
+
+# Silk router
+
+Silk router is a customizable and reactive app routing library.
 
 # Install
 
-### NPM
-<b>Stable release</b>
 ```sh
-npm install --save silkrouter
+npm install --save silkrouter@4.0.0-alpha.0 rxjs
 ```
 
-### CDN
-```html
-<script src="https://cdn.jsdelivr.net/npm/silkrouter@latest"></script>
-```
+# What's new?
 
-### JQuery version
-```sh
-npm install --save jqueryrouter@2.2.7
-```
+Silk router uses ReactiveX Observer pattern in contrast to EventEmitter pattern used in version 3 and earlier. This solves one of the major  problems silk router had in previous versions: Lack of customization. Almost 80% of the code has been re-written in favour of observer pattern. It means you can customize and use any number of operators provided by ``rxjs``, ``silkrouter`` or other third party libraries. **Neat right!**
 
-### Notes
-1. JQuery version supports IE9 and other legacy browsers. For more details please <a href="https://www.npmjs.com/package/jqueryrouter">click here</a>.
+# RxJS
 
-# How to use Silk Router?
+Silk router uses classes such as ``Observables`` and ``Subscription`` provided by ``rxjs``. We do not bundle them in order to keep file size small. You need to install ``rxjs`` separately.
 
-Silkrouter follows a familiar concept. If you have worked with custom events, you should get started with ``silkrouter`` in no time.
+# How to use Silk router
 
-## Import dependencies
+We have taken a massive leap forward syntax-wise, however the underlying premise remains the same.
+
+1. Import
 
 ```js
-import { router, route, unroute } from 'silkrouter';
+import { Router } from 'silkrouter';
+import { route } from 'silkrouter/operators';
+...
 ```
 
-## Add listeners
+2. Create a router instance
 
 ```js
-route('/path/to/route', (e) => { ... }); // Supports both primary and hash routing (Use "e.hash" to differentiate)
-route('#/path/to/route', (e) => { ... }); // Supports hash routing
-route((e) => { ... }); // A generic route listens to every route change
+const router = new Router();
 ```
 
-## Trigger an event
+3. Add a subscriber
 
 ```js
-router.set('/path/to/route');
-router.set('#/path/to/route'); // <-- Triggers hash route
-```
-
-## Complex examples
-
-### Set query string parameters
-
-```js
-route('/path/to/route', (e) => {
-    const { q, r } = e.query;
-    console.log(q, r); // -> 'Hello', 'World'
+router.subscribe((e) => {
+  // This is your new generic route syntax
 });
+```
 
+4. Use ``route`` operator to add a path
+
+Use ``pipe`` method for that
+
+```js
+router
+    .pipe(route('/path/to/route'))
+    .subscribe(e => {
+        // This listens to a specific route '/path/to/route'
+    })
+```
+
+5. Trigger a route change
+
+```js
+router.set('/path/to/another/route');
+```
+
+You can ``pipe`` more operators to apply any number of transformations. Silk router currently ships three operators ``route``, ``deparam`` and ``noMatch``. Please refer to API section below for more details.
+
+# API
+
+## Classes
+
+|Class|Description|Options and Example|
+|:----|:----------|:------------------|
+|**Router**|Creates a router instance|`` new Router({ /*Router options*/ })``<br><br>Router options:<br><br> **hashRouting**[optional] - Enables hash routing (default: ``false``)<br> **preservePath**[optional] - Preserves existing ``pathname`` when hashRouting is enabled (default: ``false``)<br> **context**[optional] - Element reference to bind ``vpushstate`` synthetic event (default: ``document.body``)|
+
+## Router methods
+
+|Method|Description|Example|
+|:-----|:----------|:------|
+|**set**|Sets browser router path|``routerIns.set(pathStringOrObject[, replace][, exec])``<br><br>Set parameters:<br><br> **pathStringOrObject** - String or object to configure current path<br>Examples:<br>``routerIns.set('/example/path')``<br>``routerIns.set({ route: '/example/path', /*...otherOptions*/ })``<br>**replace**[optional] - Use history ``replaceState`` function instead of ``pushState`` (default: ``false``).<br>**exec**[optional] - Disable or enable subscriber execution (default: ``true``)<br><br>Path object options: **route, data, queryString, preserveQuery** (bool)**, pageTitle, replace** (bool)**, exec** (bool)|
+|**subscribe**|Returns RxJS subscription|``routerIns.subscribe(e => { ... })``|
+|**pipe**|Pipes operators to return new observable|``routerIns.pipe(route('/example/route')).subscribe(e => { ... })``|
+|**destroy**|Destroys current router instance|``routerIns.destroy(() => { /* Unsubscribe your subscriptions here */ })``|
+
+## Operators
+
+|Operator|Description|Example|
+|:-------|:----------|:------|
+|**route**|Set a filter for specific route path|``routerIns.pipe(route(path[, routerIns][, ignoreCase])).subscribe(...)``<br><br>``route`` options:<br><br> **path** - Path filter to apply on generic route observer<br> **routerIns**[optional] - Current ``Router`` instance. Required only if ``noMatch`` operator is used.<br> **ignoreCase**[optional] - Ignores the case of current route|
+|**deparam**|Converts query string to JS object|**Before:** ``routerIns.subscribe(e => { console.log(e.search); })``.<br>Output: **a=10&b=20**<br> **After:** ``routerIns.pipe(deparam()).subscribe(e => { console.log(e.search); })``.<br>Output: **{ a:"10", b:"20" }**<br><br>``deparam`` options:<br><br> **coerce**[optional] - Converts object properties to their correct types|
+|**noMatch**|Adds an optional route for 'page not found'|``routerIns.pipe(noMatch([routerIns])).subscribe(...)``<br><br>``noMatch`` options:<br><br> **routerIns** - Current router instance for tracking current routes|
+
+# Examples
+
+## Enable hash routing
+
+Unlike previous versions of silk router, ``hash`` routing has to be enabled via a flag.
+
+```js
+const router = new Router({
+    hashRouting: true
+});
+```
+
+Your application will still continue to run the same way. Hash routing strips away the dependency to define server-side routes for your application (since hash routing is pretty much client-side only).<br><br>
+By default hash routes will replace your current path. In order to maintain current path, you need to pass an additional flag called ``preservePath``.
+
+```js
+const router = new Router({
+    hashRouting: true,
+    preservePath: true
+});
+```
+
+## Handle error page
+
+Silk router version 4 brings a neat way to handle error pages using operators. It comes with built-in ``noMatch`` operator which works as an error handler keeping track of routes that have been added previously, and call subsriber only if a route is missing.
+
+```js
+const router = new Router();
+
+router.pipe(route('/first/path', router)).subscribe(() => { ... });
+router.pipe(route('/second/path', router)).subscribe(() => { ... });
+router.pipe(noMatch(router)).subscribe(() => { ... }); // Called only if "first" and "second" paths are not matched
+```
+
+## Passing data
+
+There are three ways you can pass data.
+1. Route params
+2. Query strings
+3. Direct method
+
+### Route params
+
+```js
+...
+router.pipe(route('/route/:with/:params')).subscribe(e => {
+    console.log(e.params); // --> { with: 'param1', params: 'param2' }
+});
+...
+router.set('/route/param1/param2');
+```
+
+### Query string
+
+```js
+router.set('/example/route?with=query&string=true');
+// OR
 router.set({
-    route: '/path/to/route',
-    queryString: 'q=Hello&r=World'
+    route: '/example/route',
+    queryString: 'with=query&string=true'
 });
 ```
 
-### Preserve an existing query string
+You can preserve existing query string by passing ``preserveQuery`` flag.
 
 ```js
 router.set({
-    route: '/path/to/route',
-    queryString: 'q=Hello&r=World',
-    appendQuery: true
+    route: '/example/route',
+    queryString: 'with=query&string=true',
+    preserveQuery: true // Default: false
 });
-```
-
-### Use parameters within route
-
-```js
-route('/path/:to/:route', (e) => {
-    const { to, route } = e.params;
-    console.log(to, route); // -> 'hello', 'world'
-});
-
-router.set('/path/hello/world');
-```
-
-### Pass data directly to a handler
-
-```js
-route('/path/to/route', (e) => {
-    console.log(e.data); // -> 'Hello World!'
-});
-
-router.set({
-    route: '/path/to/route',
-    data: 'Hello World!'
-});
-```
-
-## Multi-routing concepts
-
-Silkrouter has several options to handle multiple routes.
-
-### Route list [Experimental]
-
-```js
-route([
-    '/route1',
-    '#/route2'
-], (e) => { ... });
-```
-
-### Generic routing
-
-```js
-route((e) => {
-    switch(e.route) {
-        case '/route1': ...;
-        case '#/route2': ...;
-        default: ...; // Handle error route here
-    }
-});
-```
-
-### Handle errors
-
-Version 3.5.0 adds a new feature which makes error handling much easier than before.
-
-1. Add routes
-
-```js
-// Routes
-route('/path/1', () => { ... });
-route('/path/2/:var1', () => { ... });
-route('/path/3/:var2/:var3', () => { ... });
-```
-
-2. Add error route
-
-```js
-// Error page handling using generic route
-route(e => {
-    if (!router.includes(
-        router.list().filter(r => r !== '*'), // Ignore current route using "filter"
-        e.route
-    )) {
-        // Handler error page
-    }
-});
-```
-
-## Ignore case
-
-### [Experimental]
-
-```js
-routeIgnoreCase('/mandatory/route/string', (e) => {
-    console.log(e.route); // -> '/MandATorY/RoUte/StriNg'
-});
-
-router.set('/MandATorY/RoUte/StriNg');
 ```
 ## Helper methods
 
@@ -178,29 +180,23 @@ route(e => {
 
 Param creates are query string from an object. Deparam just reverses it.
 
+Query strings are passed to subscriber as ``e.search`` and ``e.hashSearch``parameters (where ``e`` is an event object) depending on which router mode is enabled. You might get both under certain circumstances.
+
+### Passing data directly
+
 ```js
-import { param, deparam } from 'silkrouter';
+router.subscribe(e => {
+    console.log(e.data); // --> Hello World!
+});
 ...
-const qs = param({ a: 10, b: 20 }); // -> a=10&b=20
-const qsObject = deparam(qs); // -> { a: "10", b: "20" }
-// Deparam with coerced values
-const qsObCoerced = deparam(qs, true); // -> {a: 10, b: 20}
+router.set({
+    route: '/example/route',
+    data: 'Hello World!'
+});
 ```
 
-## Detach listeners
+Similar to route parameters and query strings, data passed this way is also persisted.
 
-```js
-unroute(); // Removes all listeners
-unroute('/path/to/route'); // Removes all listeners for current route
-unroute('/path/to/route', fn); // Removes current listener
-unroute(fn); // Removes current generic listener
-unroute([...], fn); // Removes current list listener
-```
+# Contribution
 
-# Debugging
-
-<a href="https://github.com/scssyworks/silkrouter/blob/master/DEBUGGING.md">https://github.com/scssyworks/silkrouter/blob/master/DEBUGGING.md</a>
-
-# Demo
-
-<a href="https://silkrouter.herokuapp.com/">https://silkrouter.herokuapp.com</a>
+Silk router has been evolving since the day of its inception. In my quest to improve application experience, I've been trying to find new ways to solve new problems and implement their solutions in ``silkrouter``. It started as a simple jquery plugin called ``jqueryrouter`` which provided great browser support (IE9 included). But then IE9 went dead, and ``jQuery`` started to lose its charm. I came up with a new version (now known is ``silkrouter``) free from ``jQuery`` or any other external plugins of that matter (except for few which I created myself). I solved a bunch of different problems (including data persistence, which btw ``jqueryrouter`` still doesn't support, and is still alive!). Now we are here, a new library version, with a new way of handling routes, and a bunch of features, improvement and hidden easter eggs. I would love it if you give this version a try and provide your valuable support and feedback and take it even further.<br>

@@ -1,18 +1,20 @@
-import { loc } from '../../utils/vars';
 import { trim } from '../../utils/utils';
+import { toQueryString } from '../../utils/query';
+import { assign } from '../../utils/assign';
+import { deparam } from '../../utils/deparam';
 
 /**
- * Adds a query string
+ * Resolves and analyzes existing query string
  * @private
- * @param {string} route Route string
- * @param {string} qString Query string
- * @param {boolean} appendQString Append query string flag
+ * @param {string} queryString Query string
+ * @param {string} hashRouting Flag to test if hash routing is enabled
  */
-export default function resolveQuery(route, isHash, queryString, append) {
-    queryString = trim(queryString.substring(+(queryString.charAt(0) === '?')));
-    const search = (append || '') && loc.search;
-    if (!isHash) {
-        return `${route}${search}${queryString ? `${search ? '&' : '?'}${queryString}` : ''}`;
-    }
-    return `${loc.pathname}${search}#${route}${queryString ? `?${queryString}` : ''}`;
+export default function resolveQuery(queryString, hashRouting) {
+    const { location } = this.config;
+    const search = trim(location.search && location.search.substring(1));
+    const existingQuery = hashRouting
+        ? trim(location.hash.split('?')[1])
+        : trim(search);
+    if (!existingQuery) return queryString;
+    return toQueryString(assign(deparam(search), deparam(existingQuery), deparam(queryString)));
 }

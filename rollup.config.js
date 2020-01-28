@@ -2,111 +2,118 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import babel from "rollup-plugin-babel";
 import { terser } from "rollup-plugin-terser";
-import cleanup from "rollup-plugin-cleanup";
+import { eslint } from 'rollup-plugin-eslint';
+import serve from 'rollup-plugin-serve';
+import livereload from 'rollup-plugin-livereload';
 import pkg from './package.json';
 
-const banner = `/**!
- * Router plugin for single page applications with routes
- * Released under MIT license
- * @name Silk router
- * @author Sachin Singh <contactsachinsingh@gmail.com>
- * @version ${pkg.version}
- * @license MIT
- */`;
+const rxjs = 'rxjs';
 
 const commonConfig = {
-    input: 'src/js/silkrouter',
+    input: 'src/js/index.js',
     output: {
         name: 'silkrouter',
-        sourcemap: true,
-        banner
+        sourcemap: true
     },
     plugins: [
         resolve({
             customResolveOptions: {
-                moduleDirectory: "node_modules"
-            }
+                moduleDirectory: 'node_modules'
+            },
+            preferBuiltins: true
         }),
-        commonjs()
+        commonjs({
+            namedExports: {
+                uuid: ['v4']
+            }
+        })
     ]
 };
 
-// Dev config
-const devConfig = Object.assign({}, commonConfig);
-devConfig.output = Object.assign({}, commonConfig.output, {
-    file: 'dist/umd/index.js',
-    format: 'umd'
-});
-devConfig.plugins = [
-    ...commonConfig.plugins,
-    babel({
-        exclude: "node_modules/**"
-    }),
-    cleanup({
-        maxEmptyLines: 0
-    })
-];
-
-// Esm config
+// ESM config
 const esmConfig = Object.assign({}, commonConfig);
+esmConfig.external = [...Object.keys(pkg.peerDependencies)];
 esmConfig.output = Object.assign({}, commonConfig.output, {
-    file: 'dist/esm/index.esm.js',
-    format: 'esm'
+    file: 'dist/esm/silkrouter.esm.js',
+    format: 'esm',
+    globals: { rxjs }
 });
-esmConfig.plugins = [
-    ...commonConfig.plugins,
-    cleanup({
-        maxEmptyLines: 0
-    })
-];
 
-// Prod configurations
-const prodConfig = Object.assign({}, devConfig);
-prodConfig.output = Object.assign({}, devConfig.output, {
-    file: 'dist/umd/index.min.js',
+// ESM prod config
+const esmProdConfig = Object.assign({}, esmConfig);
+esmProdConfig.output = Object.assign({}, esmConfig.output, {
+    file: 'dist/esm/silkrouter.esm.min.js',
     sourcemap: false
 });
-prodConfig.plugins = [
+esmProdConfig.plugins = [
+    ...esmConfig.plugins,
+    terser()
+];
+
+// UMD config
+const umdConfig = Object.assign({}, commonConfig);
+umdConfig.external = [...Object.keys(pkg.peerDependencies)];
+umdConfig.output = Object.assign({}, commonConfig.output, {
+    file: 'dist/umd/silkrouter.js',
+    format: 'umd',
+    globals: { rxjs }
+});
+umdConfig.plugins = [
     ...commonConfig.plugins,
     babel({
-        exclude: "node_modules/**"
-    }),
-    terser({
-        output: {
-            comments: function () {
-                const [, comment] = arguments;
-                if (comment.type === "comment2") {
-                    return /@preserve|@license|@cc_on/i.test(comment.value);
-                }
-                return false;
-            }
-        }
+        exclude: 'node_modules/**'
     })
 ];
 
-const prodEsmConfig = Object.assign({}, esmConfig);
-prodEsmConfig.output = Object.assign({}, esmConfig.output, {
-    file: 'dist/esm/index.esm.min.js',
+// Production config
+const umdProdConfig = Object.assign({}, umdConfig);
+umdProdConfig.output = Object.assign({}, umdConfig.output, {
+    file: 'dist/umd/silkrouter.min.js',
     sourcemap: false
 });
-prodEsmConfig.plugins = [
-    ...commonConfig.plugins,
-    terser({
-        output: {
-            comments: function () {
-                const [, comment] = arguments;
-                if (comment.type === "comment2") {
-                    return /@preserve|@license|@cc_on/i.test(comment.value);
-                }
-                return false;
-            }
-        }
-    })
+umdProdConfig.plugins = [
+    ...umdConfig.plugins,
+    terser()
 ];
 
-export default [
-    devConfig,
-    esmConfig,
-    prodConfig,
-    prodEsmConfig
-];
+let configurations = [];
+if (process.env.SERVE) {
+    const serveConfig = Object.assign({}, commonConfig);
+    serveConfig.input = 'render/index.js';
+    serveConfig.output = Object.assign({}, commonConfig.output, {
+        file: 'dist/render/silkrouter.iife.js',
+        format: 'iife'
+    });
+    serveConfig.plugins = [
+        eslint({
+            exclude: [
+                'node_modules/**',
+                'json/**'
+            ],
+            throwOnError: true
+        }),
+        ...umdConfig.plugins
+    ];
+    serveConfig.plugins.push(
+        serve({
+            open: true,
+            contentBase: ['dist'],
+            host: 'localhost',
+            port: '3030'
+        }),
+        livereload({
+            watch: 'dist',
+            verbose: false
+        })
+    );
+    configurations.push(serveConfig);
+} else {
+    configurations.push(
+        esmConfig,
+        esmProdConfig,
+        umdConfig,
+        umdProdConfig
+    )
+}
+
+export default configurations;

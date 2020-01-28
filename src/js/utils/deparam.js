@@ -1,20 +1,21 @@
 import { loc } from './vars';
-import { isArr, trim, isNumber, isPureObject, def } from './utils';
+import { isArr, trim, isNumber, isPureObject } from './utils';
+import { REG_COMPLEX, REG_VARIABLE, REG_REPLACE_BRACKETS, REG_REPLACE_NEXTPROP } from './constants';
 
 /**
  * Checks if query parameter key is a complex notation
  * @param {string} q 
  */
 function ifComplex(q) {
-    return (/\[/.test(q));
+    return (REG_COMPLEX.test(q));
 }
 
 /**
  * Converts query string to JavaScript object
  * @param {string} qs query string argument (defaults to url query string)
  */
-function deparam(qs, coerce) {
-    qs = trim(def(qs, loc.search));
+function deparam(qs = loc.search, coerce = false) {
+    qs = trim(qs);
     if (qs.charAt(0) === '?') {
         qs = qs.replace('?', '');
     }
@@ -22,7 +23,7 @@ function deparam(qs, coerce) {
     if (qs) {
         qs.split('&').forEach((qq) => {
             const qArr = qq.split('=').map(part => decodeURIComponent(part));
-            (ifComplex(qArr[0]) ? complex : simple).apply(this, [].concat(qArr, [queryObject, def(coerce, false), false]));
+            (ifComplex(qArr[0]) ? complex : simple).apply(this, [...qArr, queryObject, coerce, false]);
         });
     }
     return queryObject;
@@ -68,25 +69,24 @@ function resolveObj(ob, nextProp) {
  * @param {string} value 
  * @param {Object} obj 
  */
-function complex(key, value, obj, coercion) {
-    coercion = def(coercion, true);
-    const match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
+function complex(key, value, obj, coercion = true) {
+    const match = key.match(REG_VARIABLE) || [];
     if (match.length === 3) {
         const prop = match[1];
         let nextProp = match[2];
-        key = key.replace(/\[([^\[]*)\]/, '');
+        key = key.replace(REG_REPLACE_BRACKETS, '');
         if (ifComplex(key)) {
             if (nextProp === '') nextProp = '0';
-            key = key.replace(/[^\[]+/, nextProp);
+            key = key.replace(REG_REPLACE_NEXTPROP, nextProp);
             complex(key, value, (obj[prop] = resolveObj(obj[prop], nextProp).ob), coercion);
         } else if (nextProp) {
             const resolved = resolveObj(obj[prop], nextProp);
             obj[prop] = resolved.ob;
             const coercedValue = coercion ? coerce(value) : value;
             if (resolved.push) {
-                const tempObj = {};
-                tempObj[nextProp] = coercedValue;
-                obj[prop].push(tempObj);
+                obj[prop].push({
+                    [nextProp]: coercedValue
+                });
             } else {
                 obj[prop][nextProp] = coercedValue;
             }
@@ -102,8 +102,8 @@ function complex(key, value, obj, coercion) {
  * @param {Object} queryObject 
  * @param {boolean} toArray 
  */
-function simple(key, value, queryObject, coercion, toArray) {
-    if (def(coercion, true)) {
+function simple(key, value, queryObject, coercion = true, toArray) {
+    if (coercion) {
         value = coerce(value);
     }
     if (key in queryObject) {

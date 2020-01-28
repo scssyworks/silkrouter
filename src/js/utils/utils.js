@@ -40,66 +40,12 @@ export function isPureObject(value) {
 }
 
 /**
- * Sets default value
- * @param {*} value Any value
- * @param {*} defaultValue Default value if value is undefined
- */
-export function def(value, defaultValue) {
-    return typeof value === 'undefined' ? defaultValue : value;
-}
-
-/**
- * Converts array like object to array
- * @param {any[]} arr Arraylike object
- */
-export function toArray(arr) {
-    return Array.prototype.slice.call(arr);
-}
-
-/**
  * Checks if given route is valid
  * @private
  * @param {string} route Route string
  */
 export function isValidRoute(route) {
     return (typeof route === 'string' && REG_PATHNAME.test(route));
-}
-
-/**
- * Checks if the URL is a hash URL
- * @private
- * @param {string} URL URL string
- */
-export function isHashURL(URL) {
-    return typeof URL === 'string' && URL.charAt(0) === '#';
-}
-
-/**
- * Checks if input value is a function
- * @param {function} fn Input function
- */
-export function isFunc(fn) {
-    return typeof fn === 'function';
-}
-
-/**
- * Returns an empty PopStateEvent object
- * @param {string} type Type of event
- * @param {*} data Any type of data
- */
-export function getPopStateEvent(type, data) {
-    return {
-        type,
-        state: { data }
-    };
-}
-
-/**
- * Safely returns object keys
- * @param {object} obj Object
- */
-export function keys(obj) {
-    return obj ? Object.keys(obj) : [];
 }
 
 /**

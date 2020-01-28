@@ -1,4 +1,4 @@
-import { keys, isObject } from './utils';
+import { isObject } from './utils';
 
 /**
  * Inner loop function for assign
@@ -8,7 +8,7 @@ import { keys, isObject } from './utils';
  */
 function loopFunc(ref, target) {
     if (isObject(ref)) {
-        keys(ref).forEach(function (key) {
+        Object.keys(ref).forEach(function (key) {
             target[key] = ref[key];
         });
     }
