@@ -40,12 +40,43 @@
     return Constructor;
   }
 
+  function _defineProperty(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+
+    return obj;
+  }
+
   function _slicedToArray(arr, i) {
     return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
   }
 
+  function _toConsumableArray(arr) {
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+  }
+
+  function _arrayWithoutHoles(arr) {
+    if (Array.isArray(arr)) {
+      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+
+      return arr2;
+    }
+  }
+
   function _arrayWithHoles(arr) {
     if (Array.isArray(arr)) return arr;
+  }
+
+  function _iterableToArray(iter) {
+    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
   }
 
   function _iterableToArrayLimit(arr, i) {
@@ -78,6 +109,10 @@
     return _arr;
   }
 
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance");
+  }
+
   function _nonIterableRest() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance");
   }
@@ -88,6 +123,10 @@
   var POP_STATE = 'popstate';
   var REG_ROUTE_PARAMS = /:[^/]+/g;
   var REG_PATHNAME = /^\/(?=[^?]*)/;
+  var REG_COMPLEX = /\[/;
+  var REG_VARIABLE = /([^[]+)\[([^[]*)\]/;
+  var REG_REPLACE_BRACKETS = /\[([^[]*)\]/;
+  var REG_REPLACE_NEXTPROP = /[^[]+/;
   var HISTORY_UNSUPPORTED = 'Current browser does not support history object';
   var INVALID_ROUTE = 'Route string is not a pure route';
   var LOCAL_ENV = ['localhost', '0.0.0.0', '127.0.0.1', null];
@@ -133,23 +172,6 @@
     return isObject(value) && !isArr(value);
   }
   /**
-   * Sets default value
-   * @param {*} value Any value
-   * @param {*} defaultValue Default value if value is undefined
-   */
-
-  function def(value, defaultValue) {
-    return typeof value === 'undefined' ? defaultValue : value;
-  }
-  /**
-   * Converts array like object to array
-   * @param {any[]} arr Arraylike object
-   */
-
-  function toArray(arr) {
-    return Array.prototype.slice.call(arr);
-  }
-  /**
    * Checks if given route is valid
    * @private
    * @param {string} route Route string
@@ -157,14 +179,6 @@
 
   function isValidRoute(route) {
     return typeof route === 'string' && REG_PATHNAME.test(route);
-  }
-  /**
-   * Safely returns object keys
-   * @param {object} obj Object
-   */
-
-  function keys(obj) {
-    return obj ? Object.keys(obj) : [];
   }
   /**
    * Checks if key is present in provided object
@@ -208,7 +222,7 @@
 
   function loopFunc(ref, target) {
     if (isObject(ref)) {
-      keys(ref).forEach(function (key) {
+      Object.keys(ref).forEach(function (key) {
         target[key] = ref[key];
       });
     }
@@ -230,7 +244,6 @@
     return target;
   }
 
-  // Polyfill custom event
   if (typeof window.CustomEvent === 'undefined') {
     var CustomEvent = function CustomEvent(event, params) {
       params = params || {
@@ -250,13 +263,6 @@
 
   function isValidTarget(target) {
     return target instanceof NodeList || target instanceof HTMLCollection || Array.isArray(target);
-  } // Internal function
-
-
-  function each$1(ob, callback) {
-    for (var i = 0; i < ob.length; i++) {
-      callback(ob[i], i);
-    }
   }
   /**
    * Function to trigger custom event
@@ -272,7 +278,7 @@
     }
 
     if (isValidTarget(target) && typeof eventType === 'string') {
-      each$1(target, function (el) {
+      each(target, function (el) {
         var customEvent = new window.CustomEvent(eventType, {
           bubbles: true,
           cancelable: true,
@@ -663,13 +669,10 @@
         var paths = assign(store.get('routeStore'));
 
         if (paths[path]) {
-          if (!data || isPureObject(data) && keys(data).length === 0) return false;
+          if (!data || isPureObject(data) && Object.keys(data).length === 0) return false;
         }
 
-        var newPath = {};
-        newPath[path] = data;
-        paths = assign({}, paths, newPath);
-        return store.set('routeStore', paths);
+        return store.set('routeStore', assign({}, paths, _defineProperty({}, path, data)));
       }
     }]);
 
@@ -769,7 +772,7 @@
 
   function buildQuery(qsList, key, obj) {
     if (isObject(obj)) {
-      keys(obj).forEach(function (obKey) {
+      Object.keys(obj).forEach(function (obKey) {
         buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? '' : obKey, "]"), obj[obKey]);
       });
     } else if (typeof obj !== 'function') {
@@ -788,7 +791,7 @@
     var qsList = [];
 
     if (isObject(obj)) {
-      keys(obj).forEach(function (key) {
+      Object.keys(obj).forEach(function (key) {
         buildQuery(qsList, key, obj[key]);
       });
       return qsList.join('&');
@@ -803,7 +806,7 @@
    */
 
   function ifComplex(q) {
-    return /\[/.test(q);
+    return REG_COMPLEX.test(q);
   }
   /**
    * Converts query string to JavaScript object
@@ -811,10 +814,12 @@
    */
 
 
-  function deparam(qs, coerce) {
+  function deparam() {
     var _this = this;
 
-    qs = trim(def(qs, loc.search));
+    var qs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : loc.search;
+    var coerce = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    qs = trim(qs);
 
     if (qs.charAt(0) === '?') {
       qs = qs.replace('?', '');
@@ -827,7 +832,7 @@
         var qArr = qq.split('=').map(function (part) {
           return decodeURIComponent(part);
         });
-        (ifComplex(qArr[0]) ? complex : simple).apply(_this, [].concat(qArr, [queryObject, def(coerce, false), false]));
+        (ifComplex(qArr[0]) ? complex : simple).apply(_this, [].concat(_toConsumableArray(qArr), [queryObject, coerce, false]));
       });
     }
 
@@ -887,18 +892,18 @@
    */
 
 
-  function complex(key, value, obj, coercion) {
-    coercion = def(coercion, true);
-    var match = key.match(/([^[]+)\[([^[]*)\]/) || [];
+  function complex(key, value, obj) {
+    var coercion = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+    var match = key.match(REG_VARIABLE) || [];
 
     if (match.length === 3) {
       var prop = match[1];
       var nextProp = match[2];
-      key = key.replace(/\[([^[]*)\]/, '');
+      key = key.replace(REG_REPLACE_BRACKETS, '');
 
       if (ifComplex(key)) {
         if (nextProp === '') nextProp = '0';
-        key = key.replace(/[^[]+/, nextProp);
+        key = key.replace(REG_REPLACE_NEXTPROP, nextProp);
         complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, coercion);
       } else if (nextProp) {
         var resolved = resolveObj(obj[prop], nextProp);
@@ -906,9 +911,7 @@
         var coercedValue = coercion ? coerce(value) : value;
 
         if (resolved.push) {
-          var tempObj = {};
-          tempObj[nextProp] = coercedValue;
-          obj[prop].push(tempObj);
+          obj[prop].push(_defineProperty({}, nextProp, coercedValue));
         } else {
           obj[prop][nextProp] = coercedValue;
         }
@@ -925,8 +928,11 @@
    */
 
 
-  function simple(key, value, queryObject, coercion, toArray) {
-    if (def(coercion, true)) {
+  function simple(key, value, queryObject) {
+    var coercion = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+    var toArray = arguments.length > 4 ? arguments[4] : undefined;
+
+    if (coercion) {
       value = coerce(value);
     }
 
@@ -1166,8 +1172,8 @@
    * @returns {object}
    */
 
-  function extractParams(expr, path) {
-    path = def(path, loc.pathname);
+  function extractParams(expr) {
+    var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : loc.pathname;
     var params = {};
 
     if (REG_ROUTE_PARAMS.test(expr)) {
@@ -1175,10 +1181,12 @@
       REG_ROUTE_PARAMS.lastIndex = 0;
 
       if (pathRegex.test(path)) {
-        var keys = toArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
+        var keys = _toConsumableArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
           return key.replace(':', '');
         });
-        var values = toArray(path.match(pathRegex));
+
+        var values = _toConsumableArray(path.match(pathRegex));
+
         values.shift();
         keys.forEach(function (key, index) {
           params[key] = values[index];

@@ -1,5 +1,5 @@
 import { assign } from './assign';
-import { isPureObject, keys } from './utils';
+import { isPureObject } from './utils';
 import { store } from '../store';
 
 class StorageLib {
@@ -11,13 +11,12 @@ class StorageLib {
         let paths = assign(store.get('routeStore'));
         if (paths[path]) {
             if (!data
-                || (isPureObject(data) && keys(data).length === 0)
+                || (isPureObject(data) && Object.keys(data).length === 0)
             ) return false;
         }
-        const newPath = {};
-        newPath[path] = data;
-        paths = assign({}, paths, newPath);
-        return store.set('routeStore', paths);
+        return store.set('routeStore', assign({}, paths, {
+            [path]: data
+        }));
     }
 }
 

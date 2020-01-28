@@ -6,6 +6,10 @@ import { Observable, fromEvent } from 'rxjs';
 const POP_STATE = 'popstate';
 const REG_ROUTE_PARAMS = /:[^/]+/g;
 const REG_PATHNAME = /^\/(?=[^?]*)/;
+const REG_COMPLEX = /\[/;
+const REG_VARIABLE = /([^[]+)\[([^[]*)\]/;
+const REG_REPLACE_BRACKETS = /\[([^[]*)\]/;
+const REG_REPLACE_NEXTPROP = /[^[]+/;
 const HISTORY_UNSUPPORTED = 'Current browser does not support history object';
 const INVALID_ROUTE = 'Route string is not a pure route';
 const LOCAL_ENV = ['localhost', '0.0.0.0', '127.0.0.1', null];
@@ -51,37 +55,12 @@ function isPureObject(value) {
 }
 
 /**
- * Sets default value
- * @param {*} value Any value
- * @param {*} defaultValue Default value if value is undefined
- */
-function def(value, defaultValue) {
-    return typeof value === 'undefined' ? defaultValue : value;
-}
-
-/**
- * Converts array like object to array
- * @param {any[]} arr Arraylike object
- */
-function toArray(arr) {
-    return Array.prototype.slice.call(arr);
-}
-
-/**
  * Checks if given route is valid
  * @private
  * @param {string} route Route string
  */
 function isValidRoute(route) {
     return (typeof route === 'string' && REG_PATHNAME.test(route));
-}
-
-/**
- * Safely returns object keys
- * @param {object} obj Object
- */
-function keys(obj) {
-    return obj ? Object.keys(obj) : [];
 }
 
 /**
@@ -123,7 +102,7 @@ function each(arrayObj, callback) {
  */
 function loopFunc(ref, target) {
     if (isObject(ref)) {
-        keys(ref).forEach(function (key) {
+        Object.keys(ref).forEach(function (key) {
             target[key] = ref[key];
         });
     }
@@ -164,13 +143,6 @@ function isValidTarget(target) {
     );
 }
 
-// Internal function
-function each$1(ob, callback) {
-    for (let i = 0; i < ob.length; i++) {
-        callback(ob[i], i);
-    }
-}
-
 /**
  * Function to trigger custom event
  * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
@@ -182,7 +154,7 @@ function trigger(target, eventType, data) {
         target = [target];
     }
     if (isValidTarget(target) && typeof eventType === 'string') {
-        each$1(target, el => {
+        each(target, el => {
             const customEvent = new window.CustomEvent(eventType, {
                 bubbles: true,
                 cancelable: true,
@@ -504,13 +476,12 @@ class StorageLib {
         let paths = assign(store.get('routeStore'));
         if (paths[path]) {
             if (!data
-                || (isPureObject(data) && keys(data).length === 0)
+                || (isPureObject(data) && Object.keys(data).length === 0)
             ) return false;
         }
-        const newPath = {};
-        newPath[path] = data;
-        paths = assign({}, paths, newPath);
-        return store.set('routeStore', paths);
+        return store.set('routeStore', assign({}, paths, {
+            [path]: data
+        }));
     }
 }
 
@@ -590,7 +561,7 @@ function bindRouterEvents() {
  */
 function buildQuery(qsList, key, obj) {
     if (isObject(obj)) {
-        keys(obj).forEach(obKey => {
+        Object.keys(obj).forEach(obKey => {
             buildQuery(qsList, `${key}[${isArr(obj) ? '' : obKey}]`, obj[obKey]);
         });
     } else if (typeof obj !== 'function') {
@@ -607,7 +578,7 @@ function buildQuery(qsList, key, obj) {
 function toQueryString(obj) {
     let qsList = [];
     if (isObject(obj)) {
-        keys(obj).forEach(key => {
+        Object.keys(obj).forEach(key => {
             buildQuery(qsList, key, obj[key]);
         });
         return qsList.join('&');
@@ -620,15 +591,15 @@ function toQueryString(obj) {
  * @param {string} q 
  */
 function ifComplex(q) {
-    return (/\[/.test(q));
+    return (REG_COMPLEX.test(q));
 }
 
 /**
  * Converts query string to JavaScript object
  * @param {string} qs query string argument (defaults to url query string)
  */
-function deparam(qs, coerce) {
-    qs = trim(def(qs, loc.search));
+function deparam(qs = loc.search, coerce = false) {
+    qs = trim(qs);
     if (qs.charAt(0) === '?') {
         qs = qs.replace('?', '');
     }
@@ -636,7 +607,7 @@ function deparam(qs, coerce) {
     if (qs) {
         qs.split('&').forEach((qq) => {
             const qArr = qq.split('=').map(part => decodeURIComponent(part));
-            (ifComplex(qArr[0]) ? complex : simple).apply(this, [].concat(qArr, [queryObject, def(coerce, false), false]));
+            (ifComplex(qArr[0]) ? complex : simple).apply(this, [...qArr, queryObject, coerce, false]);
         });
     }
     return queryObject;
@@ -682,25 +653,24 @@ function resolveObj(ob, nextProp) {
  * @param {string} value 
  * @param {Object} obj 
  */
-function complex(key, value, obj, coercion) {
-    coercion = def(coercion, true);
-    const match = key.match(/([^[]+)\[([^[]*)\]/) || [];
+function complex(key, value, obj, coercion = true) {
+    const match = key.match(REG_VARIABLE) || [];
     if (match.length === 3) {
         const prop = match[1];
         let nextProp = match[2];
-        key = key.replace(/\[([^[]*)\]/, '');
+        key = key.replace(REG_REPLACE_BRACKETS, '');
         if (ifComplex(key)) {
             if (nextProp === '') nextProp = '0';
-            key = key.replace(/[^[]+/, nextProp);
+            key = key.replace(REG_REPLACE_NEXTPROP, nextProp);
             complex(key, value, (obj[prop] = resolveObj(obj[prop], nextProp).ob), coercion);
         } else if (nextProp) {
             const resolved = resolveObj(obj[prop], nextProp);
             obj[prop] = resolved.ob;
             const coercedValue = coercion ? coerce(value) : value;
             if (resolved.push) {
-                const tempObj = {};
-                tempObj[nextProp] = coercedValue;
-                obj[prop].push(tempObj);
+                obj[prop].push({
+                    [nextProp]: coercedValue
+                });
             } else {
                 obj[prop][nextProp] = coercedValue;
             }
@@ -716,8 +686,8 @@ function complex(key, value, obj, coercion) {
  * @param {Object} queryObject 
  * @param {boolean} toArray 
  */
-function simple(key, value, queryObject, coercion, toArray) {
-    if (def(coercion, true)) {
+function simple(key, value, queryObject, coercion = true, toArray) {
+    if (coercion) {
         value = coerce(value);
     }
     if (key in queryObject) {
@@ -897,15 +867,14 @@ class Router {
  * @param {string} path URL path
  * @returns {object}
  */
-function extractParams(expr, path) {
-    path = def(path, loc.pathname);
+function extractParams(expr, path = loc.pathname) {
     const params = {};
     if (REG_ROUTE_PARAMS.test(expr)) {
         const pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^/\\]+/g, "([^\\/]+)"));
         REG_ROUTE_PARAMS.lastIndex = 0;
         if (pathRegex.test(path)) {
-            const keys = toArray(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(':', ''));
-            const values = toArray(path.match(pathRegex));
+            const keys = [...expr.match(REG_ROUTE_PARAMS)].map(key => key.replace(':', ''));
+            const values = [...path.match(pathRegex)];
             values.shift();
             keys.forEach((key, index) => {
                 params[key] = values[index];

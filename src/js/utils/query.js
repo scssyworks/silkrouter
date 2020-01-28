@@ -1,4 +1,4 @@
-import { isArr, keys, isObject } from './utils';
+import { isArr, isObject } from './utils';
 
 /**
  * Builds query string recursively
@@ -9,7 +9,7 @@ import { isArr, keys, isObject } from './utils';
  */
 function buildQuery(qsList, key, obj) {
     if (isObject(obj)) {
-        keys(obj).forEach(obKey => {
+        Object.keys(obj).forEach(obKey => {
             buildQuery(qsList, `${key}[${isArr(obj) ? '' : obKey}]`, obj[obKey]);
         });
     } else if (typeof obj !== 'function') {
@@ -26,7 +26,7 @@ function buildQuery(qsList, key, obj) {
 export function toQueryString(obj) {
     let qsList = [];
     if (isObject(obj)) {
-        keys(obj).forEach(key => {
+        Object.keys(obj).forEach(key => {
             buildQuery(qsList, key, obj[key]);
         });
         return qsList.join('&');

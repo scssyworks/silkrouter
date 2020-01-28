@@ -28,18 +28,6 @@ describe('Utils module', () => {
     test('Function isObject should validate to false if given argument is not a valid object', () => {
         expect(isObject('Hello World')).toBeFalsy();
     });
-    test('Function "def" should set passed value if the value is not undefined', () => {
-        expect(def('test', 'hello')).toBe('test');
-    });
-    test('Function "def" should set default value if the value is undefined', () => {
-        expect(def(undefined, 'hello')).toBe('hello');
-    });
-    test('Function toArray should convert an array like object to proper array', () => {
-        function arrayTest() {
-            return toArray(arguments);
-        }
-        expect(isArr(arrayTest())).toBeTruthy();
-    });
     test('Function isValidRoute should return true if given route is valid', () => {
         expect(isValidRoute('/path/to/route')).toBeTruthy();
     });

@@ -1,3 +1,5 @@
+import { each } from './utils';
+
 // Polyfill custom event
 if (typeof window.CustomEvent === 'undefined') {
     const CustomEvent = function (event, params) {
@@ -18,13 +20,6 @@ function isValidTarget(target) {
         || target instanceof HTMLCollection
         || Array.isArray(target)
     );
-}
-
-// Internal function
-function each(ob, callback) {
-    for (let i = 0; i < ob.length; i++) {
-        callback(ob[i], i);
-    }
 }
 
 /**
