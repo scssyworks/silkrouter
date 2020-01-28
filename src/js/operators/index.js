@@ -117,8 +117,8 @@ export function noMatch(routerInstance) {
                                 break;
                             }
                         }
-                        if (match) {
-                            event.isErrorRoute = true;
+                        if (!match) {
+                            event.noMatch = true;
                             subscriber.next(event);
                         }
                     }

@@ -276,6 +276,7 @@
   function isFunction(x) {
       return typeof x === 'function';
   }
+  //# sourceMappingURL=isFunction.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var _enable_super_gross_mode_that_will_cause_bad_things = false;
@@ -292,11 +293,13 @@
           return _enable_super_gross_mode_that_will_cause_bad_things;
       },
   };
+  //# sourceMappingURL=config.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   function hostReportError(err) {
       setTimeout(function () { throw err; }, 0);
   }
+  //# sourceMappingURL=hostReportError.js.map
 
   /** PURE_IMPORTS_START _config,_util_hostReportError PURE_IMPORTS_END */
   var empty = {
@@ -312,14 +315,17 @@
       },
       complete: function () { }
   };
+  //# sourceMappingURL=Observer.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var isArray = /*@__PURE__*/ (function () { return Array.isArray || (function (x) { return x && typeof x.length === 'number'; }); })();
+  //# sourceMappingURL=isArray.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   function isObject$1(x) {
       return x !== null && typeof x === 'object';
   }
+  //# sourceMappingURL=isObject.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var UnsubscriptionErrorImpl = /*@__PURE__*/ (function () {
@@ -335,6 +341,7 @@
       return UnsubscriptionErrorImpl;
   })();
   var UnsubscriptionError = UnsubscriptionErrorImpl;
+  //# sourceMappingURL=UnsubscriptionError.js.map
 
   /** PURE_IMPORTS_START _util_isArray,_util_isObject,_util_isFunction,_util_UnsubscriptionError PURE_IMPORTS_END */
   var Subscription = /*@__PURE__*/ (function () {
@@ -466,6 +473,7 @@
   function flattenUnsubscriptionErrors(errors) {
       return errors.reduce(function (errs, err) { return errs.concat((err instanceof UnsubscriptionError) ? err.errors : err); }, []);
   }
+  //# sourceMappingURL=Subscription.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var rxSubscriber = /*@__PURE__*/ (function () {
@@ -473,6 +481,7 @@
           ? /*@__PURE__*/ Symbol('rxSubscriber')
           : '@@rxSubscriber_' + /*@__PURE__*/ Math.random();
   })();
+  //# sourceMappingURL=rxSubscriber.js.map
 
   /** PURE_IMPORTS_START tslib,_util_isFunction,_Observer,_Subscription,_internal_symbol_rxSubscriber,_config,_util_hostReportError PURE_IMPORTS_END */
   var Subscriber = /*@__PURE__*/ (function (_super) {
@@ -697,6 +706,7 @@
       };
       return SafeSubscriber;
   }(Subscriber));
+  //# sourceMappingURL=Subscriber.js.map
 
   /** PURE_IMPORTS_START _Subscriber PURE_IMPORTS_END */
   function canReportError(observer) {
@@ -714,6 +724,7 @@
       }
       return true;
   }
+  //# sourceMappingURL=canReportError.js.map
 
   /** PURE_IMPORTS_START _Subscriber,_symbol_rxSubscriber,_Observer PURE_IMPORTS_END */
   function toSubscriber(nextOrObserver, error, complete) {
@@ -730,12 +741,15 @@
       }
       return new Subscriber(nextOrObserver, error, complete);
   }
+  //# sourceMappingURL=toSubscriber.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var observable = /*@__PURE__*/ (function () { return typeof Symbol === 'function' && Symbol.observable || '@@observable'; })();
+  //# sourceMappingURL=observable.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   function noop() { }
+  //# sourceMappingURL=noop.js.map
 
   /** PURE_IMPORTS_START _noop PURE_IMPORTS_END */
   function pipeFromArray(fns) {
@@ -749,6 +763,7 @@
           return fns.reduce(function (prev, fn) { return fn(prev); }, input);
       };
   }
+  //# sourceMappingURL=pipe.js.map
 
   /** PURE_IMPORTS_START _util_canReportError,_util_toSubscriber,_symbol_observable,_util_pipe,_config PURE_IMPORTS_END */
   var Observable = /*@__PURE__*/ (function () {
@@ -859,6 +874,7 @@
       }
       return promiseCtor;
   }
+  //# sourceMappingURL=Observable.js.map
 
   /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
   function map(project, thisArg) {
@@ -901,6 +917,7 @@
       };
       return MapSubscriber;
   }(Subscriber));
+  //# sourceMappingURL=map.js.map
 
   /** PURE_IMPORTS_START _Observable,_util_isArray,_util_isFunction,_operators_map PURE_IMPORTS_END */
   function fromEvent(target, eventName, options, resultSelector) {
@@ -959,6 +976,7 @@
   function isEventTarget(sourceObj) {
       return sourceObj && typeof sourceObj.addEventListener === 'function' && typeof sourceObj.removeEventListener === 'function';
   }
+  //# sourceMappingURL=fromEvent.js.map
 
   if (typeof window.CustomEvent === 'undefined') {
     var CustomEvent = function CustomEvent(event, params) {
@@ -2041,8 +2059,8 @@
                   }
                 }
 
-                if (match) {
-                  event.isErrorRoute = true;
+                if (!match) {
+                  event.noMatch = true;
                   subscriber.next(event);
                 }
               }
