@@ -49,7 +49,7 @@ router.subscribe((e) => {
 
 4. Use ``route`` operator to add a path
 
-Use router ``pipe`` method for that
+Use ``pipe`` method for that
 
 ```js
 router
@@ -164,6 +164,21 @@ router.set({
     preserveQuery: true // Default: false
 });
 ```
+## Helper methods
+
+### Handle route parameters using "routeParams"
+
+```js
+import { route, routeParams } from 'silkrouter';
+...
+route(e => {
+    const paramsMap = routeParams('/test/:var1/:var2', e.route); // Returns {var1: "hello", var2: "world"} for "/test/hello/world"
+});
+```
+
+### Handle query strings using "param" and "deparam"
+
+Param creates are query string from an object. Deparam just reverses it.
 
 Query strings are passed to subscriber as ``e.search`` and ``e.hashSearch``parameters (where ``e`` is an event object) depending on which router mode is enabled. You might get both under certain circumstances.
 
