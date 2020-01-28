@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.js?label=unminified)
 
-**Silk router version 4 is here. If you are searching for version 3 documentation (current version), please click the link below:**
+**Silk router version 4 is here. If you are searching for version 3 documentation (current version), please click the link below:**<br>
 https://github.com/scssyworks/silkrouter/blob/master/READMEv3.md
 
 # Silk router
@@ -10,7 +10,7 @@ Silk router is a customizable and reactive app routing library.
 # Install
 
 ```sh
-npm install --save silkrouter@4.0.0-alpha.0 rxjs
+npm install --save silkrouter@4.0.0-alpha.2 rxjs
 ```
 
 # What's new?
@@ -19,7 +19,7 @@ Silk router uses ReactiveX Observer pattern in contrast to EventEmitter pattern 
 
 # RxJS
 
-Silk router uses classes such as ``Observables`` and ``Subscription`` provided by ``rxjs``. We do not bundle them in order to keep file size small. You need to install ``rxjs`` separately.
+Silk router uses classes such as ``Observables`` and ``Subscription`` provided by ``rxjs``. We do not bundle them in order to keep file size small. Hence, you need to install ``rxjs`` separately.
 
 # How to use Silk router
 
@@ -96,7 +96,7 @@ You can ``pipe`` more operators to apply any number of transformations. Silk rou
 
 ## Enable hash routing
 
-Unlike previous versions of silk router, ``hash`` routing has to be enabled via a flag.
+Unlike previous versions of silk router, ``hash`` routing has to be enabled via flag.
 
 ```js
 const router = new Router({
@@ -164,21 +164,6 @@ router.set({
     preserveQuery: true // Default: false
 });
 ```
-## Helper methods
-
-### Handle route parameters using "routeParams"
-
-```js
-import { route, routeParams } from 'silkrouter';
-...
-route(e => {
-    const paramsMap = routeParams('/test/:var1/:var2', e.route); // Returns {var1: "hello", var2: "world"} for "/test/hello/world"
-});
-```
-
-### Handle query strings using "param" and "deparam"
-
-Param creates are query string from an object. Deparam just reverses it.
 
 Query strings are passed to subscriber as ``e.search`` and ``e.hashSearch``parameters (where ``e`` is an event object) depending on which router mode is enabled. You might get both under certain circumstances.
 
