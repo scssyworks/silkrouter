@@ -120,6 +120,7 @@
    * Router constants
    */
   var POP_STATE = 'popstate';
+  var REG_ROUTE_PARAMS = /:[^/]+/g;
   var REG_PATHNAME = /^\/(?=[^?]*)/;
   var REG_COMPLEX = /\[/;
   var REG_VARIABLE = /([^[]+)\[([^[]*)\]/;
@@ -1879,7 +1880,192 @@
     return Router;
   }();
 
+  /**
+   * Parses current path and returns params object
+   * @private
+   * @param {string} expr Route expression
+   * @param {string} path URL path
+   * @returns {object}
+   */
+
+  function extractParams(expr) {
+    var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : loc.pathname;
+    var params = {};
+
+    if (REG_ROUTE_PARAMS.test(expr)) {
+      var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^/\\]+/g, "([^\\/]+)"));
+      REG_ROUTE_PARAMS.lastIndex = 0;
+
+      if (pathRegex.test(path)) {
+        var keys = _toConsumableArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
+          return key.replace(':', '');
+        });
+
+        var values = _toConsumableArray(path.match(pathRegex));
+
+        values.shift();
+        keys.forEach(function (key, index) {
+          params[key] = values[index];
+        });
+      }
+    }
+
+    return params;
+  }
+
+  /**
+   * Operator to compare a specific route
+   * @param {string} routeStr Route string
+   * @param {Router} routerInstance Current router object [optional]
+   * @param {boolean} ignoreCase Ignore case in route string
+   */
+
+  function route(routeStr, routerInstance, ignoreCase) {
+    if (typeof routerInstance === 'boolean') {
+      ignoreCase = routerInstance;
+      routerInstance = undefined;
+    }
+
+    routeStr = trim(routeStr);
+
+    if (routerInstance instanceof Router) {
+      var paths = routerInstance.__paths__;
+
+      if (paths.indexOf(routeStr) === -1) {
+        paths.push(routeStr);
+      }
+    }
+
+    return function (observable) {
+      return new Observable(function (subscriber) {
+        var subn = observable.subscribe({
+          next: function next(event) {
+            var incomingRoute = event.route;
+
+            if (isValidRoute(routeStr)) {
+              if (ignoreCase) {
+                routeStr = routeStr.toLowerCase();
+                incomingRoute = incomingRoute.toLowerCase();
+              }
+
+              var params = extractParams(routeStr, incomingRoute);
+              var paramsLength = Object.keys(params).length;
+
+              if (incomingRoute === routeStr || paramsLength > 0) {
+                if (paramsLength > 0) {
+                  event.params = params;
+                }
+
+                subscriber.next(event);
+              }
+            } else {
+              subscriber.error(new Error(INVALID_ROUTE));
+            }
+          },
+          error: function error() {
+            subscriber.error.apply(subscriber, arguments);
+          },
+          complete: function complete() {
+            subscriber.complete();
+          }
+        });
+        return function () {
+          if (routerInstance instanceof Router) {
+            var _paths = routerInstance.__paths__;
+
+            var existingRouteIndex = _paths.indexOf(routeStr);
+
+            if (existingRouteIndex > -1) {
+              _paths.splice(existingRouteIndex, 1);
+            }
+          }
+
+          subn.unsubscribe();
+        };
+      });
+    };
+  }
+  /**
+   * Converts search and hashSearch strings to object
+   * @param {boolean} coerce Flag to enable value typecast
+   */
+
+  function deparam$1() {
+    var coerce = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    return function (observable) {
+      return new Observable(function (subscriber) {
+        var subn = observable.subscribe({
+          next: function next(event) {
+            try {
+              event.search = lib(event.search, coerce);
+              event.hashSearch = lib(event.hashSearch, coerce);
+              subscriber.next(event);
+            } catch (e) {
+              subscriber.error(e);
+            }
+          },
+          error: function error() {
+            subscriber.error.apply(subscriber, arguments);
+          },
+          complete: function complete() {
+            subscriber.complete();
+          }
+        });
+        return function () {
+          subn.unsubscribe();
+        };
+      });
+    };
+  }
+  /**
+   * Modifies current subscriber to detect errors
+   * @param {Router} routerInstance Current router object
+   */
+
+  function noMatch(routerInstance) {
+    return function (observable) {
+      return new Observable(function (subscriber) {
+        var subn = observable.subscribe({
+          next: function next(event) {
+            if (routerInstance instanceof Router) {
+              var paths = routerInstance.__paths__;
+
+              if (paths.length > 0) {
+                var currentRoute = event.route;
+                var match = false;
+
+                for (var i = 0; i < paths.length; i++) {
+                  if (paths[i] === currentRoute || Object.keys(extractParams(paths[i], currentRoute)).length) {
+                    match = true;
+                    break;
+                  }
+                }
+
+                if (match) {
+                  event.isErrorRoute = true;
+                  subscriber.next(event);
+                }
+              }
+            }
+          },
+          error: function error() {
+            subscriber.error.apply(subscriber, arguments);
+          },
+          complete: function complete() {
+            subscriber.complete();
+          }
+        });
+        return function () {
+          subn.unsubscribe();
+        };
+      });
+    };
+  }
+
   window.Router = Router;
+  window.route = route;
+  window.deparam = deparam$1;
+  window.noMatch = noMatch;
 
 }());
 //# sourceMappingURL=silkrouter.iife.js.map
