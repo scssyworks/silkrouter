@@ -1,6 +1,6 @@
 {
   "name": "silkrouter",
-  "version": "3.5.2",
+  "version": "3.5.3",
   "description": "Silkrouter is a routing library for single page applications",
   "main": "dist/umd/index.js",
   "module": "dist/esm/index.esm.js",
