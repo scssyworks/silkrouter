@@ -90,7 +90,7 @@ You can ``pipe`` more operators to apply any number of transformations. Silk rou
 |:-------|:----------|:------|
 |**route**|Set a filter for specific route path|``routerIns.pipe(route(path[, routerIns][, ignoreCase])).subscribe(...)``<br><br>``route`` options:<br><br> **path** - Path filter to apply on generic route observer<br> **routerIns**[optional] - Current ``Router`` instance. Required only if ``noMatch`` operator is used.<br> **ignoreCase**[optional] - Ignores the case of current route|
 |**deparam**|Converts query string to JS object|**Before:** ``routerIns.subscribe(e => { console.log(e.search); })``.<br>Output: **a=10&b=20**<br> **After:** ``routerIns.pipe(deparam()).subscribe(e => { console.log(e.search); })``.<br>Output: **{ a:"10", b:"20" }**<br><br>``deparam`` options:<br><br> **coerce**[optional] - Converts object properties to their correct types|
-|**noMatch**|Adds an optional route for 'page not found'|``routerIns.pipe(noMatch([routerIns])).subscribe(...)``<br><br>``noMatch`` options:<br><br> **routerIns** - Current router instance for tracking current routes|
+|**noMatch**|Adds an optional route for 'page not found'|``routerIns.pipe(noMatch(routerIns)).subscribe(...)``<br><br>``noMatch`` options:<br><br> **routerIns** - Router instance for tracking current routes|
 
 # Examples
 
