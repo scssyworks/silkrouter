@@ -99,7 +99,8 @@ if (process.env.SERVE) {
             open: true,
             contentBase: ['dist'],
             host: 'localhost',
-            port: '3030'
+            port: '3030',
+            historyApiFallback: true
         }),
         livereload({
             watch: 'dist',

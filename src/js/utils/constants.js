@@ -13,3 +13,12 @@ export const HISTORY_UNSUPPORTED = 'Current browser does not support history obj
 export const INVALID_ROUTE = 'Route string is not a pure route';
 export const LOCAL_ENV = ['localhost', '0.0.0.0', '127.0.0.1', null];
 export const VIRTUAL_PUSHSTATE = 'vpushstate';
+export const CACHED_FIELDS = [
+    'route',
+    'hashRouting',
+    'path',
+    'hash',
+    'search',
+    'hashSearch',
+    'data'
+];

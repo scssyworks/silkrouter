@@ -65,7 +65,7 @@ router
 router.set('/path/to/another/route');
 ```
 
-You can ``pipe`` more operators to apply any number of transformations. Silk router currently ships three operators ``route``, ``deparam`` and ``noMatch``. Please refer to API section below for more details.
+You can ``pipe`` more operators to apply any number of transformations. Silk router currently ships three operators ``route``, ``cache``, ``deparam`` and ``noMatch``. Please refer to API section below for more details.
 
 # API
 
@@ -91,6 +91,7 @@ You can ``pipe`` more operators to apply any number of transformations. Silk rou
 |**route**|Set a filter for specific route path|``routerIns.pipe(route(path[, routerIns][, ignoreCase])).subscribe(...)``<br><br>``route`` options:<br><br> **path** - Path filter to apply on generic route observer<br> **routerIns**[optional] - Current ``Router`` instance. Required only if ``noMatch`` operator is used.<br> **ignoreCase**[optional] - Ignores the case of current route|
 |**deparam**|Converts query string to JS object|**Before:** ``routerIns.subscribe(e => { console.log(e.search); })``.<br>Output: **a=10&b=20**<br> **After:** ``routerIns.pipe(deparam()).subscribe(e => { console.log(e.search); })``.<br>Output: **{ a:"10", b:"20" }**<br><br>``deparam`` options:<br><br> **coerce**[optional] - Converts object properties to their correct types|
 |**noMatch**|Adds an optional route for 'page not found'|``routerIns.pipe(noMatch(routerIns)).subscribe(...)``<br><br>``noMatch`` options:<br><br> **routerIns** - Router instance for tracking current routes|
+|**cache**|Caches event object to call subscribers only if there is a change in URL or data|``routerIns.pipe(cache([keys][, deep])).subscribe(e => { ... })``<br><br>``cache`` options:<br>**keys**[optional] - Event object keys which you want to cache and compare<br>**deep**[optional] - Enable deep comparison (By default shallow comparison is used)<br><br>Examples:<br>1. Perform shallow comparison of all keys (excluding event objects)<br>``routerIns.pipe(cache()).subscribe(e => { ... })``<br>2. Perform deep comparison<br>``routerIns.pipe(cache(true)).subscribe(e => { ... })``<br>3. Perform comparison on selected keys<br>``routerIns.pipe(cache(['route', 'data'], true)).subscribe(e => { ... })``|
 
 # Examples
 

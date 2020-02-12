@@ -14,6 +14,15 @@ const HISTORY_UNSUPPORTED = 'Current browser does not support history object';
 const INVALID_ROUTE = 'Route string is not a pure route';
 const LOCAL_ENV = ['localhost', '0.0.0.0', '127.0.0.1', null];
 const VIRTUAL_PUSHSTATE = 'vpushstate';
+const CACHED_FIELDS = [
+    'route',
+    'hashRouting',
+    'path',
+    'hash',
+    'search',
+    'hashSearch',
+    'data'
+];
 
 /**
  * Shorthand for Array.isArray
@@ -1016,11 +1025,73 @@ function noMatch(routerInstance) {
     });
 }
 
+function deepComparison(first, second, result) {
+    each(Object.keys(first), key => {
+        if (
+            isObject(first[key])
+            && isObject(second[key])
+        ) {
+            deepComparison(first[key], second[key], result);
+        } else {
+            result.break = first[key] !== second[key];
+        }
+    });
+}
+
+/**
+ * Caches incoming routes to avoid calling handler if there is no change
+ * @param {string[]} keys
+ * @param {boolean} deep
+ */
+function cache(keys = CACHED_FIELDS, deep = false) {
+    let cache = {};
+    if (typeof keys === 'boolean') {
+        deep = keys;
+        keys = CACHED_FIELDS;
+    }
+    return (observable) => new Observable(subscriber => {
+        const subn = observable.subscribe({
+            next(event) {
+                each(keys, key => {
+                    if (
+                        deep
+                        && isObject(event[key])
+                        && isObject(cache[key])
+                    ) {
+                        const result = {};
+                        deepComparison(event[key], cache[key], result);
+                        if (result.break) {
+                            assign(cache, event);
+                            subscriber.next(event);
+                            return false;
+                        }
+                    } else if (event[key] !== cache[key]) {
+                        assign(cache, event);
+                        subscriber.next(event);
+                        return false; // break loop
+                    }
+                });
+            },
+            error() {
+                subscriber.error(...arguments);
+            },
+            complete() {
+                subscriber.complete();
+            }
+        });
+        return () => {
+            subn.unsubscribe();
+            cache = {};
+        };
+    });
+}
+
 var index = /*#__PURE__*/Object.freeze({
     __proto__: null,
     route: route,
     deparam: deparam$1,
-    noMatch: noMatch
+    noMatch: noMatch,
+    cache: cache
 });
 
 export { Router, index as operators };

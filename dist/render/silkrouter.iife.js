@@ -130,6 +130,7 @@
   var INVALID_ROUTE = 'Route string is not a pure route';
   var LOCAL_ENV = ['localhost', '0.0.0.0', '127.0.0.1', null];
   var VIRTUAL_PUSHSTATE = 'vpushstate';
+  var CACHED_FIELDS = ['route', 'hashRouting', 'path', 'hash', 'search', 'hashSearch', 'data'];
 
   /**
    * Shorthand for Array.isArray
@@ -2080,10 +2081,73 @@
     };
   }
 
+  function deepComparison(first, second, result) {
+    each(Object.keys(first), function (key) {
+      if (isObject(first[key]) && isObject(second[key])) {
+        deepComparison(first[key], second[key], result);
+      } else {
+        result["break"] = first[key] !== second[key];
+      }
+    });
+  }
+  /**
+   * Caches incoming routes to avoid calling handler if there is no change
+   * @param {string[]} keys
+   * @param {boolean} deep
+   */
+
+
+  function cache() {
+    var keys = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : CACHED_FIELDS;
+    var deep = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    var cache = {};
+
+    if (typeof keys === 'boolean') {
+      deep = keys;
+      keys = CACHED_FIELDS;
+    }
+
+    return function (observable) {
+      return new Observable(function (subscriber) {
+        var subn = observable.subscribe({
+          next: function next(event) {
+            each(keys, function (key) {
+              if (deep && isObject(event[key]) && isObject(cache[key])) {
+                var result = {};
+                deepComparison(event[key], cache[key], result);
+
+                if (result["break"]) {
+                  assign(cache, event);
+                  subscriber.next(event);
+                  return false;
+                }
+              } else if (event[key] !== cache[key]) {
+                assign(cache, event);
+                subscriber.next(event);
+                return false; // break loop
+              }
+            });
+          },
+          error: function error() {
+            subscriber.error.apply(subscriber, arguments);
+          },
+          complete: function complete() {
+            subscriber.complete();
+          }
+        });
+        return function () {
+          subn.unsubscribe();
+          cache = {};
+        };
+      });
+    };
+  }
+
   window.Router = Router;
   window.route = route;
   window.deparam = deparam$1;
   window.noMatch = noMatch;
+  window.cache = cache;
 
 }());
 //# sourceMappingURL=silkrouter.iife.js.map
