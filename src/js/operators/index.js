@@ -1,9 +1,10 @@
-import { trim, isValidRoute } from '../utils/utils';
+import { trim, isValidRoute, each, isObject } from '../utils/utils';
 import { Observable } from 'rxjs';
-import { INVALID_ROUTE } from '../utils/constants';
+import { INVALID_ROUTE, CACHED_FIELDS } from '../utils/constants';
 import { extractParams } from '../utils/params';
 import { deparam as queryDeparam } from '../utils/deparam';
 import Router from '../api/router';
+import { assign } from '../utils/assign';
 
 /**
  * Operator to compare a specific route
@@ -134,5 +135,66 @@ export function noMatch(routerInstance) {
         return () => {
             subn.unsubscribe();
         }
+    });
+}
+
+function deepComparison(first, second, result) {
+    each(Object.keys(first), key => {
+        if (
+            isObject(first[key])
+            && isObject(second[key])
+        ) {
+            deepComparison(first[key], second[key], result);
+        } else {
+            result.break = first[key] !== second[key];
+        }
+    });
+}
+
+/**
+ * Caches incoming routes to avoid calling handler if there is no change
+ * @param {string[]} keys
+ * @param {boolean} deep
+ */
+export function cache(keys = CACHED_FIELDS, deep = false) {
+    let cache = {};
+    if (typeof keys === 'boolean') {
+        deep = keys;
+        keys = CACHED_FIELDS;
+    }
+    return (observable) => new Observable(subscriber => {
+        const subn = observable.subscribe({
+            next(event) {
+                each(keys, key => {
+                    if (
+                        deep
+                        && isObject(event[key])
+                        && isObject(cache[key])
+                    ) {
+                        const result = {};
+                        deepComparison(event[key], cache[key], result);
+                        if (result.break) {
+                            assign(cache, event);
+                            subscriber.next(event);
+                            return false;
+                        }
+                    } else if (event[key] !== cache[key]) {
+                        assign(cache, event);
+                        subscriber.next(event);
+                        return false; // break loop
+                    }
+                });
+            },
+            error() {
+                subscriber.error(...arguments);
+            },
+            complete() {
+                subscriber.complete();
+            }
+        });
+        return () => {
+            subn.unsubscribe();
+            cache = {};
+        };
     });
 }
