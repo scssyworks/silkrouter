@@ -65,7 +65,7 @@ router
 router.set('/path/to/another/route');
 ```
 
-You can ``pipe`` more operators to apply any number of transformations. Silk router currently ships three operators ``route``, ``cache``, ``deparam`` and ``noMatch``. Please refer to API section below for more details.
+You can ``pipe`` more operators to apply any number of transformations. Silk router currently ships four operators ``route``, ``cache``, ``deparam`` and ``noMatch``. Please refer to API section below for more details.
 
 # API
 
