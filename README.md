@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter)
 
 # Silkrouter
-Silkrouter is a routing library for single page applications.
+Silkrouter is a routing library for single page web applications.
 
 # Install
 
@@ -11,6 +11,11 @@ Silkrouter is a routing library for single page applications.
 npm install --save silkrouter
 ```
 
+<b>New release (alpha)</b>
+```sh
+npm install --save silkrouter@4.0.0-alpha.5 rxjs
+```
+
 ### CDN
 ```html
 <script src="https://cdn.jsdelivr.net/npm/silkrouter@latest"></script>
@@ -18,7 +23,7 @@ npm install --save silkrouter
 
 ### JQuery version
 ```sh
-npm install --save jqueryrouter@2.2.7
+npm install --save jqueryrouter@2.2.8
 ```
 
 ### Notes
@@ -26,7 +31,7 @@ npm install --save jqueryrouter@2.2.7
 
 # How to use Silk Router?
 
-Silkrouter follows a familiar concept. If you have worked with custom events, you should get started with ``silkrouter`` in no time.
+Silkrouter follows event emitter pattern. You can compare it with ``jQuery`` custom events.
 
 ## Import dependencies
 
@@ -99,11 +104,11 @@ router.set({
 });
 ```
 
-## Multi-routing concepts
+## Passing a list of routes
 
 Silkrouter has several options to handle multiple routes.
 
-### Route list [Experimental]
+### Route list
 
 ```js
 route([
@@ -112,7 +117,7 @@ route([
 ], (e) => { ... });
 ```
 
-### Generic routing
+### Generic router
 
 ```js
 route((e) => {
@@ -126,7 +131,7 @@ route((e) => {
 
 ### Handle errors
 
-Version 3.5.0 adds a new feature which makes error handling much easier than before.
+Version 3.5.0 adds a new feature which makes error handling easier than before.
 
 1. Add routes
 
@@ -153,8 +158,6 @@ route(e => {
 
 ## Ignore case
 
-### [Experimental]
-
 ```js
 routeIgnoreCase('/mandatory/route/string', (e) => {
     console.log(e.route); // -> '/MandATorY/RoUte/StriNg'
@@ -162,9 +165,9 @@ routeIgnoreCase('/mandatory/route/string', (e) => {
 
 router.set('/MandATorY/RoUte/StriNg');
 ```
-## Helper methods
+## Helpers
 
-### Handle route parameters using "routeParams"
+### Handling route parameters with "routeParams" function
 
 ```js
 import { route, routeParams } from 'silkrouter';
@@ -174,7 +177,7 @@ route(e => {
 });
 ```
 
-### Handle query strings using "param" and "deparam"
+### Handling query strings with "param" and "deparam" functions
 
 Param creates are query string from an object. Deparam just reverses it.
 
@@ -187,7 +190,7 @@ const qsObject = deparam(qs); // -> { a: "10", b: "20" }
 const qsObCoerced = deparam(qs, true); // -> {a: 10, b: 20}
 ```
 
-## Detach listeners
+## Unbind listeners
 
 ```js
 unroute(); // Removes all listeners
