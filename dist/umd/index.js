@@ -3,7 +3,7 @@
  * Released under MIT license
  * @name Silk router
  * @author Sachin Singh <contactsachinsingh@gmail.com>
- * @version 3.5.1
+ * @version 3.5.4
  * @license MIT
  */
 (function (global, factory) {
@@ -24,6 +24,8 @@
   var LOCAL_ENV = ['localhost', '0.0.0.0', '127.0.0.1', null];
 
   function _typeof(obj) {
+    "@babel/helpers - typeof";
+
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
       _typeof = function (obj) {
         return typeof obj;
