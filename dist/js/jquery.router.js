@@ -4,10 +4,12 @@
   (global = global || self, factory(global.jqueryrouter = {}, global.jQuery, global.deparam));
 }(this, (function (exports, $, deparam) { 'use strict';
 
-  $ = $ && $.hasOwnProperty('default') ? $['default'] : $;
-  deparam = deparam && deparam.hasOwnProperty('default') ? deparam['default'] : deparam;
+  $ = $ && Object.prototype.hasOwnProperty.call($, 'default') ? $['default'] : $;
+  deparam = deparam && Object.prototype.hasOwnProperty.call(deparam, 'default') ? deparam['default'] : deparam;
 
   function _typeof(obj) {
+    "@babel/helpers - typeof";
+
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
       _typeof = function (obj) {
         return typeof obj;
