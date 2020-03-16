@@ -5,6 +5,8 @@
 }(this, (function (exports, rxjs) { 'use strict';
 
   function _typeof(obj) {
+    "@babel/helpers - typeof";
+
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
       _typeof = function (obj) {
         return typeof obj;
@@ -651,9 +653,7 @@
     }
   };
 
-  var StorageLib =
-  /*#__PURE__*/
-  function () {
+  var StorageLib = /*#__PURE__*/function () {
     function StorageLib() {
       _classCallCheck(this, StorageLib);
     }
@@ -1101,9 +1101,7 @@
     };
   }
 
-  var Router =
-  /*#__PURE__*/
-  function () {
+  var Router = /*#__PURE__*/function () {
     function Router() {
       var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
