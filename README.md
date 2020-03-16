@@ -19,7 +19,7 @@ Using CDN:
 ```
 
 # How to use?
-JQuery router follows a similar pattern as custom events.
+JQuery router follows event emitter pattern similar to ``jQuery`` custom events.
 
 ## Bind router events
 
@@ -45,10 +45,30 @@ $.router.set({
 });
 ```
 
+## Generic router
+
+JQuery router allows you to attach a listener that listens to all changes in history.
+
+```js
+$.route('*', (e) => {
+    switch(e.route) {
+        '/path/to/route': ...;
+        ...
+    }
+});
+// OR
+$.route((e) => {
+    switch(e.route) {
+        '/path/to/route': ...;
+        ...
+    }
+});
+```
+
 <b>Note:</b> You need to attach handlers before you can trigger router events.
 
-## Hash routing check
-If normal and hash routes are same, it causes route handler to execute twice. Luckily you can add a check to prevent that:
+## Hash router check
+If normal and hash routes are same, route handler to executed twice. You can check the event source using ``e.hash``:
 
 ```js
 $.route('...', (e) => {
@@ -63,12 +83,11 @@ To trigger route handlers on page load/reload, you need to call ``router.init`` 
 $.router.init();
 ```
 
-The ``init`` method keeps track of handlers which have been triggered. If a handler has been called before, it will not be called again.
+The ``init`` method keeps track of handlers which have triggered before. If a handler is called before, it is not called again.
 
 ## Persisting data
-JQuery router supports data persistence via <b>query strings</b> and <b>route params</b>.<br>
 
-Query string:
+Via query string:
 ```js
 $.route('/path/to/route', (e, params, query) => {
     console.log(query); // -> { h: 'Hello World' }
@@ -80,7 +99,7 @@ $.router.set({
 });
 ```
 
-Route params:
+Via route params:
 ```js
 $.route('/path/:to/:route', (e, params, query) => {
     console.log(params); // -> { to: 'value1', route: 'value2' }
@@ -91,18 +110,18 @@ $.router.set({
 });
 ```
 
-## Passing data directly
-JQuery router allows you to pass data directly to handler. However, this only works if route is triggered manually. In other words this data is never persisted.
+## Passing data one time
+JQuery router allows you to pass data directly to handler. This data is not persisted in ``jQuery`` version due to limitations of IE9.
 
 ```js
 $.router.set({
     route: '/path/to/route',
-    data: { ... } // Disclaimer: Data should be a valid object
+    data: { ... } // Data should be a valid object
 });
 ```
 
 # Browser support
-Jquery router has been tested in following browsers:
+Jquery router has been tested in browsers below:
 <b>Desktop:</b> IE 9 - 11, Chrome, Firefox, Safari, Opera, Edge
 <b>Mobile:</b> Chrome, Safari, Firefox
 
