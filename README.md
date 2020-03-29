@@ -10,7 +10,7 @@ Silk router is a customizable and reactive app routing library.
 # Install
 
 ```sh
-npm install --save silkrouter@4.0.0-alpha.2 rxjs
+npm install --save silkrouter@4.0.0-alpha.6 rxjs
 ```
 
 # What's new?
