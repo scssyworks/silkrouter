@@ -151,6 +151,12 @@ function initializeRouting() {
                     route = `/silkrouter${route}`;
                 }
                 if (isRelative) {
+                    if (
+                        location.hostname === 'scssyworks.github.io'
+                        && childRouter.config.hashRouting
+                    ) {
+                        route = route.replace(/\/silkrouter\//, '/');
+                    }
                     childRouter.set(route);
                 } else {
                     router.set(route);
@@ -160,7 +166,7 @@ function initializeRouting() {
         q('.btn-primary.clear-session').forEach(el => {
             if (el.contains(e.target)) {
                 window.sessionStorage.clear();
-                window.location.href = location.hostname === 'scssyworks.github.io' ? '/silkrouter/tab2' : '/tab2';
+                window.location.href = location.hostname === 'scssyworks.github.io' ? '/silkrouter/tab2/' : '/tab2/';
             }
         });
         q('.append-param').forEach(el => {
@@ -180,7 +186,7 @@ function initializeRouting() {
     q('#checkHash').forEach(el => {
         el.addEventListener('change', () => {
             window.sessionStorage.setItem('checkedStatus', `${q('#checkHash:checked').length}`);
-            window.location.href = `${location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''}/tab2`;
+            window.location.href = `${location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''}/tab2/`;
         });
     });
     if (q('#checkHash:checked').length) {
