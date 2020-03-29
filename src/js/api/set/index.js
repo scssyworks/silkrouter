@@ -6,7 +6,11 @@ import { toQueryString } from '../../utils/query';
 import resolveQuery from '../resolveQuery';
 import { assign } from '../../utils/assign';
 
-export default function set(route, replace = false, exec = true) {
+export default function set(
+    route,
+    replace = false,
+    exec = true
+) {
     const { preservePath, hashRouting, location, history } = this.config;
     const routeObject = assign(
         { replace, exec },
@@ -38,14 +42,19 @@ export default function set(route, replace = false, exec = true) {
     if (isValidRoute(routeStr)) {
         const unmodifiedRoute = routeStr;
         if (hashRouting) {
-            routeStr = `#${routeStr}`;
+            routeStr = `/#${routeStr}`;
             // Path preservation should only work for hash routing
             if (preservePath) {
-                routeStr = `${location.pathname}${routeStr}`;
+                routeStr = `${routeStr.substring(1)}`;
             }
         }
         // Sync data to store before appending query string. Query string should have no effect on stored data
-        libs.setDataToStore(routeStr, data);
+        libs.setDataToStore(
+            preservePath
+                ? `${location.pathname}${routeStr}`
+                : routeStr,
+            data
+        );
         // Append query string
         routeStr = `${routeStr}${queryString ? `?${queryString}` : ''}`;
         history[replace ? 'replaceState' : 'pushState']({ data }, pageTitle, routeStr);
@@ -53,7 +62,7 @@ export default function set(route, replace = false, exec = true) {
             trigger(this.config.context, VIRTUAL_PUSHSTATE, [{
                 path: unmodifiedRoute,
                 hash: hashRouting
-            }]);
+            }, undefined, this]);
         }
     } else {
         throw new TypeError(INVALID_ROUTE);

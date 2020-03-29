@@ -6,6 +6,7 @@ import { eslint } from 'rollup-plugin-eslint';
 import serve from 'rollup-plugin-serve';
 import livereload from 'rollup-plugin-livereload';
 import pkg from './package.json';
+import json from '@rollup/plugin-json';
 
 const rxjs = 'rxjs';
 
@@ -88,13 +89,20 @@ if (process.env.SERVE) {
         eslint({
             exclude: [
                 'node_modules/**',
-                'json/**'
+                'json/**',
+                'package.json',
+                'package-lock.json'
             ],
             throwOnError: true
         }),
         ...umdConfig.plugins
     ];
     serveConfig.plugins.push(
+        json({
+            exclude: ['node_modules/**'],
+            compact: true,
+            preferConst: true
+        }),
         serve({
             open: true,
             contentBase: ['dist'],
@@ -107,6 +115,7 @@ if (process.env.SERVE) {
             verbose: false
         })
     );
+    console.log(serveConfig.plugins);
     configurations.push(serveConfig);
 } else {
     configurations.push(

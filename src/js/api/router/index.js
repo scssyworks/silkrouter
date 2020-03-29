@@ -22,13 +22,13 @@ export default class Router {
     }
     pipe() {
         return this.listeners.pipe(
-            callOnce(this),
+            callOnce.apply(this),
             ...arguments
         );
     }
     subscribe() {
         return this.listeners
-            .pipe(callOnce(this))
+            .pipe(callOnce.apply(this))
             .subscribe(...arguments);
     }
     set() {
