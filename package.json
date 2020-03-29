@@ -1,6 +1,6 @@
 {
   "name": "silkrouter",
-  "version": "4.0.0-alpha.5",
+  "version": "4.0.0-alpha.6",
   "description": "Silk router is an app routing library",
   "main": "dist/umd/silkrouter.js",
   "module": "dist/esm/silkrouter.esm.js",
@@ -8,22 +8,25 @@
   "scripts": {
     "start": "rollup -c --watch --environment SERVE:true",
     "build": "npm run test && rollup -c",
-    "test": "jest tests/*"
+    "test": "jest tests/*",
+    "deploy": "gh-pages -d dist"
   },
   "author": "scssyworks",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.8.7",
-    "@babel/preset-env": "^7.8.7",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
     "@rollup/plugin-commonjs": "^11.0.2",
+    "@rollup/plugin-json": "^4.0.2",
     "@rollup/plugin-node-resolve": "^6.1.0",
     "@types/jest": "^25.1.4",
     "babel-eslint": "^10.1.0",
-    "jest": "^25.1.0",
+    "gh-pages": "^2.2.0",
+    "jest": "^25.2.0",
     "rollup": "^1.32.1",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-eslint": "^7.0.0",
-    "rollup-plugin-livereload": "^1.0.4",
+    "rollup-plugin-livereload": "^1.1.0",
     "rollup-plugin-serve": "^1.0.1",
     "rollup-plugin-terser": "^5.3.0",
     "rxjs": "^6.5.4"
@@ -64,7 +67,7 @@
   "bugs": {
     "url": "https://github.com/scssyworks/silkrouter/issues"
   },
-  "homepage": "https://github.com/scssyworks/silkrouter#readme",
+  "homepage": "scssyworks.github.io",
   "peerDependencies": {
     "rxjs": "^6.5.4"
   }

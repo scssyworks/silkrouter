@@ -4,6 +4,8 @@
   'use strict';
 
   function _typeof(obj) {
+    "@babel/helpers - typeof";
+
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
       _typeof = function (obj) {
         return typeof obj;
@@ -55,19 +57,15 @@
   }
 
   function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
   }
 
   function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
 
   function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
-
-      return arr2;
-    }
+    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
   }
 
   function _arrayWithHoles(arr) {
@@ -75,14 +73,11 @@
   }
 
   function _iterableToArray(iter) {
-    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+    if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
   }
 
   function _iterableToArrayLimit(arr, i) {
-    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
-      return;
-    }
-
+    if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
     var _arr = [];
     var _n = true;
     var _d = false;
@@ -108,12 +103,29 @@
     return _arr;
   }
 
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(n);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+    return arr2;
+  }
+
   function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance");
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
   function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
   /**
@@ -1385,9 +1397,7 @@
     }
   };
 
-  var StorageLib =
-  /*#__PURE__*/
-  function () {
+  var StorageLib = /*#__PURE__*/function () {
     function StorageLib() {
       _classCallCheck(this, StorageLib);
     }
@@ -1416,18 +1426,18 @@
 
   var libs = new StorageLib();
 
-  var RouterEvent = function RouterEvent(routeInfo, routerInstance, currentEvent) {
+  var RouterEvent = function RouterEvent(routeInfo, currentEvent) {
     _classCallCheck(this, RouterEvent);
 
     // Set relevant parameters
+    var _routeInfo = _slicedToArray(routeInfo, 3),
+        routeObject = _routeInfo[0],
+        originalEvent = _routeInfo[1],
+        routerInstance = _routeInfo[2];
+
     var _routerInstance$confi = routerInstance.config,
         location = _routerInstance$confi.location,
         preservePath = _routerInstance$confi.preservePath;
-
-    var _routeInfo = _slicedToArray(routeInfo, 2),
-        routeObject = _routeInfo[0],
-        originalEvent = _routeInfo[1];
-
     this.route = routeObject.path;
     this.hashRouting = routeObject.hash;
     this.routerInstance = routerInstance;
@@ -1441,10 +1451,10 @@
     var path = routeObject.path;
 
     if (this.hashRouting) {
-      path = "#".concat(path);
+      path = "/#".concat(path);
 
       if (preservePath) {
-        path = "".concat(location.pathname).concat(path);
+        path = "".concat(location.pathname).concat(path.substring(1));
       }
     } // Set route data to store
 
@@ -1454,12 +1464,18 @@
     this.data = libs.getDataFromStore(path);
   };
 
-  function collate(routerInstance) {
+  function collate() {
+    var currentRouterInstance = this;
     return function (observable) {
       return new Observable(function (subscriber) {
         var subn = observable.subscribe({
           next: function next(event) {
-            subscriber.next(new RouterEvent(event.detail, routerInstance, event));
+            var _event$detail = _slicedToArray(event.detail, 3),
+                routerInstance = _event$detail[2];
+
+            if (routerInstance === currentRouterInstance) {
+              subscriber.next(new RouterEvent(event.detail, event));
+            }
           },
           error: function error() {
             subscriber.error.apply(subscriber, arguments);
@@ -1476,6 +1492,8 @@
   }
 
   function bindRouterEvents() {
+    var _this = this;
+
     var _this$config = this.config,
         context = _this$config.context,
         location = _this$config.location,
@@ -1487,10 +1505,10 @@
         trigger(context, VIRTUAL_PUSHSTATE, [{
           path: path,
           hash: hashRouting
-        }, e]);
+        }, e, _this]);
       }
     });
-    this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate(this));
+    this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(this));
 
     if (hashRouting && !location.hash) {
       this.set('/', true, false); // Replace current hash path without executing anythings
@@ -1770,15 +1788,15 @@
       var unmodifiedRoute = routeStr;
 
       if (hashRouting) {
-        routeStr = "#".concat(routeStr); // Path preservation should only work for hash routing
+        routeStr = "/#".concat(routeStr); // Path preservation should only work for hash routing
 
         if (preservePath) {
-          routeStr = "".concat(location.pathname).concat(routeStr);
+          routeStr = "".concat(routeStr.substring(1));
         }
       } // Sync data to store before appending query string. Query string should have no effect on stored data
 
 
-      libs.setDataToStore(routeStr, data); // Append query string
+      libs.setDataToStore(preservePath ? "".concat(location.pathname).concat(routeStr) : routeStr, data); // Append query string
 
       routeStr = "".concat(routeStr).concat(queryString ? "?".concat(queryString) : '');
       history[replace ? 'replaceState' : 'pushState']({
@@ -1789,7 +1807,7 @@
         trigger(this.config.context, VIRTUAL_PUSHSTATE, [{
           path: unmodifiedRoute,
           hash: hashRouting
-        }]);
+        }, undefined, this]);
       }
     } else {
       throw new TypeError(INVALID_ROUTE);
@@ -1798,10 +1816,12 @@
     return this;
   }
 
-  function callOnce(routerInstance, isDone) {
-    var _routerInstance$confi = routerInstance.config,
-        hashRouting = _routerInstance$confi.hashRouting,
-        location = _routerInstance$confi.location;
+  function callOnce(isDone) {
+    var _this = this;
+
+    var _this$config = this.config,
+        hashRouting = _this$config.hashRouting,
+        location = _this$config.location;
     var path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
     return function (observable) {
       return new Observable(function (subscriber) {
@@ -1824,7 +1844,7 @@
             subscriber.next(new RouterEvent([{
               path: path,
               hash: hashRouting
-            }], routerInstance));
+            }, undefined, _this]));
           }
         }
 
@@ -1835,9 +1855,7 @@
     };
   }
 
-  var Router =
-  /*#__PURE__*/
-  function () {
+  var Router = /*#__PURE__*/function () {
     function Router() {
       var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
@@ -1869,14 +1887,14 @@
       value: function pipe() {
         var _this$listeners;
 
-        return (_this$listeners = this.listeners).pipe.apply(_this$listeners, [callOnce(this)].concat(Array.prototype.slice.call(arguments)));
+        return (_this$listeners = this.listeners).pipe.apply(_this$listeners, [callOnce.apply(this)].concat(Array.prototype.slice.call(arguments)));
       }
     }, {
       key: "subscribe",
       value: function subscribe() {
         var _this$listeners$pipe;
 
-        return (_this$listeners$pipe = this.listeners.pipe(callOnce(this))).subscribe.apply(_this$listeners$pipe, arguments);
+        return (_this$listeners$pipe = this.listeners.pipe(callOnce.apply(this))).subscribe.apply(_this$listeners$pipe, arguments);
       }
     }, {
       key: "set",
@@ -2143,11 +2161,231 @@
     };
   }
 
-  window.Router = Router;
-  window.route = route;
-  window.deparam = deparam$1;
-  window.noMatch = noMatch;
-  window.cache = cache;
+  const name="silkrouter";const version="4.0.0-alpha.5";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.9.0","@babel/preset-env":"^7.9.0","@rollup/plugin-commonjs":"^11.0.2","@rollup/plugin-json":"^4.0.2","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.1.4","babel-eslint":"^10.1.0",jest:"^25.2.0",rollup:"^1.32.1","rollup-plugin-babel":"^4.4.0","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.1.0","rollup-plugin-serve":"^1.0.1","rollup-plugin-terser":"^5.3.0",rxjs:"^6.5.4"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://github.com/scssyworks/silkrouter#readme";const peerDependencies={rxjs:"^6.5.4"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies};
+
+  function q(selector) {
+    var _document;
+
+    if (typeof selector === 'string') {
+      var elArray = [];
+      selector.split(',').map(function (selectorPart) {
+        return selectorPart.trim();
+      }).forEach(function (selectorPart) {
+        var selected = _toConsumableArray(document.querySelectorAll(selectorPart));
+
+        selected.forEach(function (el) {
+          if (!elArray.includes(el)) {
+            elArray.push(el);
+          }
+        });
+      });
+      return elArray;
+    }
+
+    return _toConsumableArray((_document = document).querySelectorAll.apply(_document, arguments));
+  }
+
+  function keywordHighlight(text) {
+    ['(new|throw|let|const|var|typeof|instanceof|in|of|import|case|extends|delete)(\\s)', '(function|class|try|catch|finally|do|else)(\\s|{)', '(for|while|if)(\\s|\\()', '(return|break|continue)(\\s|;)'].forEach(function (matcher) {
+      var regex = new RegExp(matcher, 'g');
+
+      if (regex.test(text)) {
+        text = text.replace(regex, function () {
+          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+          }
+
+          var keyword = args[1],
+              extra = args[2];
+          return "<span class=\"keyword\">".concat(keyword, "</span>").concat(extra);
+        });
+      }
+    });
+    return text;
+  }
+
+  function methodHighlight(text) {
+    text = text.replace(/(\.)([^;:'",.())?|\\/^*@%#!~+-[\]{}=]+)(\()/g, function () {
+      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+
+      var dot = args[1],
+          method = args[2],
+          brace = args[3];
+      return "".concat(dot, "<span class=\"method\">").concat(method, "</span>").concat(brace);
+    });
+    return text;
+  }
+
+  function suppressComments(text) {
+    text = text.replace(/\/\/[^\n]+/g, function (comment) {
+      return "<span class=\"comment\">".concat(comment, "</span>");
+    });
+    return text;
+  }
+
+  function highlightFatArrow(text) {
+    text = text.replace(/\s=&gt;\s/g, function (fatArrow) {
+      return "<span class=\"fat-arrow\">".concat(fatArrow, "</span>");
+    });
+    return text;
+  }
+
+  function highlightString(text) {
+    text = text.replace(/['"`].*['"`]/g, function (str) {
+      return "<span class=\"str\">".concat(str.replace(/\//g, '&#47;'), "</span>");
+    });
+    return text;
+  }
+
+  function jsHighlight(text) {
+    text = highlightString(text);
+    text = keywordHighlight(text);
+    text = methodHighlight(text);
+    text = suppressComments(text);
+    text = highlightFatArrow(text);
+    return text;
+  }
+
+  function renderDecorators() {
+    q('code pre').forEach(function (decorator) {
+      var html = decorator.innerHTML;
+      var pattern = html.match(/^\s+/);
+      var originalIndent = pattern && pattern[0].length;
+      html = html.split('\n').map(function (codePart) {
+        return codePart.substring(originalIndent);
+      }).join('\n');
+      decorator.innerHTML = jsHighlight(html.trim());
+    });
+  }
+
+  function renderVersion() {
+    q('.version').forEach(function (el) {
+      return el.querySelector('span').textContent = pkg.version;
+    });
+  }
+
+  function initializeRouting() {
+    q('#checkHash').forEach(function (el) {
+      el.checked = window.sessionStorage.getItem('checkedStatus') === '1';
+    });
+    var router = new Router();
+    var childRouter = router;
+    router.subscribe(function (e) {
+      q('[data-route]').forEach(function (el) {
+        el.classList.remove('active');
+        var elRoute = el.getAttribute('data-route');
+
+        if (elRoute === '/' && e.route === elRoute) {
+          el.classList.add('active');
+        } else if (elRoute !== '/' && e.route.includes(elRoute)) {
+          el.classList.add('active');
+        }
+      });
+      q('[data-section]').forEach(function (el) {
+        el.classList.add('d-none');
+        var elSection = el.getAttribute('data-section');
+
+        if (elSection === '/' && e.route === elSection) {
+          el.classList.remove('d-none');
+        } else if (elSection !== '/' && e.route.includes(elSection)) {
+          el.classList.remove('d-none');
+        }
+      });
+      q('.params-data, .query-next-step, .query-data, .pass-data-tutorial').forEach(function (el) {
+        el.classList.add('d-none');
+      });
+    });
+    router.pipe(route('/tab3/:firstname/:lastname')).subscribe(function (e) {
+      q('.params-data pre').forEach(function (el) {
+        el.textContent = JSON.stringify(e.params, null, 2);
+      });
+      q('.params-data, .query-next-step').forEach(function (el) {
+        el.classList.remove('d-none');
+      });
+
+      if (e.search) {
+        q('.query-data').forEach(function (el) {
+          el.querySelector('pre').textContent = e.search;
+          el.classList.remove('d-none');
+        });
+        q('.pass-data-tutorial').forEach(function (el) {
+          el.classList.remove('d-none');
+        });
+      }
+    });
+    document.addEventListener('click', function (e) {
+      q('[data-route]').forEach(function (el) {
+        if (el.contains(e.target)) {
+          var isRelative = el.hasAttribute('data-relative');
+
+          var _route = isRelative && q('#checkHash:checked').length === 0 ? el.closest('section').getAttribute('data-section') + el.getAttribute('data-route') : el.getAttribute('data-route');
+
+          if (isRelative) {
+            childRouter.set(_route);
+          } else {
+            router.set(_route);
+          }
+        }
+      });
+      q('.btn-primary.clear-session').forEach(function (el) {
+        if (el.contains(e.target)) {
+          window.sessionStorage.clear();
+          window.location.href = '/tab2';
+        }
+      });
+      q('.append-param').forEach(function (el) {
+        if (el.contains(e.target)) {
+          router.set('/tab3/john/doe');
+        }
+      });
+      q('.append-query').forEach(function (el) {
+        if (el.contains(e.target)) {
+          router.set({
+            route: "/tab3/john/doe",
+            queryString: 'q=HelloWorld'
+          });
+        }
+      });
+    });
+    q('#checkHash').forEach(function (el) {
+      el.addEventListener('change', function () {
+        window.sessionStorage.setItem('checkedStatus', "".concat(q('#checkHash:checked').length));
+        window.location.href = '/tab2';
+      });
+    });
+
+    if (q('#checkHash:checked').length) {
+      var hashRouter = new Router({
+        hashRouting: true,
+        preservePath: true
+      });
+      hashRouter.subscribe(function (e) {
+        q('[data-route][data-relative]').forEach(function (el) {
+          el.classList.remove('active');
+
+          if (e.route.includes(el.getAttribute('data-route'))) {
+            el.classList.add('active');
+          }
+        });
+      });
+      childRouter = hashRouter;
+    }
+  }
+
+  function setGlobals() {
+    window.Router = Router;
+    window.route = route;
+    window.deparam = deparam$1;
+    window.noMatch = noMatch;
+    window.cache = cache;
+  }
+
+  initializeRouting();
+  renderDecorators();
+  renderVersion();
+  setGlobals();
 
 }());
 //# sourceMappingURL=silkrouter.iife.js.map

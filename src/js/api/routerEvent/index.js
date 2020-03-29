@@ -2,10 +2,10 @@ import { trim } from '../../utils/utils';
 import { libs } from '../../utils/libs';
 
 export default class RouterEvent {
-    constructor(routeInfo, routerInstance, currentEvent) {
+    constructor(routeInfo, currentEvent) {
         // Set relevant parameters
+        const [routeObject, originalEvent, routerInstance] = routeInfo;
         const { location, preservePath } = routerInstance.config;
-        const [routeObject, originalEvent] = routeInfo;
         this.route = routeObject.path;
         this.hashRouting = routeObject.hash;
         this.routerInstance = routerInstance;
@@ -18,9 +18,9 @@ export default class RouterEvent {
         // Extract data
         let { path } = routeObject;
         if (this.hashRouting) {
-            path = `#${path}`;
+            path = `/#${path}`;
             if (preservePath) {
-                path = `${location.pathname}${path}`;
+                path = `${location.pathname}${path.substring(1)}`;
             }
         }
         // Set route data to store

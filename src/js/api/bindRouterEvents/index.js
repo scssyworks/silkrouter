@@ -9,11 +9,11 @@ export default function bindRouterEvents() {
     this.popStateSubscription = fromEvent(window, POP_STATE).subscribe(e => {
         const path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
         if (path) {
-            trigger(context, VIRTUAL_PUSHSTATE, [{ path, hash: hashRouting }, e]);
+            trigger(context, VIRTUAL_PUSHSTATE, [{ path, hash: hashRouting }, e, this]);
         }
     });
     this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE)
-        .pipe(collate(this));
+        .pipe(collate.apply(this));
     if (hashRouting && !location.hash) {
         this.set('/', true, false); // Replace current hash path without executing anythings
     }
