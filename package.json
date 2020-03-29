@@ -67,7 +67,7 @@
   "bugs": {
     "url": "https://github.com/scssyworks/silkrouter/issues"
   },
-  "homepage": "scssyworks.github.io",
+  "homepage": "https://scssyworks.github.io",
   "peerDependencies": {
     "rxjs": "^6.5.4"
   }
