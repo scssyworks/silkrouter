@@ -58,19 +58,15 @@
   }
 
   function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
   }
 
   function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
 
   function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
-
-      return arr2;
-    }
+    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
   }
 
   function _arrayWithHoles(arr) {
@@ -78,14 +74,11 @@
   }
 
   function _iterableToArray(iter) {
-    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+    if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
   }
 
   function _iterableToArrayLimit(arr, i) {
-    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
-      return;
-    }
-
+    if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
     var _arr = [];
     var _n = true;
     var _d = false;
@@ -111,12 +104,29 @@
     return _arr;
   }
 
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(n);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+    return arr2;
+  }
+
   function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance");
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
   function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
   /**
@@ -682,18 +692,18 @@
 
   var libs = new StorageLib();
 
-  var RouterEvent = function RouterEvent(routeInfo, routerInstance, currentEvent) {
+  var RouterEvent = function RouterEvent(routeInfo, currentEvent) {
     _classCallCheck(this, RouterEvent);
 
     // Set relevant parameters
+    var _routeInfo = _slicedToArray(routeInfo, 3),
+        routeObject = _routeInfo[0],
+        originalEvent = _routeInfo[1],
+        routerInstance = _routeInfo[2];
+
     var _routerInstance$confi = routerInstance.config,
         location = _routerInstance$confi.location,
         preservePath = _routerInstance$confi.preservePath;
-
-    var _routeInfo = _slicedToArray(routeInfo, 2),
-        routeObject = _routeInfo[0],
-        originalEvent = _routeInfo[1];
-
     this.route = routeObject.path;
     this.hashRouting = routeObject.hash;
     this.routerInstance = routerInstance;
@@ -707,10 +717,10 @@
     var path = routeObject.path;
 
     if (this.hashRouting) {
-      path = "#".concat(path);
+      path = "/#".concat(path);
 
       if (preservePath) {
-        path = "".concat(location.pathname).concat(path);
+        path = "".concat(location.pathname).concat(path.substring(1));
       }
     } // Set route data to store
 
@@ -720,12 +730,18 @@
     this.data = libs.getDataFromStore(path);
   };
 
-  function collate(routerInstance) {
+  function collate() {
+    var currentRouterInstance = this;
     return function (observable) {
       return new rxjs.Observable(function (subscriber) {
         var subn = observable.subscribe({
           next: function next(event) {
-            subscriber.next(new RouterEvent(event.detail, routerInstance, event));
+            var _event$detail = _slicedToArray(event.detail, 3),
+                routerInstance = _event$detail[2];
+
+            if (routerInstance === currentRouterInstance) {
+              subscriber.next(new RouterEvent(event.detail, event));
+            }
           },
           error: function error() {
             subscriber.error.apply(subscriber, arguments);
@@ -742,6 +758,8 @@
   }
 
   function bindRouterEvents() {
+    var _this = this;
+
     var _this$config = this.config,
         context = _this$config.context,
         location = _this$config.location,
@@ -753,10 +771,10 @@
         trigger(context, VIRTUAL_PUSHSTATE, [{
           path: path,
           hash: hashRouting
-        }, e]);
+        }, e, _this]);
       }
     });
-    this.listeners = rxjs.fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate(this));
+    this.listeners = rxjs.fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(this));
 
     if (hashRouting && !location.hash) {
       this.set('/', true, false); // Replace current hash path without executing anythings
@@ -1036,15 +1054,15 @@
       var unmodifiedRoute = routeStr;
 
       if (hashRouting) {
-        routeStr = "#".concat(routeStr); // Path preservation should only work for hash routing
+        routeStr = "/#".concat(routeStr); // Path preservation should only work for hash routing
 
         if (preservePath) {
-          routeStr = "".concat(location.pathname).concat(routeStr);
+          routeStr = "".concat(routeStr.substring(1));
         }
       } // Sync data to store before appending query string. Query string should have no effect on stored data
 
 
-      libs.setDataToStore(routeStr, data); // Append query string
+      libs.setDataToStore(preservePath ? "".concat(location.pathname).concat(routeStr) : routeStr, data); // Append query string
 
       routeStr = "".concat(routeStr).concat(queryString ? "?".concat(queryString) : '');
       history[replace ? 'replaceState' : 'pushState']({
@@ -1055,7 +1073,7 @@
         trigger(this.config.context, VIRTUAL_PUSHSTATE, [{
           path: unmodifiedRoute,
           hash: hashRouting
-        }]);
+        }, undefined, this]);
       }
     } else {
       throw new TypeError(INVALID_ROUTE);
@@ -1064,10 +1082,12 @@
     return this;
   }
 
-  function callOnce(routerInstance, isDone) {
-    var _routerInstance$confi = routerInstance.config,
-        hashRouting = _routerInstance$confi.hashRouting,
-        location = _routerInstance$confi.location;
+  function callOnce(isDone) {
+    var _this = this;
+
+    var _this$config = this.config,
+        hashRouting = _this$config.hashRouting,
+        location = _this$config.location;
     var path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
     return function (observable) {
       return new rxjs.Observable(function (subscriber) {
@@ -1090,7 +1110,7 @@
             subscriber.next(new RouterEvent([{
               path: path,
               hash: hashRouting
-            }], routerInstance));
+            }, undefined, _this]));
           }
         }
 
@@ -1133,14 +1153,14 @@
       value: function pipe() {
         var _this$listeners;
 
-        return (_this$listeners = this.listeners).pipe.apply(_this$listeners, [callOnce(this)].concat(Array.prototype.slice.call(arguments)));
+        return (_this$listeners = this.listeners).pipe.apply(_this$listeners, [callOnce.apply(this)].concat(Array.prototype.slice.call(arguments)));
       }
     }, {
       key: "subscribe",
       value: function subscribe() {
         var _this$listeners$pipe;
 
-        return (_this$listeners$pipe = this.listeners.pipe(callOnce(this))).subscribe.apply(_this$listeners$pipe, arguments);
+        return (_this$listeners$pipe = this.listeners.pipe(callOnce.apply(this))).subscribe.apply(_this$listeners$pipe, arguments);
       }
     }, {
       key: "set",

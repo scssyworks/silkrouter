@@ -497,10 +497,10 @@ class StorageLib {
 const libs = new StorageLib();
 
 class RouterEvent {
-    constructor(routeInfo, routerInstance, currentEvent) {
+    constructor(routeInfo, currentEvent) {
         // Set relevant parameters
+        const [routeObject, originalEvent, routerInstance] = routeInfo;
         const { location, preservePath } = routerInstance.config;
-        const [routeObject, originalEvent] = routeInfo;
         this.route = routeObject.path;
         this.hashRouting = routeObject.hash;
         this.routerInstance = routerInstance;
@@ -513,9 +513,9 @@ class RouterEvent {
         // Extract data
         let { path } = routeObject;
         if (this.hashRouting) {
-            path = `#${path}`;
+            path = `/#${path}`;
             if (preservePath) {
-                path = `${location.pathname}${path}`;
+                path = `${location.pathname}${path.substring(1)}`;
             }
         }
         // Set route data to store
@@ -525,13 +525,17 @@ class RouterEvent {
     }
 }
 
-function collate(routerInstance) {
+function collate() {
+    const currentRouterInstance = this;
     return (observable) => new Observable(subscriber => {
         const subn = observable.subscribe({
             next(event) {
-                subscriber.next(
-                    new RouterEvent(event.detail, routerInstance, event)
-                );
+                const [, , routerInstance] = event.detail;
+                if (routerInstance === currentRouterInstance) {
+                    subscriber.next(
+                        new RouterEvent(event.detail, event)
+                    );
+                }
             },
             error() {
                 subscriber.error(...arguments);
@@ -551,11 +555,11 @@ function bindRouterEvents() {
     this.popStateSubscription = fromEvent(window, POP_STATE).subscribe(e => {
         const path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
         if (path) {
-            trigger(context, VIRTUAL_PUSHSTATE, [{ path, hash: hashRouting }, e]);
+            trigger(context, VIRTUAL_PUSHSTATE, [{ path, hash: hashRouting }, e, this]);
         }
     });
     this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE)
-        .pipe(collate(this));
+        .pipe(collate.apply(this));
     if (hashRouting && !location.hash) {
         this.set('/', true, false); // Replace current hash path without executing anythings
     }
@@ -746,7 +750,11 @@ function resolveQuery(queryString, hashRouting) {
     return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
 }
 
-function set$1(route, replace = false, exec = true) {
+function set$1(
+    route,
+    replace = false,
+    exec = true
+) {
     const { preservePath, hashRouting, location, history } = this.config;
     const routeObject = assign(
         { replace, exec },
@@ -778,14 +786,19 @@ function set$1(route, replace = false, exec = true) {
     if (isValidRoute(routeStr)) {
         const unmodifiedRoute = routeStr;
         if (hashRouting) {
-            routeStr = `#${routeStr}`;
+            routeStr = `/#${routeStr}`;
             // Path preservation should only work for hash routing
             if (preservePath) {
-                routeStr = `${location.pathname}${routeStr}`;
+                routeStr = `${routeStr.substring(1)}`;
             }
         }
         // Sync data to store before appending query string. Query string should have no effect on stored data
-        libs.setDataToStore(routeStr, data);
+        libs.setDataToStore(
+            preservePath
+                ? `${location.pathname}${routeStr}`
+                : routeStr,
+            data
+        );
         // Append query string
         routeStr = `${routeStr}${queryString ? `?${queryString}` : ''}`;
         history[replace ? 'replaceState' : 'pushState']({ data }, pageTitle, routeStr);
@@ -793,7 +806,7 @@ function set$1(route, replace = false, exec = true) {
             trigger(this.config.context, VIRTUAL_PUSHSTATE, [{
                 path: unmodifiedRoute,
                 hash: hashRouting
-            }]);
+            }, undefined, this]);
         }
     } else {
         throw new TypeError(INVALID_ROUTE);
@@ -801,8 +814,8 @@ function set$1(route, replace = false, exec = true) {
     return this;
 }
 
-function callOnce(routerInstance, isDone) {
-    const { hashRouting, location } = routerInstance.config;
+function callOnce(isDone) {
+    const { hashRouting, location } = this.config;
     const path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
     return (observable) => new Observable(subscriber => {
         const subn = observable.subscribe({
@@ -820,7 +833,7 @@ function callOnce(routerInstance, isDone) {
             isDone = true;
             if (path) {
                 subscriber.next(
-                    new RouterEvent([{ path, hash: hashRouting }], routerInstance)
+                    new RouterEvent([{ path, hash: hashRouting }, undefined, this])
                 );
             }
         }
@@ -848,13 +861,13 @@ class Router {
     }
     pipe() {
         return this.listeners.pipe(
-            callOnce(this),
+            callOnce.apply(this),
             ...arguments
         );
     }
     subscribe() {
         return this.listeners
-            .pipe(callOnce(this))
+            .pipe(callOnce.apply(this))
             .subscribe(...arguments);
     }
     set() {
