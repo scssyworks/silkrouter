@@ -8,7 +8,8 @@
   "scripts": {
     "start": "rollup -c --watch --environment SERVE:true",
     "build": "npm run test && rollup -c",
-    "test": "jest tests/*"
+    "test": "jest tests/*",
+    "deploy": "gh-pages -d dist"
   },
   "author": "scssyworks",
   "license": "MIT",
@@ -20,6 +21,7 @@
     "@rollup/plugin-node-resolve": "^6.1.0",
     "@types/jest": "^25.1.4",
     "babel-eslint": "^10.1.0",
+    "gh-pages": "^2.2.0",
     "jest": "^25.2.0",
     "rollup": "^1.32.1",
     "rollup-plugin-babel": "^4.4.0",
@@ -65,7 +67,7 @@
   "bugs": {
     "url": "https://github.com/scssyworks/silkrouter/issues"
   },
-  "homepage": "https://github.com/scssyworks/silkrouter#readme",
+  "homepage": "scssyworks.github.io",
   "peerDependencies": {
     "rxjs": "^6.5.4"
   }
