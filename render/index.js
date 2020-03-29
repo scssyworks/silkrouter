@@ -93,21 +93,24 @@ function initializeRouting() {
     const router = new Router();
     let childRouter = router;
     router.subscribe((e) => {
+        const eventRoute = location.hostname === 'scssyworks.github.io'
+            ? e.route.replace(/\/silkrouter\//, '/')
+            : e.route;
         q('[data-route]').forEach(el => {
             el.classList.remove('active');
             const elRoute = el.getAttribute('data-route');
-            if (elRoute === '/' && e.route === elRoute) {
+            if (elRoute === '/' && eventRoute === elRoute) {
                 el.classList.add('active');
-            } else if (elRoute !== '/' && e.route.includes(elRoute)) {
+            } else if (elRoute !== '/' && eventRoute.includes(elRoute)) {
                 el.classList.add('active');
             }
         });
         q('[data-section]').forEach(el => {
             el.classList.add('d-none');
             const elSection = el.getAttribute('data-section');
-            if (elSection === '/' && e.route === elSection) {
+            if (elSection === '/' && eventRoute === elSection) {
                 el.classList.remove('d-none');
-            } else if (elSection !== '/' && e.route.includes(elSection)) {
+            } else if (elSection !== '/' && eventRoute.includes(elSection)) {
                 el.classList.remove('d-none');
             }
         });
@@ -115,8 +118,11 @@ function initializeRouting() {
             el.classList.add('d-none');
         });
     });
+    const paramsRoute = location.hostname === 'scssyworks.github.io'
+        ? '/silkrouter/tab3/:firstname/:lastname'
+        : '/tab3/:firstname/:lastname';
     router.pipe(
-        route('/tab3/:firstname/:lastname')
+        route(paramsRoute)
     ).subscribe((e) => {
         q('.params-data pre').forEach(el => {
             el.textContent = JSON.stringify(e.params, null, 2);
@@ -138,10 +144,19 @@ function initializeRouting() {
         q('[data-route]').forEach(el => {
             if (el.contains(e.target)) {
                 const isRelative = el.hasAttribute('data-relative');
-                const route = isRelative && q('#checkHash:checked').length === 0
+                let route = isRelative && q('#checkHash:checked').length === 0
                     ? el.closest('section').getAttribute('data-section') + el.getAttribute('data-route')
                     : el.getAttribute('data-route');
+                if (location.hostname === 'scssyworks.github.io') {
+                    route = `/silkrouter${route}`;
+                }
                 if (isRelative) {
+                    if (
+                        location.hostname === 'scssyworks.github.io'
+                        && childRouter.config.hashRouting
+                    ) {
+                        route = route.replace(/\/silkrouter\//, '/');
+                    }
                     childRouter.set(route);
                 } else {
                     router.set(route);
@@ -151,18 +166,18 @@ function initializeRouting() {
         q('.btn-primary.clear-session').forEach(el => {
             if (el.contains(e.target)) {
                 window.sessionStorage.clear();
-                window.location.href = '/tab2';
+                window.location.href = location.hostname === 'scssyworks.github.io' ? '/silkrouter/tab2/' : '/tab2/';
             }
         });
         q('.append-param').forEach(el => {
             if (el.contains(e.target)) {
-                router.set('/tab3/john/doe');
+                router.set(`${location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''}/tab3/john/doe`);
             }
         });
         q('.append-query').forEach(el => {
             if (el.contains(e.target)) {
                 router.set({
-                    route: `/tab3/john/doe`,
+                    route: `${location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''}/tab3/john/doe`,
                     queryString: 'q=HelloWorld'
                 });
             }
@@ -171,7 +186,7 @@ function initializeRouting() {
     q('#checkHash').forEach(el => {
         el.addEventListener('change', () => {
             window.sessionStorage.setItem('checkedStatus', `${q('#checkHash:checked').length}`);
-            window.location.href = '/tab2';
+            window.location.href = `${location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''}/tab2/`;
         });
     });
     if (q('#checkHash:checked').length) {

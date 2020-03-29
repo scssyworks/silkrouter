@@ -2161,7 +2161,7 @@
     };
   }
 
-  const name="silkrouter";const version="4.0.0-alpha.5";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.9.0","@babel/preset-env":"^7.9.0","@rollup/plugin-commonjs":"^11.0.2","@rollup/plugin-json":"^4.0.2","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.1.4","babel-eslint":"^10.1.0",jest:"^25.2.0",rollup:"^1.32.1","rollup-plugin-babel":"^4.4.0","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.1.0","rollup-plugin-serve":"^1.0.1","rollup-plugin-terser":"^5.3.0",rxjs:"^6.5.4"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://github.com/scssyworks/silkrouter#readme";const peerDependencies={rxjs:"^6.5.4"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies};
+  const name="silkrouter";const version="4.0.0-alpha.6";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.9.0","@babel/preset-env":"^7.9.0","@rollup/plugin-commonjs":"^11.0.2","@rollup/plugin-json":"^4.0.2","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.1.4","babel-eslint":"^10.1.0","gh-pages":"^2.2.0",jest:"^25.2.0",rollup:"^1.32.1","rollup-plugin-babel":"^4.4.0","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.1.0","rollup-plugin-serve":"^1.0.1","rollup-plugin-terser":"^5.3.0",rxjs:"^6.5.4"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^6.5.4"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies};
 
   function q(selector) {
     var _document;
@@ -2273,13 +2273,14 @@
     var router = new Router();
     var childRouter = router;
     router.subscribe(function (e) {
+      var eventRoute = location.hostname === 'scssyworks.github.io' ? e.route.replace(/\/silkrouter\//, '/') : e.route;
       q('[data-route]').forEach(function (el) {
         el.classList.remove('active');
         var elRoute = el.getAttribute('data-route');
 
-        if (elRoute === '/' && e.route === elRoute) {
+        if (elRoute === '/' && eventRoute === elRoute) {
           el.classList.add('active');
-        } else if (elRoute !== '/' && e.route.includes(elRoute)) {
+        } else if (elRoute !== '/' && eventRoute.includes(elRoute)) {
           el.classList.add('active');
         }
       });
@@ -2287,9 +2288,9 @@
         el.classList.add('d-none');
         var elSection = el.getAttribute('data-section');
 
-        if (elSection === '/' && e.route === elSection) {
+        if (elSection === '/' && eventRoute === elSection) {
           el.classList.remove('d-none');
-        } else if (elSection !== '/' && e.route.includes(elSection)) {
+        } else if (elSection !== '/' && eventRoute.includes(elSection)) {
           el.classList.remove('d-none');
         }
       });
@@ -2297,7 +2298,8 @@
         el.classList.add('d-none');
       });
     });
-    router.pipe(route('/tab3/:firstname/:lastname')).subscribe(function (e) {
+    var paramsRoute = location.hostname === 'scssyworks.github.io' ? '/silkrouter/tab3/:firstname/:lastname' : '/tab3/:firstname/:lastname';
+    router.pipe(route(paramsRoute)).subscribe(function (e) {
       q('.params-data pre').forEach(function (el) {
         el.textContent = JSON.stringify(e.params, null, 2);
       });
@@ -2322,7 +2324,15 @@
 
           var _route = isRelative && q('#checkHash:checked').length === 0 ? el.closest('section').getAttribute('data-section') + el.getAttribute('data-route') : el.getAttribute('data-route');
 
+          if (location.hostname === 'scssyworks.github.io') {
+            _route = "/silkrouter".concat(_route);
+          }
+
           if (isRelative) {
+            if (location.hostname === 'scssyworks.github.io' && childRouter.config.hashRouting) {
+              _route = _route.replace(/\/silkrouter\//, '/');
+            }
+
             childRouter.set(_route);
           } else {
             router.set(_route);
@@ -2332,18 +2342,18 @@
       q('.btn-primary.clear-session').forEach(function (el) {
         if (el.contains(e.target)) {
           window.sessionStorage.clear();
-          window.location.href = '/tab2';
+          window.location.href = location.hostname === 'scssyworks.github.io' ? '/silkrouter/tab2/' : '/tab2/';
         }
       });
       q('.append-param').forEach(function (el) {
         if (el.contains(e.target)) {
-          router.set('/tab3/john/doe');
+          router.set("".concat(location.hostname === 'scssyworks.github.io' ? '/silkrouter' : '', "/tab3/john/doe"));
         }
       });
       q('.append-query').forEach(function (el) {
         if (el.contains(e.target)) {
           router.set({
-            route: "/tab3/john/doe",
+            route: "".concat(location.hostname === 'scssyworks.github.io' ? '/silkrouter' : '', "/tab3/john/doe"),
             queryString: 'q=HelloWorld'
           });
         }
@@ -2352,7 +2362,7 @@
     q('#checkHash').forEach(function (el) {
       el.addEventListener('change', function () {
         window.sessionStorage.setItem('checkedStatus', "".concat(q('#checkHash:checked').length));
-        window.location.href = '/tab2';
+        window.location.href = "".concat(location.hostname === 'scssyworks.github.io' ? '/silkrouter' : '', "/tab2/");
       });
     });
 
