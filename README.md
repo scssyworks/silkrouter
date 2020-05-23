@@ -19,7 +19,7 @@ Using CDN:
 ```
 
 # How to use?
-JQuery router follows event emitter pattern similar to ``jQuery`` custom events.
+JQuery router uses event emitters similar to ``jQuery`` custom events.
 
 ## Bind router events
 
