@@ -13,7 +13,7 @@ npm install --save silkrouter
 
 <b>New release (alpha)</b>
 ```sh
-npm install --save silkrouter@4.0.0-alpha.5 rxjs
+npm install --save silkrouter@4.0.0-beta.0 rxjs
 ```
 
 ### CDN
