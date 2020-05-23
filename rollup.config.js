@@ -80,10 +80,17 @@ umdProdConfig.plugins = [
 let configurations = [];
 if (process.env.SERVE) {
     const serveConfig = Object.assign({}, commonConfig);
+    const serveMinConfig = Object.assign({}, commonConfig);
     serveConfig.input = 'render/index.js';
+    serveMinConfig.input = 'render/index.js';
     serveConfig.output = Object.assign({}, commonConfig.output, {
         file: 'dist/render/silkrouter.iife.js',
         format: 'iife'
+    });
+    serveMinConfig.output = Object.assign({}, commonConfig.output, {
+        file: 'dist/render/silkrouter.iife.min.js',
+        format: 'iife',
+        sourcemap: false
     });
     serveConfig.plugins = [
         eslint({
@@ -96,6 +103,14 @@ if (process.env.SERVE) {
             throwOnError: true
         }),
         ...umdConfig.plugins
+    ];
+    serveMinConfig.plugins = [
+        ...umdProdConfig.plugins,
+        json({
+            exclude: ['node_modules/**'],
+            compact: true,
+            preferConst: true
+        })
     ];
     serveConfig.plugins.push(
         json({
@@ -115,8 +130,7 @@ if (process.env.SERVE) {
             verbose: false
         })
     );
-    console.log(serveConfig.plugins);
-    configurations.push(serveConfig);
+    configurations.push(serveConfig, serveMinConfig);
 } else {
     configurations.push(
         esmConfig,
