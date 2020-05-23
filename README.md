@@ -11,7 +11,7 @@ Silkrouter is a routing library for single page web applications.
 npm install --save silkrouter
 ```
 
-<b>New release (alpha)</b>
+<b>New release (beta)</b>
 ```sh
 npm install --save silkrouter@4.0.0-beta.0 rxjs
 ```
@@ -23,7 +23,7 @@ npm install --save silkrouter@4.0.0-beta.0 rxjs
 
 ### JQuery version
 ```sh
-npm install --save jqueryrouter@2.2.8
+npm install --save jqueryrouter jquery deparam.js
 ```
 
 ### Notes
