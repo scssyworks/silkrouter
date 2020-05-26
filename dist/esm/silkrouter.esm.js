@@ -553,7 +553,11 @@ function collate() {
 function bindRouterEvents() {
     const { context, location, hashRouting } = this.config;
     this.popStateSubscription = fromEvent(window, POP_STATE).subscribe(e => {
-        const path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
+        const path = trim(
+            hashRouting
+                ? location.hash.substring(1).split('?')[0]
+                : location.pathname
+        );
         if (path) {
             trigger(context, VIRTUAL_PUSHSTATE, [{ path, hash: hashRouting }, e, this]);
         }

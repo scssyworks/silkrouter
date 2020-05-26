@@ -1,29 +1,29 @@
 [![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.js?label=unminified)
 
-**Silk router version 4 is here. If you are searching for version 3 documentation (current version), please click the link below:**<br>
+**Silk router version 4 is here. If you are searching for version 3 documentation (current version), please click on the link below:**<br>
 https://github.com/scssyworks/silkrouter/blob/master/READMEv3.md
 
 # Silk router
 
-Silk router is a customizable and reactive app routing library.
+Silk router is customizable/reactive app routing library.
 
 # Install
 
 ```sh
-npm install --save silkrouter@4.0.0-alpha.6 rxjs
+npm install --save silkrouter@4.0.0-beta.1 rxjs
 ```
 
 # What's new?
 
-Silk router uses ReactiveX Observer pattern in contrast to EventEmitter pattern used in version 3 and earlier. This solves one of the major  problems silk router had in previous versions: Lack of customization. Almost 80% of the code has been re-written in favour of observer pattern. It means you can customize and use any number of operators provided by ``rxjs``, ``silkrouter`` or other third party libraries. **Neat right!**
+Silk router has switched from ``EventEmitter`` pattern used in version 3 to a new ``Observer`` pattern. This solves one major problem Silkrouter had in previous versions: Customization. Almost 80% of the code has been re-written. It means you can use a bunch of operators provided by ``rxjs``, ``silkrouter`` or other third party libraries. **Neat right!**
 
 # RxJS
 
-Silk router uses classes such as ``Observables`` and ``Subscription`` provided by ``rxjs``. We do not bundle them in order to keep file size small. Hence, you need to install ``rxjs`` separately.
+Silk router uses classes such as ``Observables`` and ``Subscription`` provided by ``rxjs``. We do not bundle them to keep file size small. You need to install ``rxjs`` separately.
 
 # How to use Silk router
 
-We have taken a massive leap forward syntax-wise, however the underlying premise remains the same.
+Silkrouter syntax has changed (and for good).
 
 1. Import
 
@@ -49,7 +49,7 @@ router.subscribe((e) => {
 
 4. Use ``route`` operator to add a path
 
-Use ``pipe`` method for that
+Use ``pipe`` method to chain an operator (similar to RxJS)
 
 ```js
 router
@@ -65,7 +65,7 @@ router
 router.set('/path/to/another/route');
 ```
 
-You can ``pipe`` more operators to apply any number of transformations. Silk router currently ships four operators ``route``, ``cache``, ``deparam`` and ``noMatch``. Please refer to API section below for more details.
+You can ``pipe`` as many operators you want. Please refer to API section below for more details.
 
 # API
 
@@ -105,8 +105,8 @@ const router = new Router({
 });
 ```
 
-Your application will still continue to run the same way. Hash routing strips away the dependency to define server-side routes for your application (since hash routing is pretty much client-side only).<br><br>
-By default hash routes will replace your current path. In order to maintain current path, you need to pass an additional flag called ``preservePath``.
+Your application will continue to run the same way. Hash routing strips away the dependency to define server-side routes for your application (since hash routing is pretty much client-side).<br><br>
+By default hash routes replaces your current path. In order to keep the current path, you need to pass an additional flag called ``preservePath``.
 
 ```js
 const router = new Router({
@@ -126,6 +126,8 @@ router.pipe(route('/first/path', router)).subscribe(() => { ... });
 router.pipe(route('/second/path', router)).subscribe(() => { ... });
 router.pipe(noMatch(router)).subscribe(() => { ... }); // Called only if "first" and "second" paths are not matched
 ```
+
+Make sure to pass the current router instance as parameter.
 
 ## Passing data
 
