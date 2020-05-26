@@ -15,7 +15,7 @@ npm install --save silkrouter@4.0.0-beta.1 rxjs
 
 # What's new?
 
-Silk router ditches ``EventEmitter`` pattern used in version 3 in favour of new ``Observer`` pattern. This solves one major problem Silkrouter had in previous versions: Customization. Almost 80% of the code has been re-written. It means you can use a bunch of operators provided by ``rxjs``, ``silkrouter`` or other third party libraries. **Neat right!**
+Silk router has switched from ``EventEmitter`` pattern used in version 3 to a new ``Observer`` pattern. This solves one major problem Silkrouter had in previous versions: Customization. Almost 80% of the code has been re-written. It means you can use a bunch of operators provided by ``rxjs``, ``silkrouter`` or other third party libraries. **Neat right!**
 
 # RxJS
 
