@@ -27,7 +27,10 @@ const commonConfig = {
                 moduleDirectory: "node_modules"
             }
         }),
-        commonjs()
+        commonjs(),
+        babel({
+            exclude: "node_modules/**"
+        })
     ]
 };
 
@@ -39,9 +42,6 @@ devConfig.output = Object.assign({}, commonConfig.output, {
 });
 devConfig.plugins = [
     ...commonConfig.plugins,
-    babel({
-        exclude: "node_modules/**"
-    }),
     cleanup({
         maxEmptyLines: 0
     })
@@ -68,9 +68,6 @@ prodConfig.output = Object.assign({}, devConfig.output, {
 });
 prodConfig.plugins = [
     ...commonConfig.plugins,
-    babel({
-        exclude: "node_modules/**"
-    }),
     terser({
         output: {
             comments: function () {
