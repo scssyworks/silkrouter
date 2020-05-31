@@ -50,8 +50,8 @@
   },
   "homepage": "https://github.com/scssyworks/silkrouter#readme",
   "devDependencies": {
-    "@babel/core": "^7.9.6",
-    "@babel/preset-env": "^7.9.6",
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
     "@rollup/plugin-commonjs": "^11.1.0",
     "@rollup/plugin-node-resolve": "^6.1.0",
     "@types/jest": "^25.2.3",
