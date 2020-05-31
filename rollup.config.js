@@ -27,6 +27,9 @@ const commonConfig = {
             namedExports: {
                 uuid: ['v4']
             }
+        }),
+        babel({
+            exclude: 'node_modules/**'
         })
     ]
 };
@@ -60,10 +63,7 @@ umdConfig.output = Object.assign({}, commonConfig.output, {
     globals: { rxjs }
 });
 umdConfig.plugins = [
-    ...commonConfig.plugins,
-    babel({
-        exclude: 'node_modules/**'
-    })
+    ...commonConfig.plugins
 ];
 
 // Production config
