@@ -289,6 +289,7 @@
   function isFunction(x) {
       return typeof x === 'function';
   }
+  //# sourceMappingURL=isFunction.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var _enable_super_gross_mode_that_will_cause_bad_things = false;
@@ -305,11 +306,13 @@
           return _enable_super_gross_mode_that_will_cause_bad_things;
       },
   };
+  //# sourceMappingURL=config.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   function hostReportError(err) {
       setTimeout(function () { throw err; }, 0);
   }
+  //# sourceMappingURL=hostReportError.js.map
 
   /** PURE_IMPORTS_START _config,_util_hostReportError PURE_IMPORTS_END */
   var empty = {
@@ -325,14 +328,17 @@
       },
       complete: function () { }
   };
+  //# sourceMappingURL=Observer.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var isArray = /*@__PURE__*/ (function () { return Array.isArray || (function (x) { return x && typeof x.length === 'number'; }); })();
+  //# sourceMappingURL=isArray.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   function isObject$1(x) {
       return x !== null && typeof x === 'object';
   }
+  //# sourceMappingURL=isObject.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var UnsubscriptionErrorImpl = /*@__PURE__*/ (function () {
@@ -348,6 +354,7 @@
       return UnsubscriptionErrorImpl;
   })();
   var UnsubscriptionError = UnsubscriptionErrorImpl;
+  //# sourceMappingURL=UnsubscriptionError.js.map
 
   /** PURE_IMPORTS_START _util_isArray,_util_isObject,_util_isFunction,_util_UnsubscriptionError PURE_IMPORTS_END */
   var Subscription = /*@__PURE__*/ (function () {
@@ -479,6 +486,7 @@
   function flattenUnsubscriptionErrors(errors) {
       return errors.reduce(function (errs, err) { return errs.concat((err instanceof UnsubscriptionError) ? err.errors : err); }, []);
   }
+  //# sourceMappingURL=Subscription.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var rxSubscriber = /*@__PURE__*/ (function () {
@@ -486,6 +494,7 @@
           ? /*@__PURE__*/ Symbol('rxSubscriber')
           : '@@rxSubscriber_' + /*@__PURE__*/ Math.random();
   })();
+  //# sourceMappingURL=rxSubscriber.js.map
 
   /** PURE_IMPORTS_START tslib,_util_isFunction,_Observer,_Subscription,_internal_symbol_rxSubscriber,_config,_util_hostReportError PURE_IMPORTS_END */
   var Subscriber = /*@__PURE__*/ (function (_super) {
@@ -710,6 +719,7 @@
       };
       return SafeSubscriber;
   }(Subscriber));
+  //# sourceMappingURL=Subscriber.js.map
 
   /** PURE_IMPORTS_START _Subscriber PURE_IMPORTS_END */
   function canReportError(observer) {
@@ -727,6 +737,7 @@
       }
       return true;
   }
+  //# sourceMappingURL=canReportError.js.map
 
   /** PURE_IMPORTS_START _Subscriber,_symbol_rxSubscriber,_Observer PURE_IMPORTS_END */
   function toSubscriber(nextOrObserver, error, complete) {
@@ -743,14 +754,17 @@
       }
       return new Subscriber(nextOrObserver, error, complete);
   }
+  //# sourceMappingURL=toSubscriber.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var observable = /*@__PURE__*/ (function () { return typeof Symbol === 'function' && Symbol.observable || '@@observable'; })();
+  //# sourceMappingURL=observable.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   function identity(x) {
       return x;
   }
+  //# sourceMappingURL=identity.js.map
 
   /** PURE_IMPORTS_START _identity PURE_IMPORTS_END */
   function pipeFromArray(fns) {
@@ -764,6 +778,7 @@
           return fns.reduce(function (prev, fn) { return fn(prev); }, input);
       };
   }
+  //# sourceMappingURL=pipe.js.map
 
   /** PURE_IMPORTS_START _util_canReportError,_util_toSubscriber,_symbol_observable,_util_pipe,_config PURE_IMPORTS_END */
   var Observable = /*@__PURE__*/ (function () {
@@ -874,6 +889,7 @@
       }
       return promiseCtor;
   }
+  //# sourceMappingURL=Observable.js.map
 
   /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
   function map(project, thisArg) {
@@ -916,6 +932,7 @@
       };
       return MapSubscriber;
   }(Subscriber));
+  //# sourceMappingURL=map.js.map
 
   /** PURE_IMPORTS_START _Observable,_util_isArray,_util_isFunction,_operators_map PURE_IMPORTS_END */
   function fromEvent(target, eventName, options, resultSelector) {
@@ -974,6 +991,7 @@
   function isEventTarget(sourceObj) {
       return sourceObj && typeof sourceObj.addEventListener === 'function' && typeof sourceObj.removeEventListener === 'function';
   }
+  //# sourceMappingURL=fromEvent.js.map
 
   if (typeof window.CustomEvent === 'undefined') {
     var CustomEvent = function CustomEvent(event, params) {
@@ -2145,7 +2163,7 @@
     };
   }
 
-  const name="silkrouter";const version="4.0.0-beta.0";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.9.6","@babel/preset-env":"^7.9.6","@rollup/plugin-commonjs":"^11.1.0","@rollup/plugin-json":"^4.0.3","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.2.3","babel-eslint":"^10.1.0","gh-pages":"^2.2.0",jest:"^25.5.4",rollup:"^1.32.1","rollup-plugin-babel":"^4.4.0","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.3.0","rollup-plugin-serve":"^1.0.1","rollup-plugin-terser":"^5.3.0",rxjs:"^6.5.5"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^6.5.4"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies};
+  const name="silkrouter";const version="4.0.0-beta.0";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.9.6","@babel/preset-env":"^7.9.6","@rollup/plugin-babel":"^5.0.2","@rollup/plugin-commonjs":"^11.1.0","@rollup/plugin-json":"^4.0.3","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.2.3","babel-eslint":"^10.1.0","gh-pages":"^2.2.0",jest:"^25.5.4",rollup:"^1.32.1","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.3.0","rollup-plugin-serve":"^1.0.1","rollup-plugin-terser":"^5.3.0",rxjs:"^6.5.5"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^6.5.4"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies};
 
   function q(selector) {
     var _document;
