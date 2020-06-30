@@ -15,7 +15,7 @@ npm install --save jqueryrouter deparam.js jquery
 Using CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@2.2.6/dist/js/jquery.router.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jqueryrouter@2.2.11/dist/js/jquery.router.min.js"></script>
 ```
 
 # How to use?
