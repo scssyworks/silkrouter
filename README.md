@@ -13,7 +13,7 @@ npm install --save silkrouter
 
 <b>New release (beta)</b>
 ```sh
-npm install --save silkrouter@4.0.0-beta.0 rxjs
+npm install --save silkrouter@4.0.0-beta.2 rxjs
 ```
 
 ### CDN
@@ -131,7 +131,7 @@ route((e) => {
 
 ### Handle errors
 
-Version 3.5.0 adds a new feature which makes error handling easier than before.
+Version 3.5.0 adds a new feature which makes error handling easier.
 
 1. Add routes
 
