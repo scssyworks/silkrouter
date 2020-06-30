@@ -18,7 +18,7 @@ npm install --save silkrouter
 
 ### JQuery version
 ```sh
-npm install --save jqueryrouter@2.2.7
+npm install --save jqueryrouter
 ```
 
 ### Notes
@@ -126,7 +126,7 @@ route((e) => {
 
 ### Handle errors
 
-Version 3.5.0 adds a new feature which makes error handling much easier than before.
+Version 3.5.0 adds a new feature which makes error handling much easier.
 
 1. Add routes
 
