@@ -26,7 +26,7 @@ route('invalidRoute', ...);
 
 ## Trying to remove list routes removes all generic routes
 
-List routes are generic routes behind the scenes.
+List routes are generic routes.
 
 ```js
 route([ ... ], () => { ... });
