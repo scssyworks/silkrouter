@@ -1,19 +1,20 @@
 [![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter)
 
 # Silkrouter
-Silkrouter is a routing library for single page web applications.
+Silkrouter is a reactive app routing library for single page applications.
+
+# Silkrouter v4 is here
+Silkrouter v4 is now beta. To install beta version use the command below:
+
+```sh
+npm install --save silkrouter@4.0.0-beta.4 rxjs
+```
 
 # Install
 
 ### NPM
-<b>Stable release</b>
 ```sh
 npm install --save silkrouter
-```
-
-<b>New release (beta)</b>
-```sh
-npm install --save silkrouter@4.0.0-beta.2 rxjs
 ```
 
 ### CDN
@@ -31,7 +32,7 @@ npm install --save jqueryrouter jquery deparam.js
 
 # How to use Silk Router?
 
-Silkrouter follows event emitter pattern. You can compare it with ``jQuery`` custom events.
+Silkrouter is easy to use library for application routing. It's syntax is comparable to ``jQuery`` custom events.
 
 ## Import dependencies
 
