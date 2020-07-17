@@ -2,7 +2,7 @@
 JQuery router is a SPA (Single Page Apps) router plugin for jQuery.
 
 # Upgrade to Silkrouter (Recommended)
-``Silkrouter`` is latest recommended version. Refer to <a href="https://github.com/scssyworks/silkrouter/blob/feature/ver2/MIGRATION.md">migration documentation</a> to migrate to this version.
+``Silkrouter`` is latest recommended version. Refer to <a href="https://github.com/scssyworks/silkrouter/blob/feature/ver2/MIGRATION.md">migration documentation</a> for more details. Please note that we are going end support for ``jqueryrouter`` soon. The package will continue to exist but there won't be any further security updates or patches to this version.
 
 # Installation
 
