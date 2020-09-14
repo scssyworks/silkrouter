@@ -8,7 +8,7 @@ Silkrouter is a routing library for single page applications.
 ### NPM
 <b>Stable release</b>
 ```sh
-npm install --save silkrouter
+npm install --save silkrouter@3
 ```
 
 ### CDN
