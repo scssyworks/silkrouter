@@ -1,7 +1,7 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs')) :
   typeof define === 'function' && define.amd ? define(['exports', 'rxjs'], factory) :
-  (global = global || self, factory(global.silkrouter = {}, global.rxjs));
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.silkrouter = {}, global.rxjs));
 }(this, (function (exports, rxjs) { 'use strict';
 
   function _typeof(obj) {
