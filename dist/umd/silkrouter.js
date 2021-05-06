@@ -74,18 +74,21 @@
   }
 
   function _iterableToArray(iter) {
-    if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
   }
 
   function _iterableToArrayLimit(arr, i) {
-    if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+    var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
+
+    if (_i == null) return;
     var _arr = [];
     var _n = true;
     var _d = false;
-    var _e = undefined;
+
+    var _s, _e;
 
     try {
-      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
         _arr.push(_s.value);
 
         if (i && _arr.length === i) break;
@@ -632,7 +635,7 @@
     }
   }
 
-  function set(key, value) {
+  function set$1(key, value) {
     if (isStorageAvailable()) {
       return sessionStorage.setItem(key, toUTF16(isObject(value) ? JSON.stringify(value) : value));
     }
@@ -655,8 +658,8 @@
   }
 
   var store = {
-    set: function set$1() {
-      return set.apply(this, arguments);
+    set: function set() {
+      return set$1.apply(this, arguments);
     },
     get: function get$1() {
       return get.apply(this, arguments);
@@ -833,7 +836,7 @@
    */
 
 
-  function deparam() {
+  function deparam$1() {
     var _this = this;
 
     var qs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : loc.search;
@@ -996,7 +999,7 @@
 
 
   function lib() {
-    return deparam.apply(this, arguments);
+    return deparam$1.apply(this, arguments);
   }
 
   /**
@@ -1014,7 +1017,7 @@
     return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
   }
 
-  function set$1(route) {
+  function set(route) {
     var replace = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     var exec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
     var _this$config = this.config,
@@ -1164,8 +1167,8 @@
       }
     }, {
       key: "set",
-      value: function set() {
-        return set$1.apply(this, arguments);
+      value: function set$1() {
+        return set.apply(this, arguments);
       }
     }, {
       key: "destroy",
@@ -1293,7 +1296,7 @@
    * @param {boolean} coerce Flag to enable value typecast
    */
 
-  function deparam$1() {
+  function deparam() {
     var coerce = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     return function (observable) {
       return new rxjs.Observable(function (subscriber) {
@@ -1430,7 +1433,7 @@
   var index = /*#__PURE__*/Object.freeze({
     __proto__: null,
     route: route,
-    deparam: deparam$1,
+    deparam: deparam,
     noMatch: noMatch,
     cache: cache
   });
