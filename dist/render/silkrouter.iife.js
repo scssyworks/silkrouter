@@ -73,18 +73,21 @@
   }
 
   function _iterableToArray(iter) {
-    if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
   }
 
   function _iterableToArrayLimit(arr, i) {
-    if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+    var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
+
+    if (_i == null) return;
     var _arr = [];
     var _n = true;
     var _d = false;
-    var _e = undefined;
+
+    var _s, _e;
 
     try {
-      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
         _arr.push(_s.value);
 
         if (i && _arr.length === i) break;
@@ -172,7 +175,7 @@
    * @param {*} value Any type of value
    */
 
-  function isObject(value) {
+  function isObject$1(value) {
     return value && _typeof(value) === 'object';
   }
   /**
@@ -181,7 +184,7 @@
    */
 
   function isPureObject(value) {
-    return isObject(value) && !isArr(value);
+    return isObject$1(value) && !isArr(value);
   }
   /**
    * Checks if given route is valid
@@ -233,7 +236,7 @@
    */
 
   function loopFunc(ref, target) {
-    if (isObject(ref)) {
+    if (isObject$1(ref)) {
       Object.keys(ref).forEach(function (key) {
         target[key] = ref[key];
       });
@@ -247,7 +250,7 @@
 
 
   function assign() {
-    var target = isObject(arguments[0]) ? arguments[0] : {};
+    var target = isObject$1(arguments[0]) ? arguments[0] : {};
 
     for (var i = 1; i < arguments.length; i++) {
       loopFunc(arguments[i], target);
@@ -289,7 +292,6 @@
   function isFunction(x) {
       return typeof x === 'function';
   }
-  //# sourceMappingURL=isFunction.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var _enable_super_gross_mode_that_will_cause_bad_things = false;
@@ -306,13 +308,11 @@
           return _enable_super_gross_mode_that_will_cause_bad_things;
       },
   };
-  //# sourceMappingURL=config.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   function hostReportError(err) {
       setTimeout(function () { throw err; }, 0);
   }
-  //# sourceMappingURL=hostReportError.js.map
 
   /** PURE_IMPORTS_START _config,_util_hostReportError PURE_IMPORTS_END */
   var empty = {
@@ -328,17 +328,14 @@
       },
       complete: function () { }
   };
-  //# sourceMappingURL=Observer.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var isArray = /*@__PURE__*/ (function () { return Array.isArray || (function (x) { return x && typeof x.length === 'number'; }); })();
-  //# sourceMappingURL=isArray.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
-  function isObject$1(x) {
+  function isObject(x) {
       return x !== null && typeof x === 'object';
   }
-  //# sourceMappingURL=isObject.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var UnsubscriptionErrorImpl = /*@__PURE__*/ (function () {
@@ -354,7 +351,6 @@
       return UnsubscriptionErrorImpl;
   })();
   var UnsubscriptionError = UnsubscriptionErrorImpl;
-  //# sourceMappingURL=UnsubscriptionError.js.map
 
   /** PURE_IMPORTS_START _util_isArray,_util_isObject,_util_isFunction,_util_UnsubscriptionError PURE_IMPORTS_END */
   var Subscription = /*@__PURE__*/ (function () {
@@ -363,6 +359,7 @@
           this._parentOrParents = null;
           this._subscriptions = null;
           if (unsubscribe) {
+              this._ctorUnsubscribe = true;
               this._unsubscribe = unsubscribe;
           }
       }
@@ -371,7 +368,7 @@
           if (this.closed) {
               return;
           }
-          var _a = this, _parentOrParents = _a._parentOrParents, _unsubscribe = _a._unsubscribe, _subscriptions = _a._subscriptions;
+          var _a = this, _parentOrParents = _a._parentOrParents, _ctorUnsubscribe = _a._ctorUnsubscribe, _unsubscribe = _a._unsubscribe, _subscriptions = _a._subscriptions;
           this.closed = true;
           this._parentOrParents = null;
           this._subscriptions = null;
@@ -385,6 +382,9 @@
               }
           }
           if (isFunction(_unsubscribe)) {
+              if (_ctorUnsubscribe) {
+                  this._unsubscribe = undefined;
+              }
               try {
                   _unsubscribe.call(this);
               }
@@ -397,7 +397,7 @@
               var len = _subscriptions.length;
               while (++index < len) {
                   var sub = _subscriptions[index];
-                  if (isObject$1(sub)) {
+                  if (isObject(sub)) {
                       try {
                           sub.unsubscribe();
                       }
@@ -486,7 +486,6 @@
   function flattenUnsubscriptionErrors(errors) {
       return errors.reduce(function (errs, err) { return errs.concat((err instanceof UnsubscriptionError) ? err.errors : err); }, []);
   }
-  //# sourceMappingURL=Subscription.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var rxSubscriber = /*@__PURE__*/ (function () {
@@ -494,7 +493,6 @@
           ? /*@__PURE__*/ Symbol('rxSubscriber')
           : '@@rxSubscriber_' + /*@__PURE__*/ Math.random();
   })();
-  //# sourceMappingURL=rxSubscriber.js.map
 
   /** PURE_IMPORTS_START tslib,_util_isFunction,_Observer,_Subscription,_internal_symbol_rxSubscriber,_config,_util_hostReportError PURE_IMPORTS_END */
   var Subscriber = /*@__PURE__*/ (function (_super) {
@@ -719,7 +717,6 @@
       };
       return SafeSubscriber;
   }(Subscriber));
-  //# sourceMappingURL=Subscriber.js.map
 
   /** PURE_IMPORTS_START _Subscriber PURE_IMPORTS_END */
   function canReportError(observer) {
@@ -737,7 +734,6 @@
       }
       return true;
   }
-  //# sourceMappingURL=canReportError.js.map
 
   /** PURE_IMPORTS_START _Subscriber,_symbol_rxSubscriber,_Observer PURE_IMPORTS_END */
   function toSubscriber(nextOrObserver, error, complete) {
@@ -754,17 +750,14 @@
       }
       return new Subscriber(nextOrObserver, error, complete);
   }
-  //# sourceMappingURL=toSubscriber.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   var observable = /*@__PURE__*/ (function () { return typeof Symbol === 'function' && Symbol.observable || '@@observable'; })();
-  //# sourceMappingURL=observable.js.map
 
   /** PURE_IMPORTS_START  PURE_IMPORTS_END */
   function identity(x) {
       return x;
   }
-  //# sourceMappingURL=identity.js.map
 
   /** PURE_IMPORTS_START _identity PURE_IMPORTS_END */
   function pipeFromArray(fns) {
@@ -778,7 +771,6 @@
           return fns.reduce(function (prev, fn) { return fn(prev); }, input);
       };
   }
-  //# sourceMappingURL=pipe.js.map
 
   /** PURE_IMPORTS_START _util_canReportError,_util_toSubscriber,_symbol_observable,_util_pipe,_config PURE_IMPORTS_END */
   var Observable = /*@__PURE__*/ (function () {
@@ -882,14 +874,13 @@
   }());
   function getPromiseCtor(promiseCtor) {
       if (!promiseCtor) {
-          promiseCtor =  Promise;
+          promiseCtor = Promise;
       }
       if (!promiseCtor) {
           throw new Error('no Promise impl found');
       }
       return promiseCtor;
   }
-  //# sourceMappingURL=Observable.js.map
 
   /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
   function map(project, thisArg) {
@@ -932,7 +923,6 @@
       };
       return MapSubscriber;
   }(Subscriber));
-  //# sourceMappingURL=map.js.map
 
   /** PURE_IMPORTS_START _Observable,_util_isArray,_util_isFunction,_operators_map PURE_IMPORTS_END */
   function fromEvent(target, eventName, options, resultSelector) {
@@ -991,7 +981,6 @@
   function isEventTarget(sourceObj) {
       return sourceObj && typeof sourceObj.addEventListener === 'function' && typeof sourceObj.removeEventListener === 'function';
   }
-  //# sourceMappingURL=fromEvent.js.map
 
   if (typeof window.CustomEvent === 'undefined') {
     var CustomEvent = function CustomEvent(event, params) {
@@ -1318,7 +1307,7 @@
       var isSecure = loc.protocol === 'https:';
       var transformedValue = value;
 
-      if (isObject(value)) {
+      if (isObject$1(value)) {
         transformedValue = JSON.stringify(value);
       }
 
@@ -1368,9 +1357,9 @@
     }
   }
 
-  function set(key, value) {
+  function set$1(key, value) {
     if (isStorageAvailable()) {
-      return sessionStorage.setItem(key, toUTF16(isObject(value) ? JSON.stringify(value) : value));
+      return sessionStorage.setItem(key, toUTF16(isObject$1(value) ? JSON.stringify(value) : value));
     }
 
     return setCookie(key, value);
@@ -1391,8 +1380,8 @@
   }
 
   var store = {
-    set: function set$1() {
-      return set.apply(this, arguments);
+    set: function set() {
+      return set$1.apply(this, arguments);
     },
     get: function get$1() {
       return get.apply(this, arguments);
@@ -1526,7 +1515,7 @@
    */
 
   function buildQuery(qsList, key, obj) {
-    if (isObject(obj)) {
+    if (isObject$1(obj)) {
       Object.keys(obj).forEach(function (obKey) {
         buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? '' : obKey, "]"), obj[obKey]);
       });
@@ -1545,7 +1534,7 @@
   function toQueryString(obj) {
     var qsList = [];
 
-    if (isObject(obj)) {
+    if (isObject$1(obj)) {
       Object.keys(obj).forEach(function (key) {
         buildQuery(qsList, key, obj[key]);
       });
@@ -1569,7 +1558,7 @@
    */
 
 
-  function deparam() {
+  function deparam$1() {
     var _this = this;
 
     var qs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : loc.search;
@@ -1732,7 +1721,7 @@
 
 
   function lib() {
-    return deparam.apply(this, arguments);
+    return deparam$1.apply(this, arguments);
   }
 
   /**
@@ -1750,7 +1739,7 @@
     return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
   }
 
-  function set$1(route) {
+  function set(route) {
     var replace = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     var exec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
     var _this$config = this.config,
@@ -1774,7 +1763,7 @@
         pageTitle = _routeObject$pageTitl === void 0 ? document.querySelector('head title').textContent : _routeObject$pageTitl;
     var routeParts = routeStr.split('?'); // Check if query string is an object
 
-    if (isObject(queryString)) {
+    if (isObject$1(queryString)) {
       queryString = toQueryString(queryString);
     } // Resolve to URL query string if it's not explicitly passed
 
@@ -1900,8 +1889,8 @@
       }
     }, {
       key: "set",
-      value: function set() {
-        return set$1.apply(this, arguments);
+      value: function set$1() {
+        return set.apply(this, arguments);
       }
     }, {
       key: "destroy",
@@ -2029,7 +2018,7 @@
    * @param {boolean} coerce Flag to enable value typecast
    */
 
-  function deparam$1() {
+  function deparam() {
     var coerce = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     return function (observable) {
       return new Observable(function (subscriber) {
@@ -2103,7 +2092,7 @@
 
   function deepComparison(first, second, result) {
     each(Object.keys(first), function (key) {
-      if (isObject(first[key]) && isObject(second[key])) {
+      if (isObject$1(first[key]) && isObject$1(second[key])) {
         deepComparison(first[key], second[key], result);
       } else {
         result["break"] = first[key] !== second[key];
@@ -2132,7 +2121,7 @@
         var subn = observable.subscribe({
           next: function next(event) {
             each(keys, function (key) {
-              if (deep && isObject(event[key]) && isObject(cache[key])) {
+              if (deep && isObject$1(event[key]) && isObject$1(cache[key])) {
                 var result = {};
                 deepComparison(event[key], cache[key], result);
 
@@ -2163,7 +2152,7 @@
     };
   }
 
-  const name="silkrouter";const version="4.0.0-beta.0";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.9.6","@babel/preset-env":"^7.9.6","@rollup/plugin-babel":"^5.0.2","@rollup/plugin-commonjs":"^11.1.0","@rollup/plugin-json":"^4.0.3","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.2.3","babel-eslint":"^10.1.0","gh-pages":"^2.2.0",jest:"^25.5.4",rollup:"^1.32.1","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.3.0","rollup-plugin-serve":"^1.0.1","rollup-plugin-terser":"^5.3.0",rxjs:"^6.5.5"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^6.5.4"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies};
+  const name="silkrouter";const version="4.1.1";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.14.0","@babel/preset-env":"^7.14.1","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-commonjs":"^11.1.0","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.2.3","babel-eslint":"^10.1.0","gh-pages":"^2.2.0",jest:"^25.5.4",rollup:"^2.47.0","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.3.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2",rxjs:"^6.6.7"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^6.5.4"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies};
 
   function q(selector) {
     var _document;
@@ -2389,7 +2378,7 @@
   function setGlobals() {
     window.Router = Router;
     window.route = route;
-    window.deparam = deparam$1;
+    window.deparam = deparam;
     window.noMatch = noMatch;
     window.cache = cache;
   }
