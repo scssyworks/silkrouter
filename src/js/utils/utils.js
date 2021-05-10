@@ -10,17 +10,7 @@ export const isArr = Array.isArray;
  * @param {string} str String
  */
 export function trim(str) {
-    return ((typeof str === 'string') ? str.trim() : '');
-}
-
-/**
- * Checks if input is a number
- * @param {*} key 
- */
-export function isNumber(key) {
-    key = trim(`${key}`);
-    if (['null', 'undefined', ''].indexOf(key) > -1) return false;
-    return !isNaN(+key);
+  return typeof str === 'string' ? str.trim() : '';
 }
 
 /**
@@ -28,7 +18,7 @@ export function isNumber(key) {
  * @param {*} value Any type of value
  */
 export function isObject(value) {
-    return value && typeof value === 'object';
+  return value && typeof value === 'object';
 }
 
 /**
@@ -36,7 +26,7 @@ export function isObject(value) {
  * @param {*} value Any type of value
  */
 export function isPureObject(value) {
-    return isObject(value) && !isArr(value);
+  return isObject(value) && !isArr(value);
 }
 
 /**
@@ -45,7 +35,7 @@ export function isPureObject(value) {
  * @param {string} route Route string
  */
 export function isValidRoute(route) {
-    return (typeof route === 'string' && REG_PATHNAME.test(route));
+  return typeof route === 'string' && REG_PATHNAME.test(route);
 }
 
 /**
@@ -54,7 +44,7 @@ export function isValidRoute(route) {
  * @param {*} key Key
  */
 export function hasOwn(ob, key) {
-    return Object.prototype.hasOwnProperty.call(ob, key);
+  return Object.prototype.hasOwnProperty.call(ob, key);
 }
 
 /**
@@ -63,18 +53,21 @@ export function hasOwn(ob, key) {
  * @param {function} callback Callback function
  */
 export function each(arrayObj, callback) {
-    if (arrayObj && arrayObj.length) {
-        for (let index = 0; index < arrayObj.length; index += 1) {
-            if (typeof callback === 'function') {
-                const continueTheLoop = callback.apply(arrayObj, [arrayObj[index], index]);
-                if (typeof continueTheLoop === 'boolean') {
-                    if (continueTheLoop) {
-                        continue;
-                    } else {
-                        break;
-                    }
-                }
-            }
+  if (arrayObj && arrayObj.length) {
+    for (let index = 0; index < arrayObj.length; index += 1) {
+      if (typeof callback === 'function') {
+        const continueTheLoop = callback.apply(arrayObj, [
+          arrayObj[index],
+          index,
+        ]);
+        if (typeof continueTheLoop === 'boolean') {
+          if (continueTheLoop) {
+            continue;
+          } else {
+            break;
+          }
         }
+      }
     }
+  }
 }

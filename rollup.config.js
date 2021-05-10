@@ -23,11 +23,7 @@ const commonConfig = {
       },
       preferBuiltins: true,
     }),
-    commonjs({
-      namedExports: {
-        uuid: ['v4'],
-      },
-    }),
+    commonjs(),
     babel({
       exclude: 'node_modules/**',
       babelHelpers: 'bundled',
@@ -50,7 +46,14 @@ esmProdConfig.output = Object.assign({}, esmConfig.output, {
   file: 'dist/esm/silkrouter.esm.min.js',
   sourcemap: false,
 });
-esmProdConfig.plugins = [...esmConfig.plugins, terser()];
+esmProdConfig.plugins = [
+  ...esmConfig.plugins,
+  terser({
+    output: {
+      comments: false,
+    },
+  }),
+];
 
 // UMD config
 const umdConfig = Object.assign({}, commonConfig);
@@ -68,7 +71,14 @@ umdProdConfig.output = Object.assign({}, umdConfig.output, {
   file: 'dist/umd/silkrouter.min.js',
   sourcemap: false,
 });
-umdProdConfig.plugins = [...umdConfig.plugins, terser()];
+umdProdConfig.plugins = [
+  ...umdConfig.plugins,
+  terser({
+    output: {
+      comments: false,
+    },
+  }),
+];
 
 let configurations = [];
 if (process.env.SERVE) {

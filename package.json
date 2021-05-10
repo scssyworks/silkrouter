@@ -70,5 +70,8 @@
   "homepage": "https://scssyworks.github.io/silkrouter",
   "peerDependencies": {
     "rxjs": "^6.5.4"
+  },
+  "dependencies": {
+    "is-number": "^7.0.0"
   }
 }
