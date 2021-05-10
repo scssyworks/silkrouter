@@ -1,32 +1,42 @@
 [![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter)
 
+# [[NOTICE]]
+
+Silk router version 3 will no longer receive security updates going forward. Please upgrade to the latest version 4.
+
 # Silkrouter
+
 Silkrouter is a routing library for single page applications.
 
 # Install
 
 ### NPM
+
 <b>Stable release</b>
+
 ```sh
 npm install --save silkrouter@3
 ```
 
 ### CDN
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/silkrouter@latest"></script>
 ```
 
 ### JQuery version
+
 ```sh
 npm install --save jqueryrouter
 ```
 
 ### Notes
+
 1. JQuery version supports IE9 and other legacy browsers. For more details please <a href="https://www.npmjs.com/package/jqueryrouter">click here</a>.
 
 # How to use Silk Router?
 
-Silkrouter follows a familiar concept. If you have worked with custom events, you should get started with ``silkrouter`` in no time.
+Silkrouter follows a familiar concept. If you have worked with custom events, you should get started with `silkrouter` in no time.
 
 ## Import dependencies
 
@@ -55,13 +65,13 @@ router.set('#/path/to/route'); // <-- Triggers hash route
 
 ```js
 route('/path/to/route', (e) => {
-    const { q, r } = e.query;
-    console.log(q, r); // -> 'Hello', 'World'
+  const { q, r } = e.query;
+  console.log(q, r); // -> 'Hello', 'World'
 });
 
 router.set({
-    route: '/path/to/route',
-    queryString: 'q=Hello&r=World'
+  route: '/path/to/route',
+  queryString: 'q=Hello&r=World',
 });
 ```
 
@@ -69,9 +79,9 @@ router.set({
 
 ```js
 router.set({
-    route: '/path/to/route',
-    queryString: 'q=Hello&r=World',
-    appendQuery: true
+  route: '/path/to/route',
+  queryString: 'q=Hello&r=World',
+  appendQuery: true,
 });
 ```
 
@@ -79,8 +89,8 @@ router.set({
 
 ```js
 route('/path/:to/:route', (e) => {
-    const { to, route } = e.params;
-    console.log(to, route); // -> 'hello', 'world'
+  const { to, route } = e.params;
+  console.log(to, route); // -> 'hello', 'world'
 });
 
 router.set('/path/hello/world');
@@ -90,12 +100,12 @@ router.set('/path/hello/world');
 
 ```js
 route('/path/to/route', (e) => {
-    console.log(e.data); // -> 'Hello World!'
+  console.log(e.data); // -> 'Hello World!'
 });
 
 router.set({
-    route: '/path/to/route',
-    data: 'Hello World!'
+  route: '/path/to/route',
+  data: 'Hello World!',
 });
 ```
 
@@ -141,13 +151,15 @@ route('/path/3/:var2/:var3', () => { ... });
 
 ```js
 // Error page handling using generic route
-route(e => {
-    if (!router.includes(
-        router.list().filter(r => r !== '*'), // Ignore current route using "filter"
-        e.route
-    )) {
-        // Handler error page
-    }
+route((e) => {
+  if (
+    !router.includes(
+      router.list().filter((r) => r !== '*'), // Ignore current route using "filter"
+      e.route
+    )
+  ) {
+    // Handler error page
+  }
 });
 ```
 
@@ -157,11 +169,12 @@ route(e => {
 
 ```js
 routeIgnoreCase('/mandatory/route/string', (e) => {
-    console.log(e.route); // -> '/MandATorY/RoUte/StriNg'
+  console.log(e.route); // -> '/MandATorY/RoUte/StriNg'
 });
 
 router.set('/MandATorY/RoUte/StriNg');
 ```
+
 ## Helper methods
 
 ### Handle route parameters using "routeParams"
