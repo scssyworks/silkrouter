@@ -162,16 +162,6 @@
     return typeof str === 'string' ? str.trim() : '';
   }
   /**
-   * Checks if input is a number
-   * @param {*} key 
-   */
-
-  function isNumber(key) {
-    key = trim("".concat(key));
-    if (['null', 'undefined', ''].indexOf(key) > -1) return false;
-    return !isNaN(+key);
-  }
-  /**
    * Checks if value is an object
    * @param {*} value Any type of value
    */
@@ -822,9 +812,26 @@
     return typeof obj === 'string' ? obj : '';
   }
 
+  /*!
+   * is-number <https://github.com/jonschlinkert/is-number>
+   *
+   * Copyright (c) 2014-present, Jon Schlinkert.
+   * Released under the MIT License.
+   */
+
+  var isNumber = function(num) {
+    if (typeof num === 'number') {
+      return num - num === 0;
+    }
+    if (typeof num === 'string' && num.trim() !== '') {
+      return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+    }
+    return false;
+  };
+
   /**
    * Checks if query parameter key is a complex notation
-   * @param {string} q 
+   * @param {string} q
    */
 
   function ifComplex(q) {
@@ -847,7 +854,7 @@
       qs = qs.replace('?', '');
     }
 
-    var queryObject = {};
+    var queryObject = Object.create(null);
 
     if (qs) {
       qs.split('&').forEach(function (qq) {
@@ -862,12 +869,12 @@
   }
   /**
    * Converts an array to an object
-   * @param {array} arr 
+   * @param {array} arr
    */
 
 
   function toObject(arr) {
-    var convertedObj = {};
+    var convertedObj = Object.create(null);
 
     if (isArr(arr)) {
       arr.forEach(function (value, index) {
@@ -908,14 +915,13 @@
   }
   /**
    * Handles complex query parameters
-   * @param {string} key 
-   * @param {string} value 
-   * @param {Object} obj 
+   * @param {string} key
+   * @param {string} value
+   * @param {Object} obj
    */
 
 
-  function complex(key, value, obj) {
-    var coercion = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+  function complex(key, value, obj, coercion) {
     var match = key.match(REG_VARIABLE) || [];
 
     if (match.length === 3) {
@@ -944,16 +950,13 @@
   }
   /**
    * Handles simple query
-   * @param {array} qArr 
-   * @param {Object} queryObject 
-   * @param {boolean} toArray 
+   * @param {array} qArr
+   * @param {Object} queryObject
+   * @param {boolean} toArray
    */
 
 
-  function simple(key, value, queryObject) {
-    var coercion = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
-    var toArray = arguments.length > 4 ? arguments[4] : undefined;
-
+  function simple(key, value, queryObject, coercion, toArray) {
     if (coercion) {
       value = coerce(value);
     }

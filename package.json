@@ -1,6 +1,6 @@
 {
   "name": "silkrouter",
-  "version": "4.1.2",
+  "version": "4.1.3",
   "description": "Silk router is an app routing library",
   "main": "dist/umd/silkrouter.js",
   "module": "dist/esm/silkrouter.esm.js",
@@ -70,5 +70,8 @@
   "homepage": "https://scssyworks.github.io/silkrouter",
   "peerDependencies": {
     "rxjs": "^6.5.4"
+  },
+  "dependencies": {
+    "is-number": "^7.0.0"
   }
 }

@@ -161,16 +161,6 @@
     return typeof str === 'string' ? str.trim() : '';
   }
   /**
-   * Checks if input is a number
-   * @param {*} key 
-   */
-
-  function isNumber(key) {
-    key = trim("".concat(key));
-    if (['null', 'undefined', ''].indexOf(key) > -1) return false;
-    return !isNaN(+key);
-  }
-  /**
    * Checks if value is an object
    * @param {*} value Any type of value
    */
@@ -1544,9 +1534,26 @@
     return typeof obj === 'string' ? obj : '';
   }
 
+  /*!
+   * is-number <https://github.com/jonschlinkert/is-number>
+   *
+   * Copyright (c) 2014-present, Jon Schlinkert.
+   * Released under the MIT License.
+   */
+
+  var isNumber = function(num) {
+    if (typeof num === 'number') {
+      return num - num === 0;
+    }
+    if (typeof num === 'string' && num.trim() !== '') {
+      return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+    }
+    return false;
+  };
+
   /**
    * Checks if query parameter key is a complex notation
-   * @param {string} q 
+   * @param {string} q
    */
 
   function ifComplex(q) {
@@ -1569,7 +1576,7 @@
       qs = qs.replace('?', '');
     }
 
-    var queryObject = {};
+    var queryObject = Object.create(null);
 
     if (qs) {
       qs.split('&').forEach(function (qq) {
@@ -1584,12 +1591,12 @@
   }
   /**
    * Converts an array to an object
-   * @param {array} arr 
+   * @param {array} arr
    */
 
 
   function toObject(arr) {
-    var convertedObj = {};
+    var convertedObj = Object.create(null);
 
     if (isArr(arr)) {
       arr.forEach(function (value, index) {
@@ -1630,14 +1637,13 @@
   }
   /**
    * Handles complex query parameters
-   * @param {string} key 
-   * @param {string} value 
-   * @param {Object} obj 
+   * @param {string} key
+   * @param {string} value
+   * @param {Object} obj
    */
 
 
-  function complex(key, value, obj) {
-    var coercion = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+  function complex(key, value, obj, coercion) {
     var match = key.match(REG_VARIABLE) || [];
 
     if (match.length === 3) {
@@ -1666,16 +1672,13 @@
   }
   /**
    * Handles simple query
-   * @param {array} qArr 
-   * @param {Object} queryObject 
-   * @param {boolean} toArray 
+   * @param {array} qArr
+   * @param {Object} queryObject
+   * @param {boolean} toArray
    */
 
 
-  function simple(key, value, queryObject) {
-    var coercion = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
-    var toArray = arguments.length > 4 ? arguments[4] : undefined;
-
+  function simple(key, value, queryObject, coercion, toArray) {
     if (coercion) {
       value = coerce(value);
     }
@@ -2152,7 +2155,7 @@
     };
   }
 
-  const name="silkrouter";const version="4.1.1";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.14.0","@babel/preset-env":"^7.14.1","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-commonjs":"^11.1.0","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.2.3","babel-eslint":"^10.1.0","gh-pages":"^2.2.0",jest:"^25.5.4",rollup:"^2.47.0","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.3.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2",rxjs:"^6.6.7"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^6.5.4"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies};
+  const name="silkrouter";const version="4.1.2";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.14.0","@babel/preset-env":"^7.14.1","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-commonjs":"^11.1.0","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.2.3","babel-eslint":"^10.1.0","gh-pages":"^2.2.0",jest:"^25.5.4",rollup:"^2.47.0","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.3.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2",rxjs:"^6.6.7"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^6.5.4"};const dependencies={"is-number":"^7.0.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies,dependencies:dependencies};
 
   function q(selector) {
     var _document;
