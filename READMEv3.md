@@ -21,7 +21,7 @@ npm install --save silkrouter@3
 ### CDN
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/silkrouter@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/silkrouter@3"></script>
 ```
 
 ### JQuery version

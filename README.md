@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/scssyworks/silkrouter.svg?branch=master)](https://travis-ci.org/scssyworks/silkrouter) ![GitHub](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.js?label=unminified)
 
-**If you are searching for version 3 documentation (current version), please click on the link below:**<br>
+**If you are searching for version 3 documentation (previous version), please click on the link below:**<br>
 https://github.com/scssyworks/silkrouter/blob/master/READMEv3.md
 
 # Silk router
