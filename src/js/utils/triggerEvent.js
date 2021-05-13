@@ -1,25 +1,15 @@
+import { getGlobal } from './getGlobal';
 import { each } from './utils';
 
-// Polyfill custom event
-if (typeof window.CustomEvent === 'undefined') {
-    const CustomEvent = function (event, params) {
-        params = params || { bubbles: false, cancelable: false, detail: undefined };
-        const evt = document.createEvent('CustomEvent');
-        evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-        return evt;
-    }
-
-    CustomEvent.prototype = window.Event.prototype;
-    window.CustomEvent = CustomEvent;
-}
+const g = getGlobal();
 
 // Internal function
 function isValidTarget(target) {
-    return (
-        target instanceof NodeList
-        || target instanceof HTMLCollection
-        || Array.isArray(target)
-    );
+  return (
+    target instanceof NodeList ||
+    target instanceof HTMLCollection ||
+    Array.isArray(target)
+  );
 }
 
 /**
@@ -29,17 +19,17 @@ function isValidTarget(target) {
  * @param {any[]} data Data to be passed to handler
  */
 export function trigger(target, eventType, data) {
-    if (target instanceof Node) {
-        target = [target];
-    }
-    if (isValidTarget(target) && typeof eventType === 'string') {
-        each(target, el => {
-            const customEvent = new window.CustomEvent(eventType, {
-                bubbles: true,
-                cancelable: true,
-                detail: (data || [])
-            });
-            el.dispatchEvent(customEvent);
-        });
-    }
+  if (target instanceof Node) {
+    target = [target];
+  }
+  if (isValidTarget(target) && typeof eventType === 'string') {
+    each(target, (el) => {
+      const customEvent = new g.CustomEvent(eventType, {
+        bubbles: true,
+        cancelable: true,
+        detail: data || [],
+      });
+      el.dispatchEvent(customEvent);
+    });
+  }
 }

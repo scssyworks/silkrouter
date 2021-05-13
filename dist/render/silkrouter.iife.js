@@ -131,6 +131,10 @@
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
+  function getGlobal() {
+    return typeof globalThis !== 'undefined' ? globalThis : global || self;
+  }
+
   /**
    * Router constants
    */
@@ -206,6 +210,41 @@
         }
       }
     }
+  }
+
+  var g$1 = getGlobal();
+
+  if (typeof g$1.CustomEvent === 'undefined') {
+    var CustomEvent = function CustomEvent(event, params) {
+      params = params || {
+        bubbles: false,
+        cancelable: false,
+        detail: undefined
+      };
+      var evt = document.createEvent('CustomEvent');
+      evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+      return evt;
+    };
+
+    CustomEvent.prototype = g$1.Event.prototype;
+    g$1.CustomEvent = CustomEvent;
+  } // Polyfill Array.from
+
+
+  if (!Array.from) {
+    Array.from = function (arrayLike) {
+      if (isArr(arrayLike)) {
+        return arrayLike;
+      }
+
+      var arr = [];
+
+      for (var i = 0; i < arrayLike.length; i++) {
+        arr.push(arrayLike[i]);
+      }
+
+      return arr;
+    };
   }
 
   /**
@@ -962,22 +1001,7 @@
       return sourceObj && typeof sourceObj.addEventListener === 'function' && typeof sourceObj.removeEventListener === 'function';
   }
 
-  if (typeof window.CustomEvent === 'undefined') {
-    var CustomEvent = function CustomEvent(event, params) {
-      params = params || {
-        bubbles: false,
-        cancelable: false,
-        detail: undefined
-      };
-      var evt = document.createEvent('CustomEvent');
-      evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-      return evt;
-    };
-
-    CustomEvent.prototype = window.Event.prototype;
-    window.CustomEvent = CustomEvent;
-  } // Internal function
-
+  var g = getGlobal(); // Internal function
 
   function isValidTarget(target) {
     return target instanceof NodeList || target instanceof HTMLCollection || Array.isArray(target);
@@ -997,7 +1021,7 @@
 
     if (isValidTarget(target) && typeof eventType === 'string') {
       each(target, function (el) {
-        var customEvent = new window.CustomEvent(eventType, {
+        var customEvent = new g.CustomEvent(eventType, {
           bubbles: true,
           cancelable: true,
           detail: data || []
@@ -1033,7 +1057,8 @@
   };
 
   function collate() {
-    var currentRouterInstance = this;
+    var _this = this;
+
     return function (observable) {
       return new Observable(function (subscriber) {
         var subn = observable.subscribe({
@@ -1041,16 +1066,12 @@
             var _event$detail = _slicedToArray(event.detail, 3),
                 routerInstance = _event$detail[2];
 
-            if (routerInstance === currentRouterInstance) {
+            if (routerInstance === _this) {
               subscriber.next(new RouterEvent(event.detail, event));
             }
           },
-          error: function error() {
-            subscriber.error.apply(subscriber, arguments);
-          },
-          complete: function complete() {
-            subscriber.complete();
-          }
+          error: subscriber.error,
+          complete: subscriber.complete
         });
         return function () {
           subn.unsubscribe();
@@ -1066,7 +1087,7 @@
         context = _this$config.context,
         location = _this$config.location,
         hashRouting = _this$config.hashRouting;
-    this.popStateSubscription = fromEvent(window, POP_STATE).subscribe(function (e) {
+    this.popStateSubscription = fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
       var path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
 
       if (path) {
@@ -1138,8 +1159,6 @@
     return false;
   };
 
-  var loc = window.location;
-
   /**
    * Checks if query parameter key is a complex notation
    * @param {string} q
@@ -1154,11 +1173,9 @@
    */
 
 
-  function deparam$1() {
+  function lib(qs, coerce) {
     var _this = this;
 
-    var qs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : loc.search;
-    var coerce = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     qs = trim(qs);
 
     if (qs.charAt(0) === '?') {
@@ -1309,11 +1326,6 @@
       default:
         return value;
     }
-  } // Library encapsulation
-
-
-  function lib() {
-    return deparam$1.apply(this, arguments);
   }
 
   /**
@@ -1400,22 +1412,12 @@
     var _this = this;
 
     var _this$config = this.config,
-        hashRouting = _this$config.hashRouting,
+        hash = _this$config.hashRouting,
         location = _this$config.location;
-    var path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
+    var path = trim(hash ? location.hash.substring(1).split('?')[0] : location.pathname);
     return function (observable) {
       return new Observable(function (subscriber) {
-        var subn = observable.subscribe({
-          next: function next() {
-            subscriber.next.apply(subscriber, arguments);
-          },
-          error: function error() {
-            subscriber.error.apply(subscriber, arguments);
-          },
-          complete: function complete() {
-            subscriber.complete();
-          }
-        });
+        var subn = observable.subscribe(subscriber);
 
         if (!isDone) {
           isDone = true;
@@ -1423,7 +1425,7 @@
           if (path) {
             subscriber.next(new RouterEvent([{
               path: path,
-              hash: hashRouting
+              hash: hash
             }, undefined, _this]));
           }
         }
@@ -1441,7 +1443,12 @@
 
       _classCallCheck(this, Router);
 
-      if (!window.history.pushState) {
+      var _getGlobal = getGlobal(),
+          history = _getGlobal.history,
+          location = _getGlobal.location,
+          document = _getGlobal.document;
+
+      if (!history.pushState) {
         throw new Error(HISTORY_UNSUPPORTED);
       }
 
@@ -1452,9 +1459,9 @@
         // Works for hash routing
         context: document.body,
         // To change the context of "vpushstate" event
-        location: window.location,
+        location: location,
         // Should remain unchanged
-        history: window.history // History object
+        history: history // History object
 
       }, config);
       this.config = Object.freeze(config);
@@ -1467,7 +1474,11 @@
       value: function pipe() {
         var _this$listeners;
 
-        return (_this$listeners = this.listeners).pipe.apply(_this$listeners, [callOnce.apply(this)].concat(Array.prototype.slice.call(arguments)));
+        for (var _len = arguments.length, ops = new Array(_len), _key = 0; _key < _len; _key++) {
+          ops[_key] = arguments[_key];
+        }
+
+        return (_this$listeners = this.listeners).pipe.apply(_this$listeners, [callOnce.apply(this)].concat(ops));
       }
     }, {
       key: "subscribe",
@@ -1479,7 +1490,11 @@
     }, {
       key: "set",
       value: function set$1() {
-        return set.apply(this, arguments);
+        for (var _len2 = arguments.length, props = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          props[_key2] = arguments[_key2];
+        }
+
+        return set.apply(this, props);
       }
     }, {
       key: "destroy",
@@ -1505,21 +1520,18 @@
    * @returns {object}
    */
 
-  function extractParams(expr) {
-    var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : loc.pathname;
+  function extractParams(expr, path) {
     var params = {};
 
     if (REG_ROUTE_PARAMS.test(expr)) {
-      var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^/\\]+/g, "([^\\/]+)"));
+      var pathRegex = new RegExp(expr.replace(/\//g, '\\/').replace(/:[^/\\]+/g, '([^\\/]+)'));
       REG_ROUTE_PARAMS.lastIndex = 0;
 
       if (pathRegex.test(path)) {
-        var keys = _toConsumableArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
+        var keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
           return key.replace(':', '');
         });
-
-        var values = _toConsumableArray(path.match(pathRegex));
-
+        var values = Array.from(path.match(pathRegex));
         values.shift();
         keys.forEach(function (key, index) {
           params[key] = values[index];
@@ -1530,12 +1542,33 @@
     return params;
   }
 
+  if (!Array.from) {
+    /**
+     * Array.from polyfill in case browser doesn't has it
+     * @param {any} arrayLike Any array like object
+     * @returns {any[]} Array equivalent
+     */
+    Array.from = function (arrayLike) {
+      if (isArr) {
+        return arrayLike;
+      }
+
+      var arr = [];
+
+      for (var i = 0; i < arrayLike.length; i += 1) {
+        arr.push(arrayLike[i]);
+      }
+
+      return arr;
+    };
+  }
   /**
    * Operator to compare a specific route
    * @param {string} routeStr Route string
    * @param {Router} routerInstance Current router object [optional]
    * @param {boolean} ignoreCase Ignore case in route string
    */
+
 
   function route(routeStr, routerInstance, ignoreCase) {
     if (typeof routerInstance === 'boolean') {
@@ -1579,12 +1612,8 @@
               subscriber.error(new Error(INVALID_ROUTE));
             }
           },
-          error: function error() {
-            subscriber.error.apply(subscriber, arguments);
-          },
-          complete: function complete() {
-            subscriber.complete();
-          }
+          error: subscriber.error,
+          complete: subscriber.complete
         });
         return function () {
           if (routerInstance instanceof Router) {
@@ -1607,8 +1636,7 @@
    * @param {boolean} coerce Flag to enable value typecast
    */
 
-  function deparam() {
-    var coerce = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+  function deparam(coerce) {
     return function (observable) {
       return new Observable(function (subscriber) {
         var subn = observable.subscribe({
@@ -1621,12 +1649,8 @@
               subscriber.error(e);
             }
           },
-          error: function error() {
-            subscriber.error.apply(subscriber, arguments);
-          },
-          complete: function complete() {
-            subscriber.complete();
-          }
+          error: subscriber.error,
+          complete: subscriber.complete
         });
         return function () {
           subn.unsubscribe();
@@ -1665,12 +1689,8 @@
               }
             }
           },
-          error: function error() {
-            subscriber.error.apply(subscriber, arguments);
-          },
-          complete: function complete() {
-            subscriber.complete();
-          }
+          error: subscriber.error,
+          complete: subscriber.complete
         });
         return function () {
           subn.unsubscribe();
@@ -1697,7 +1717,7 @@
 
   function cache() {
     var keys = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : CACHED_FIELDS;
-    var deep = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    var deep = arguments.length > 1 ? arguments[1] : undefined;
     var cache = {};
 
     if (typeof keys === 'boolean') {
@@ -1726,12 +1746,8 @@
               }
             });
           },
-          error: function error() {
-            subscriber.error.apply(subscriber, arguments);
-          },
-          complete: function complete() {
-            subscriber.complete();
-          }
+          error: subscriber.error,
+          complete: subscriber.complete
         });
         return function () {
           subn.unsubscribe();
@@ -1741,7 +1757,7 @@
     };
   }
 
-  const name="silkrouter";const version="4.1.3";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.14.0","@babel/preset-env":"^7.14.1","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-commonjs":"^11.1.0","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.2.3","babel-eslint":"^10.1.0","gh-pages":"^2.2.0",jest:"^25.5.4",rollup:"^2.47.0","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.3.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2",rxjs:"^6.6.7"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^6.5.4"};const dependencies={"is-number":"^7.0.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies,dependencies:dependencies};
+  const name="silkrouter";const version="4.2.0";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.14.0","@babel/preset-env":"^7.14.1","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-commonjs":"^11.1.0","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.2.3","babel-eslint":"^10.1.0","gh-pages":"^2.2.0",jest:"^25.5.4",rollup:"^2.47.0","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.3.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2",rxjs:"^6.6.7"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^6.5.4"};const dependencies={"is-number":"^7.0.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies,dependencies:dependencies};
 
   function q(selector) {
     var _document;

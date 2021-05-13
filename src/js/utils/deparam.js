@@ -1,5 +1,4 @@
 import isNumber from 'is-number';
-import { loc } from './vars';
 import { isArr, trim, isPureObject } from './utils';
 import {
   REG_COMPLEX,
@@ -20,7 +19,7 @@ function ifComplex(q) {
  * Converts query string to JavaScript object
  * @param {string} qs query string argument (defaults to url query string)
  */
-function deparam(qs = loc.search, coerce = false) {
+function lib(qs, coerce) {
   qs = trim(qs);
   if (qs.charAt(0) === '?') {
     qs = qs.replace('?', '');
@@ -155,11 +154,6 @@ function coerce(value) {
     default:
       return value;
   }
-}
-
-// Library encapsulation
-function lib() {
-  return deparam.apply(this, arguments);
 }
 
 export { lib as deparam };
