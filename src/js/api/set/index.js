@@ -1,25 +1,31 @@
 import { trigger } from '../../utils/triggerEvent';
-import { VIRTUAL_PUSHSTATE, INVALID_ROUTE } from '../../utils/constants';
+import {
+  VIRTUAL_PUSHSTATE,
+  INVALID_ROUTE,
+  UNDEF,
+  TYPEOF_STR,
+  EMPTY,
+  QRY,
+  REPLACE,
+  PUSH,
+} from '../../utils/constants';
 import { isValidRoute, trim, isObject } from '../../utils/utils';
 import { toQueryString } from '../../utils/query';
 import resolveQuery from '../resolveQuery';
 import { assign } from '../../utils/assign';
 
-export default function set(route, replace = false, exec = true) {
+export default function set(route, replace, exec) {
+  exec = exec || true;
   const { preservePath, hashRouting, history } = this.config;
   const routeObject = assign(
     { replace, exec },
-    typeof route === 'string' ? { route } : route
+    typeof route === TYPEOF_STR ? { route } : route
   );
   replace = routeObject.replace;
   exec = routeObject.exec;
   let { route: routeStr, queryString } = routeObject;
-  const {
-    preserveQuery,
-    data,
-    pageTitle = document.querySelector('head > title').textContent,
-  } = routeObject;
-  const routeParts = routeStr.split('?');
+  const { preserveQuery, data, pageTitle = null } = routeObject;
+  const routeParts = routeStr.split(QRY);
   // Check if query string is an object
   if (isObject(queryString)) {
     queryString = toQueryString(queryString);
@@ -41,19 +47,15 @@ export default function set(route, replace = false, exec = true) {
       }
     }
     // Append query string
-    routeStr = `${routeStr}${queryString ? `?${queryString}` : ''}`;
-    history[replace ? 'replaceState' : 'pushState'](
-      { data },
-      pageTitle,
-      routeStr
-    );
+    routeStr = `${routeStr}${queryString ? `${QRY + queryString}` : EMPTY}`;
+    history[replace ? REPLACE : PUSH]({ data }, pageTitle, routeStr);
     if (exec && unmodifiedRoute) {
       trigger(this.config.context, VIRTUAL_PUSHSTATE, [
         {
           path: unmodifiedRoute,
           hash: hashRouting,
         },
-        undefined,
+        UNDEF,
         this,
       ]);
     }

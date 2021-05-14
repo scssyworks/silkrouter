@@ -1,3 +1,4 @@
+import { AMP, EMPTY, TYPEOF_FUNC, TYPEOF_STR } from './constants';
 import { isArr, isObject } from './utils';
 
 /**
@@ -8,13 +9,13 @@ import { isArr, isObject } from './utils';
  * @param {*} obj Value
  */
 function buildQuery(qsList, key, obj) {
-    if (isObject(obj)) {
-        Object.keys(obj).forEach(obKey => {
-            buildQuery(qsList, `${key}[${isArr(obj) ? '' : obKey}]`, obj[obKey]);
-        });
-    } else if (typeof obj !== 'function') {
-        qsList.push(`${encodeURIComponent(key)}=${encodeURIComponent(obj)}`);
-    }
+  if (isObject(obj)) {
+    Object.keys(obj).forEach((obKey) => {
+      buildQuery(qsList, `${key}[${isArr(obj) ? EMPTY : obKey}]`, obj[obKey]);
+    });
+  } else if (typeof obj !== TYPEOF_FUNC) {
+    qsList.push(`${encodeURIComponent(key)}=${encodeURIComponent(obj)}`);
+  }
 }
 
 /**
@@ -24,12 +25,12 @@ function buildQuery(qsList, key, obj) {
  * @returns {string}
  */
 export function toQueryString(obj) {
-    let qsList = [];
-    if (isObject(obj)) {
-        Object.keys(obj).forEach(key => {
-            buildQuery(qsList, key, obj[key]);
-        });
-        return qsList.join('&');
-    }
-    return typeof obj === 'string' ? obj : '';
+  let qsList = [];
+  if (isObject(obj)) {
+    Object.keys(obj).forEach((key) => {
+      buildQuery(qsList, key, obj[key]);
+    });
+    return qsList.join(AMP);
+  }
+  return typeof obj === TYPEOF_STR ? obj : EMPTY;
 }

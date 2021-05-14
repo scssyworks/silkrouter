@@ -53,81 +53,6 @@ function _defineProperty(obj, key, value) {
   return obj;
 }
 
-function _slicedToArray(arr, i) {
-  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
-}
-
-function _toConsumableArray(arr) {
-  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
-}
-
-function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
-}
-
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
-
-function _iterableToArray(iter) {
-  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
-}
-
-function _iterableToArrayLimit(arr, i) {
-  var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
-
-  if (_i == null) return;
-  var _arr = [];
-  var _n = true;
-  var _d = false;
-
-  var _s, _e;
-
-  try {
-    for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
-      _arr.push(_s.value);
-
-      if (i && _arr.length === i) break;
-    }
-  } catch (err) {
-    _d = true;
-    _e = err;
-  } finally {
-    try {
-      if (!_n && _i["return"] != null) _i["return"]();
-    } finally {
-      if (_d) throw _e;
-    }
-  }
-
-  return _arr;
-}
-
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(o);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-}
-
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-
-  return arr2;
-}
-
-function _nonIterableSpread() {
-  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}
-
-function _nonIterableRest() {
-  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}
-
 /**
  * Router constants
  */
@@ -142,6 +67,24 @@ var HISTORY_UNSUPPORTED = 'Current browser does not support history object';
 var INVALID_ROUTE = 'Route string is not a pure route';
 var VIRTUAL_PUSHSTATE = 'vpushstate';
 var CACHED_FIELDS = ['route', 'hashRouting', 'path', 'hash', 'search', 'hashSearch', 'data'];
+var AMP = '&';
+var QRY = '?';
+var EQ = '=';
+var EMPTY = '';
+var UNDEF = void 0;
+var TYPEOF_STR = _typeof(EMPTY);
+var TYPEOF_BOOL = _typeof(true);
+var TYPEOF_UNDEF = _typeof(UNDEF);
+var TYPEOF_OBJ = _typeof({});
+_typeof(0);
+var TYPEOF_FUNC = _typeof(function () {});
+var STATE = 'State';
+var PUSH = "push".concat(STATE);
+var REPLACE = "replace".concat(STATE);
+
+function getGlobal() {
+  return (typeof globalThis === "undefined" ? "undefined" : _typeof(globalThis)) !== TYPEOF_UNDEF ? globalThis : global || self;
+}
 
 /**
  * Shorthand for Array.isArray
@@ -154,7 +97,7 @@ var isArr = Array.isArray;
  */
 
 function trim(str) {
-  return typeof str === 'string' ? str.trim() : '';
+  return _typeof(str) === TYPEOF_STR ? str.trim() : EMPTY;
 }
 /**
  * Checks if value is an object
@@ -162,7 +105,7 @@ function trim(str) {
  */
 
 function isObject(value) {
-  return value && _typeof(value) === 'object';
+  return value && _typeof(value) === TYPEOF_OBJ;
 }
 /**
  * Checks if key is a true object
@@ -179,7 +122,7 @@ function isPureObject(value) {
  */
 
 function isValidRoute(route) {
-  return typeof route === 'string' && REG_PATHNAME.test(route);
+  return _typeof(route) === TYPEOF_STR && REG_PATHNAME.test(route);
 }
 /**
  * Loops over an array like object
@@ -190,10 +133,10 @@ function isValidRoute(route) {
 function each(arrayObj, callback) {
   if (arrayObj && arrayObj.length) {
     for (var index = 0; index < arrayObj.length; index += 1) {
-      if (typeof callback === 'function') {
+      if (_typeof(callback) === TYPEOF_FUNC) {
         var continueTheLoop = callback.apply(arrayObj, [arrayObj[index], index]);
 
-        if (typeof continueTheLoop === 'boolean') {
+        if (_typeof(continueTheLoop) === TYPEOF_BOOL) {
           if (continueTheLoop) {
             continue;
           } else {
@@ -203,6 +146,41 @@ function each(arrayObj, callback) {
       }
     }
   }
+}
+
+var g$1 = getGlobal();
+
+if (_typeof(g$1.CustomEvent) === TYPEOF_UNDEF) {
+  var CustomEvent = function CustomEvent(event, params) {
+    params = params || {
+      bubbles: false,
+      cancelable: false,
+      detail: UNDEF
+    };
+    var evt = document.createEvent('CustomEvent');
+    evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+    return evt;
+  };
+
+  CustomEvent.prototype = g$1.Event.prototype;
+  g$1.CustomEvent = CustomEvent;
+} // Polyfill Array.from
+
+
+if (!Array.from) {
+  Array.from = function (arrayLike) {
+    if (isArr(arrayLike)) {
+      return arrayLike;
+    }
+
+    var arr = [];
+
+    for (var i = 0; i < arrayLike.length; i++) {
+      arr.push(arrayLike[i]);
+    }
+
+    return arr;
+  };
 }
 
 /**
@@ -227,31 +205,16 @@ function loopFunc(ref, target) {
 
 
 function assign() {
-  var target = isObject(arguments[0]) ? arguments[0] : {};
+  var target = isObject(arguments.length <= 0 ? undefined : arguments[0]) ? arguments.length <= 0 ? undefined : arguments[0] : {};
 
   for (var i = 1; i < arguments.length; i++) {
-    loopFunc(arguments[i], target);
+    loopFunc(i < 0 || arguments.length <= i ? undefined : arguments[i], target);
   }
 
   return target;
 }
 
-if (typeof window.CustomEvent === 'undefined') {
-  var CustomEvent = function CustomEvent(event, params) {
-    params = params || {
-      bubbles: false,
-      cancelable: false,
-      detail: undefined
-    };
-    var evt = document.createEvent('CustomEvent');
-    evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-    return evt;
-  };
-
-  CustomEvent.prototype = window.Event.prototype;
-  window.CustomEvent = CustomEvent;
-} // Internal function
-
+var g = getGlobal(); // Internal function
 
 function isValidTarget(target) {
   return target instanceof NodeList || target instanceof HTMLCollection || Array.isArray(target);
@@ -269,9 +232,9 @@ function trigger(target, eventType, data) {
     target = [target];
   }
 
-  if (isValidTarget(target) && typeof eventType === 'string') {
+  if (isValidTarget(target) && _typeof(eventType) === TYPEOF_STR) {
     each(target, function (el) {
-      var customEvent = new window.CustomEvent(eventType, {
+      var customEvent = new g.CustomEvent(eventType, {
         bubbles: true,
         cancelable: true,
         detail: data || []
@@ -285,11 +248,9 @@ var RouterEvent = function RouterEvent(routeInfo, currentEvent) {
   _classCallCheck(this, RouterEvent);
 
   // Set relevant parameters
-  var _routeInfo = _slicedToArray(routeInfo, 3),
-      routeObject = _routeInfo[0],
-      originalEvent = _routeInfo[1],
-      routerInstance = _routeInfo[2];
-
+  var routeObject = routeInfo[0];
+  var originalEvent = routeInfo[1];
+  var routerInstance = routeInfo[2];
   var _routerInstance$confi = routerInstance.config,
       location = _routerInstance$confi.location,
       history = _routerInstance$confi.history;
@@ -301,30 +262,26 @@ var RouterEvent = function RouterEvent(routeInfo, currentEvent) {
   this.path = trim(location.pathname);
   this.hash = location.hash;
   this.search = trim(location.search.substring(1));
-  this.hashSearch = trim(location.hash && location.hash.split('?')[1]);
+  this.hashSearch = trim(location.hash && location.hash.split(QRY)[1]);
   var state = this.originalEvent.state;
   this.data = state && state.data || history.state && history.state.data;
 };
 
 function collate() {
-  var currentRouterInstance = this;
+  var _this = this;
+
   return function (observable) {
     return new Observable(function (subscriber) {
       var subn = observable.subscribe({
         next: function next(event) {
-          var _event$detail = _slicedToArray(event.detail, 3),
-              routerInstance = _event$detail[2];
+          var routerInstance = event.detail[2];
 
-          if (routerInstance === currentRouterInstance) {
+          if (routerInstance === _this) {
             subscriber.next(new RouterEvent(event.detail, event));
           }
         },
-        error: function error() {
-          subscriber.error.apply(subscriber, arguments);
-        },
-        complete: function complete() {
-          subscriber.complete();
-        }
+        error: subscriber.error,
+        complete: subscriber.complete
       });
       return function () {
         subn.unsubscribe();
@@ -340,8 +297,8 @@ function bindRouterEvents() {
       context = _this$config.context,
       location = _this$config.location,
       hashRouting = _this$config.hashRouting;
-  this.popStateSubscription = fromEvent(window, POP_STATE).subscribe(function (e) {
-    var path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
+  this.popStateSubscription = fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
+    var path = trim(hashRouting ? location.hash.substring(1).split(QRY)[0] : location.pathname);
 
     if (path) {
       trigger(context, VIRTUAL_PUSHSTATE, [{
@@ -368,9 +325,9 @@ function bindRouterEvents() {
 function buildQuery(qsList, key, obj) {
   if (isObject(obj)) {
     Object.keys(obj).forEach(function (obKey) {
-      buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? '' : obKey, "]"), obj[obKey]);
+      buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? EMPTY : obKey, "]"), obj[obKey]);
     });
-  } else if (typeof obj !== 'function') {
+  } else if (_typeof(obj) !== TYPEOF_FUNC) {
     qsList.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
   }
 }
@@ -389,10 +346,10 @@ function toQueryString(obj) {
     Object.keys(obj).forEach(function (key) {
       buildQuery(qsList, key, obj[key]);
     });
-    return qsList.join('&');
+    return qsList.join(AMP);
   }
 
-  return typeof obj === 'string' ? obj : '';
+  return _typeof(obj) === TYPEOF_STR ? obj : EMPTY;
 }
 
 /*!
@@ -412,8 +369,6 @@ var isNumber = function(num) {
   return false;
 };
 
-var loc = window.location;
-
 /**
  * Checks if query parameter key is a complex notation
  * @param {string} q
@@ -428,25 +383,23 @@ function ifComplex(q) {
  */
 
 
-function deparam$1() {
+function lib(qs, coerce) {
   var _this = this;
 
-  var qs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : loc.search;
-  var coerce = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
   qs = trim(qs);
 
-  if (qs.charAt(0) === '?') {
-    qs = qs.replace('?', '');
+  if (qs.charAt(0) === QRY) {
+    qs = qs.replace(QRY, EMPTY);
   }
 
   var queryObject = Object.create(null);
 
   if (qs) {
-    qs.split('&').forEach(function (qq) {
-      var qArr = qq.split('=').map(function (part) {
+    qs.split(AMP).forEach(function (qq) {
+      var qArr = qq.split(EQ).map(function (part) {
         return decodeURIComponent(part);
       });
-      (ifComplex(qArr[0]) ? complex : simple).apply(_this, [].concat(_toConsumableArray(qArr), [queryObject, coerce, false]));
+      (ifComplex(qArr[0]) ? complex : simple).apply(_this, qArr.concat([queryObject, coerce, false]));
     });
   }
 
@@ -477,7 +430,7 @@ function toObject(arr) {
 
 
 function resolve(ob, isNextNumber) {
-  return isNextNumber ? typeof ob === 'undefined' ? [] : ob : toObject(ob);
+  return isNextNumber ? _typeof(ob) === TYPEOF_UNDEF ? [] : ob : toObject(ob);
 }
 /**
  * Resolves the target object for next iteration
@@ -490,7 +443,7 @@ function resolveObj(ob, nextProp) {
   if (isPureObject(ob)) return {
     ob: ob
   };
-  if (isArr(ob) || typeof ob === 'undefined') return {
+  if (isArr(ob) || _typeof(ob) === TYPEOF_UNDEF) return {
     ob: resolve(ob, isNumber(nextProp))
   };
   return {
@@ -512,10 +465,10 @@ function complex(key, value, obj, coercion) {
   if (match.length === 3) {
     var prop = match[1];
     var nextProp = match[2];
-    key = key.replace(REG_REPLACE_BRACKETS, '');
+    key = key.replace(REG_REPLACE_BRACKETS, EMPTY);
 
     if (ifComplex(key)) {
-      if (nextProp === '') nextProp = '0';
+      if (nextProp === EMPTY) nextProp = '0';
       key = key.replace(REG_REPLACE_NEXTPROP, nextProp);
       complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, coercion);
     } else if (nextProp) {
@@ -560,16 +513,16 @@ function simple(key, value, queryObject, coercion, toArray) {
 
 
 function coerce(value) {
-  if (value == null) return '';
-  if (typeof value !== 'string') return value;
+  if (value == null) return EMPTY;
+  if (_typeof(value) !== TYPEOF_STR) return value;
   if (isNumber(value = trim(value))) return +value;
 
   switch (value) {
     case 'null':
       return null;
 
-    case 'undefined':
-      return undefined;
+    case TYPEOF_UNDEF:
+      return UNDEF;
 
     case 'true':
       return true;
@@ -583,11 +536,6 @@ function coerce(value) {
     default:
       return value;
   }
-} // Library encapsulation
-
-
-function lib() {
-  return deparam$1.apply(this, arguments);
 }
 
 /**
@@ -600,14 +548,13 @@ function lib() {
 function resolveQuery(queryString, hashRouting) {
   var location = this.config.location;
   var search = trim(location.search && location.search.substring(1));
-  var existingQuery = hashRouting ? trim(location.hash.split('?')[1]) : trim(search);
+  var existingQuery = hashRouting ? trim(location.hash.split(QRY)[1]) : trim(search);
   if (!existingQuery) return queryString;
   return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
 }
 
-function set(route) {
-  var replace = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-  var exec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+function set(route, replace, exec) {
+  exec = exec || true;
   var _this$config = this.config,
       preservePath = _this$config.preservePath,
       hashRouting = _this$config.hashRouting,
@@ -615,7 +562,7 @@ function set(route) {
   var routeObject = assign({
     replace: replace,
     exec: exec
-  }, typeof route === 'string' ? {
+  }, _typeof(route) === TYPEOF_STR ? {
     route: route
   } : route);
   replace = routeObject.replace;
@@ -625,8 +572,8 @@ function set(route) {
   var preserveQuery = routeObject.preserveQuery,
       data = routeObject.data,
       _routeObject$pageTitl = routeObject.pageTitle,
-      pageTitle = _routeObject$pageTitl === void 0 ? document.querySelector('head > title').textContent : _routeObject$pageTitl;
-  var routeParts = routeStr.split('?'); // Check if query string is an object
+      pageTitle = _routeObject$pageTitl === void 0 ? null : _routeObject$pageTitl;
+  var routeParts = routeStr.split(QRY); // Check if query string is an object
 
   if (isObject(queryString)) {
     queryString = toQueryString(queryString);
@@ -652,8 +599,8 @@ function set(route) {
     } // Append query string
 
 
-    routeStr = "".concat(routeStr).concat(queryString ? "?".concat(queryString) : '');
-    history[replace ? 'replaceState' : 'pushState']({
+    routeStr = "".concat(routeStr).concat(queryString ? "".concat(QRY + queryString) : EMPTY);
+    history[replace ? REPLACE : PUSH]({
       data: data
     }, pageTitle, routeStr);
 
@@ -661,7 +608,7 @@ function set(route) {
       trigger(this.config.context, VIRTUAL_PUSHSTATE, [{
         path: unmodifiedRoute,
         hash: hashRouting
-      }, undefined, this]);
+      }, UNDEF, this]);
     }
   } else {
     throw new TypeError(INVALID_ROUTE);
@@ -674,22 +621,12 @@ function callOnce(isDone) {
   var _this = this;
 
   var _this$config = this.config,
-      hashRouting = _this$config.hashRouting,
+      hash = _this$config.hashRouting,
       location = _this$config.location;
-  var path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
+  var path = trim(hash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
   return function (observable) {
     return new Observable(function (subscriber) {
-      var subn = observable.subscribe({
-        next: function next() {
-          subscriber.next.apply(subscriber, arguments);
-        },
-        error: function error() {
-          subscriber.error.apply(subscriber, arguments);
-        },
-        complete: function complete() {
-          subscriber.complete();
-        }
-      });
+      var subn = observable.subscribe(subscriber);
 
       if (!isDone) {
         isDone = true;
@@ -697,8 +634,8 @@ function callOnce(isDone) {
         if (path) {
           subscriber.next(new RouterEvent([{
             path: path,
-            hash: hashRouting
-          }, undefined, _this]));
+            hash: hash
+          }, UNDEF, _this]));
         }
       }
 
@@ -715,7 +652,12 @@ var Router = /*#__PURE__*/function () {
 
     _classCallCheck(this, Router);
 
-    if (!window.history.pushState) {
+    var _getGlobal = getGlobal(),
+        history = _getGlobal.history,
+        location = _getGlobal.location,
+        document = _getGlobal.document;
+
+    if (!history[PUSH]) {
       throw new Error(HISTORY_UNSUPPORTED);
     }
 
@@ -726,9 +668,9 @@ var Router = /*#__PURE__*/function () {
       // Works for hash routing
       context: document.body,
       // To change the context of "vpushstate" event
-      location: window.location,
+      location: location,
       // Should remain unchanged
-      history: window.history // History object
+      history: history // History object
 
     }, config);
     this.config = Object.freeze(config);
@@ -741,7 +683,11 @@ var Router = /*#__PURE__*/function () {
     value: function pipe() {
       var _this$listeners;
 
-      return (_this$listeners = this.listeners).pipe.apply(_this$listeners, [callOnce.apply(this)].concat(Array.prototype.slice.call(arguments)));
+      for (var _len = arguments.length, ops = new Array(_len), _key = 0; _key < _len; _key++) {
+        ops[_key] = arguments[_key];
+      }
+
+      return (_this$listeners = this.listeners).pipe.apply(_this$listeners, [callOnce.apply(this)].concat(ops));
     }
   }, {
     key: "subscribe",
@@ -753,12 +699,16 @@ var Router = /*#__PURE__*/function () {
   }, {
     key: "set",
     value: function set$1() {
-      return set.apply(this, arguments);
+      for (var _len2 = arguments.length, props = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        props[_key2] = arguments[_key2];
+      }
+
+      return set.apply(this, props);
     }
   }, {
     key: "destroy",
     value: function destroy(callback) {
-      if (typeof callback === 'function') {
+      if (_typeof(callback) === TYPEOF_FUNC) {
         callback();
       }
 
@@ -779,21 +729,18 @@ var Router = /*#__PURE__*/function () {
  * @returns {object}
  */
 
-function extractParams(expr) {
-  var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : loc.pathname;
+function extractParams(expr, path) {
   var params = {};
 
   if (REG_ROUTE_PARAMS.test(expr)) {
-    var pathRegex = new RegExp(expr.replace(/\//g, "\\/").replace(/:[^/\\]+/g, "([^\\/]+)"));
+    var pathRegex = new RegExp(expr.replace(/\//g, '\\/').replace(/:[^/\\]+/g, '([^\\/]+)'));
     REG_ROUTE_PARAMS.lastIndex = 0;
 
     if (pathRegex.test(path)) {
-      var keys = _toConsumableArray(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
-        return key.replace(':', '');
+      var keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
+        return key.replace(':', EMPTY);
       });
-
-      var values = _toConsumableArray(path.match(pathRegex));
-
+      var values = Array.from(path.match(pathRegex));
       values.shift();
       keys.forEach(function (key, index) {
         params[key] = values[index];
@@ -812,9 +759,9 @@ function extractParams(expr) {
  */
 
 function route(routeStr, routerInstance, ignoreCase) {
-  if (typeof routerInstance === 'boolean') {
+  if (_typeof(routerInstance) === TYPEOF_BOOL) {
     ignoreCase = routerInstance;
-    routerInstance = undefined;
+    routerInstance = UNDEF;
   }
 
   routeStr = trim(routeStr);
@@ -853,12 +800,8 @@ function route(routeStr, routerInstance, ignoreCase) {
             subscriber.error(new Error(INVALID_ROUTE));
           }
         },
-        error: function error() {
-          subscriber.error.apply(subscriber, arguments);
-        },
-        complete: function complete() {
-          subscriber.complete();
-        }
+        error: subscriber.error,
+        complete: subscriber.complete
       });
       return function () {
         if (routerInstance instanceof Router) {
@@ -881,8 +824,7 @@ function route(routeStr, routerInstance, ignoreCase) {
  * @param {boolean} coerce Flag to enable value typecast
  */
 
-function deparam() {
-  var coerce = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+function deparam(coerce) {
   return function (observable) {
     return new Observable(function (subscriber) {
       var subn = observable.subscribe({
@@ -895,12 +837,8 @@ function deparam() {
             subscriber.error(e);
           }
         },
-        error: function error() {
-          subscriber.error.apply(subscriber, arguments);
-        },
-        complete: function complete() {
-          subscriber.complete();
-        }
+        error: subscriber.error,
+        complete: subscriber.complete
       });
       return function () {
         subn.unsubscribe();
@@ -939,12 +877,8 @@ function noMatch(routerInstance) {
             }
           }
         },
-        error: function error() {
-          subscriber.error.apply(subscriber, arguments);
-        },
-        complete: function complete() {
-          subscriber.complete();
-        }
+        error: subscriber.error,
+        complete: subscriber.complete
       });
       return function () {
         subn.unsubscribe();
@@ -971,10 +905,10 @@ function deepComparison(first, second, result) {
 
 function cache() {
   var keys = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : CACHED_FIELDS;
-  var deep = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+  var deep = arguments.length > 1 ? arguments[1] : undefined;
   var cache = {};
 
-  if (typeof keys === 'boolean') {
+  if (_typeof(keys) === TYPEOF_BOOL) {
     deep = keys;
     keys = CACHED_FIELDS;
   }
@@ -1000,12 +934,8 @@ function cache() {
             }
           });
         },
-        error: function error() {
-          subscriber.error.apply(subscriber, arguments);
-        },
-        complete: function complete() {
-          subscriber.complete();
-        }
+        error: subscriber.error,
+        complete: subscriber.complete
       });
       return function () {
         subn.unsubscribe();

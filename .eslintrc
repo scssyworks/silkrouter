@@ -1,14 +1,17 @@
 {
-    "env": {
-        "browser": true,
-        "node": true,
-        "jquery": true,
-        "es6": true
-    },
-    "parser": "babel-eslint",
-    "parserOptions": {
-        "sourceType": "module",
-        "allowImportExportEverywhere": true
-    },
-    "extends": "eslint:recommended"
+  "env": {
+    "browser": true,
+    "node": true,
+    "jquery": true,
+    "es6": true
+  },
+  "globals": {
+    "globalThis": false
+  },
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "sourceType": "module",
+    "allowImportExportEverywhere": true
+  },
+  "extends": "eslint:recommended"
 }

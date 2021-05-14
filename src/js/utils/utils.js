@@ -1,4 +1,11 @@
-import { REG_PATHNAME } from './constants';
+import {
+  EMPTY,
+  REG_PATHNAME,
+  TYPEOF_BOOL,
+  TYPEOF_FUNC,
+  TYPEOF_OBJ,
+  TYPEOF_STR,
+} from './constants';
 
 /**
  * Shorthand for Array.isArray
@@ -10,7 +17,7 @@ export const isArr = Array.isArray;
  * @param {string} str String
  */
 export function trim(str) {
-  return typeof str === 'string' ? str.trim() : '';
+  return typeof str === TYPEOF_STR ? str.trim() : EMPTY;
 }
 
 /**
@@ -18,7 +25,7 @@ export function trim(str) {
  * @param {*} value Any type of value
  */
 export function isObject(value) {
-  return value && typeof value === 'object';
+  return value && typeof value === TYPEOF_OBJ;
 }
 
 /**
@@ -35,7 +42,7 @@ export function isPureObject(value) {
  * @param {string} route Route string
  */
 export function isValidRoute(route) {
-  return typeof route === 'string' && REG_PATHNAME.test(route);
+  return typeof route === TYPEOF_STR && REG_PATHNAME.test(route);
 }
 
 /**
@@ -55,12 +62,12 @@ export function hasOwn(ob, key) {
 export function each(arrayObj, callback) {
   if (arrayObj && arrayObj.length) {
     for (let index = 0; index < arrayObj.length; index += 1) {
-      if (typeof callback === 'function') {
+      if (typeof callback === TYPEOF_FUNC) {
         const continueTheLoop = callback.apply(arrayObj, [
           arrayObj[index],
           index,
         ]);
-        if (typeof continueTheLoop === 'boolean') {
+        if (typeof continueTheLoop === TYPEOF_BOOL) {
           if (continueTheLoop) {
             continue;
           } else {
