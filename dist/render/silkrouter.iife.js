@@ -1704,7 +1704,7 @@
     };
   }
 
-  const name="silkrouter";const version="4.2.0";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.14.0","@babel/preset-env":"^7.14.1","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-commonjs":"^11.1.0","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.2.3","babel-eslint":"^10.1.0","gh-pages":"^2.2.0",jest:"^25.5.4",rollup:"^2.47.0","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.3.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2",rxjs:"^6.6.7"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^6.5.4"};const dependencies={"is-number":"^7.0.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies,dependencies:dependencies};
+  const name="silkrouter";const version="4.2.1";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.js";const module="dist/esm/silkrouter.esm.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"rollup -c --watch --environment SERVE:true",build:"npm run test && rollup -c",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.14.0","@babel/preset-env":"^7.14.1","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-commonjs":"^11.1.0","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^6.1.0","@types/jest":"^25.2.3","babel-eslint":"^10.1.0","gh-pages":"^2.2.0",jest:"^25.5.4",rollup:"^2.47.0","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^1.3.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2",rxjs:"^6.6.7"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^6.5.4"};const dependencies={"is-number":"^7.0.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies,dependencies:dependencies};
 
   function q(selector) {
     var _document;
@@ -1842,7 +1842,7 @@
       });
     });
     var paramsRoute = location.hostname === 'scssyworks.github.io' ? '/silkrouter/tab3/:firstname/:lastname' : '/tab3/:firstname/:lastname';
-    router.pipe(route(paramsRoute)).subscribe(function (e) {
+    router.pipe(route(paramsRoute), deparam(true)).subscribe(function (e) {
       q('.params-data pre').forEach(function (el) {
         el.textContent = JSON.stringify(e.params, null, 2);
       });
@@ -1852,7 +1852,7 @@
 
       if (e.search) {
         q('.query-data').forEach(function (el) {
-          el.querySelector('pre').textContent = e.search;
+          el.querySelector('pre').textContent = JSON.stringify(e.search, null, 2);
           el.classList.remove('d-none');
         });
         q('.data-next-step').forEach(function (el) {

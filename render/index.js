@@ -143,7 +143,7 @@ function initializeRouting() {
     location.hostname === 'scssyworks.github.io'
       ? '/silkrouter/tab3/:firstname/:lastname'
       : '/tab3/:firstname/:lastname';
-  router.pipe(route(paramsRoute)).subscribe((e) => {
+  router.pipe(route(paramsRoute), deparam(true)).subscribe((e) => {
     q('.params-data pre').forEach((el) => {
       el.textContent = JSON.stringify(e.params, null, 2);
     });
@@ -152,7 +152,7 @@ function initializeRouting() {
     });
     if (e.search) {
       q('.query-data').forEach((el) => {
-        el.querySelector('pre').textContent = e.search;
+        el.querySelector('pre').textContent = JSON.stringify(e.search, null, 2);
         el.classList.remove('d-none');
       });
       q('.data-next-step').forEach((el) => {
