@@ -1,5 +1,5 @@
 import { fromEvent } from 'rxjs';
-import { POP_STATE, VIRTUAL_PUSHSTATE } from '../../utils/constants';
+import { POP_STATE, QRY, VIRTUAL_PUSHSTATE } from '../../utils/constants';
 import { trigger } from '../../utils/triggerEvent';
 import collate from '../collate';
 import { trim } from '../../utils/utils';
@@ -11,7 +11,7 @@ export default function bindRouterEvents() {
     (e) => {
       const path = trim(
         hashRouting
-          ? location.hash.substring(1).split('?')[0]
+          ? location.hash.substring(1).split(QRY)[0]
           : location.pathname
       );
       if (path) {

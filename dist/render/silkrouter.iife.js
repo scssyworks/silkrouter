@@ -56,10 +56,6 @@
     return obj;
   }
 
-  function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
-  }
-
   function _toConsumableArray(arr) {
     return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
@@ -68,42 +64,8 @@
     if (Array.isArray(arr)) return _arrayLikeToArray(arr);
   }
 
-  function _arrayWithHoles(arr) {
-    if (Array.isArray(arr)) return arr;
-  }
-
   function _iterableToArray(iter) {
     if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
-  }
-
-  function _iterableToArrayLimit(arr, i) {
-    var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
-
-    if (_i == null) return;
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-
-    var _s, _e;
-
-    try {
-      for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
-
-        if (i && _arr.length === i) break;
-      }
-    } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"] != null) _i["return"]();
-      } finally {
-        if (_d) throw _e;
-      }
-    }
-
-    return _arr;
   }
 
   function _unsupportedIterableToArray(o, minLen) {
@@ -127,14 +89,6 @@
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-
-  function getGlobal() {
-    return typeof globalThis !== 'undefined' ? globalThis : global || self;
-  }
-
   /**
    * Router constants
    */
@@ -149,6 +103,24 @@
   var INVALID_ROUTE = 'Route string is not a pure route';
   var VIRTUAL_PUSHSTATE = 'vpushstate';
   var CACHED_FIELDS = ['route', 'hashRouting', 'path', 'hash', 'search', 'hashSearch', 'data'];
+  var AMP = '&';
+  var QRY = '?';
+  var EQ = '=';
+  var EMPTY = '';
+  var UNDEF = void 0;
+  var TYPEOF_STR = _typeof(EMPTY);
+  var TYPEOF_BOOL = _typeof(true);
+  var TYPEOF_UNDEF = _typeof(UNDEF);
+  var TYPEOF_OBJ = _typeof({});
+  _typeof(0);
+  var TYPEOF_FUNC = _typeof(function () {});
+  var STATE = 'State';
+  var PUSH = "push".concat(STATE);
+  var REPLACE = "replace".concat(STATE);
+
+  function getGlobal() {
+    return (typeof globalThis === "undefined" ? "undefined" : _typeof(globalThis)) !== TYPEOF_UNDEF ? globalThis : global || self;
+  }
 
   /**
    * Shorthand for Array.isArray
@@ -161,7 +133,7 @@
    */
 
   function trim(str) {
-    return typeof str === 'string' ? str.trim() : '';
+    return _typeof(str) === TYPEOF_STR ? str.trim() : EMPTY;
   }
   /**
    * Checks if value is an object
@@ -169,7 +141,7 @@
    */
 
   function isObject$1(value) {
-    return value && _typeof(value) === 'object';
+    return value && _typeof(value) === TYPEOF_OBJ;
   }
   /**
    * Checks if key is a true object
@@ -186,7 +158,7 @@
    */
 
   function isValidRoute(route) {
-    return typeof route === 'string' && REG_PATHNAME.test(route);
+    return _typeof(route) === TYPEOF_STR && REG_PATHNAME.test(route);
   }
   /**
    * Loops over an array like object
@@ -197,10 +169,10 @@
   function each(arrayObj, callback) {
     if (arrayObj && arrayObj.length) {
       for (var index = 0; index < arrayObj.length; index += 1) {
-        if (typeof callback === 'function') {
+        if (_typeof(callback) === TYPEOF_FUNC) {
           var continueTheLoop = callback.apply(arrayObj, [arrayObj[index], index]);
 
-          if (typeof continueTheLoop === 'boolean') {
+          if (_typeof(continueTheLoop) === TYPEOF_BOOL) {
             if (continueTheLoop) {
               continue;
             } else {
@@ -214,12 +186,12 @@
 
   var g$1 = getGlobal();
 
-  if (typeof g$1.CustomEvent === 'undefined') {
+  if (_typeof(g$1.CustomEvent) === TYPEOF_UNDEF) {
     var CustomEvent = function CustomEvent(event, params) {
       params = params || {
         bubbles: false,
         cancelable: false,
-        detail: undefined
+        detail: UNDEF
       };
       var evt = document.createEvent('CustomEvent');
       evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
@@ -269,10 +241,10 @@
 
 
   function assign() {
-    var target = isObject$1(arguments[0]) ? arguments[0] : {};
+    var target = isObject$1(arguments.length <= 0 ? undefined : arguments[0]) ? arguments.length <= 0 ? undefined : arguments[0] : {};
 
     for (var i = 1; i < arguments.length; i++) {
-      loopFunc(arguments[i], target);
+      loopFunc(i < 0 || arguments.length <= i ? undefined : arguments[i], target);
     }
 
     return target;
@@ -1019,7 +991,7 @@
       target = [target];
     }
 
-    if (isValidTarget(target) && typeof eventType === 'string') {
+    if (isValidTarget(target) && _typeof(eventType) === TYPEOF_STR) {
       each(target, function (el) {
         var customEvent = new g.CustomEvent(eventType, {
           bubbles: true,
@@ -1035,11 +1007,9 @@
     _classCallCheck(this, RouterEvent);
 
     // Set relevant parameters
-    var _routeInfo = _slicedToArray(routeInfo, 3),
-        routeObject = _routeInfo[0],
-        originalEvent = _routeInfo[1],
-        routerInstance = _routeInfo[2];
-
+    var routeObject = routeInfo[0];
+    var originalEvent = routeInfo[1];
+    var routerInstance = routeInfo[2];
     var _routerInstance$confi = routerInstance.config,
         location = _routerInstance$confi.location,
         history = _routerInstance$confi.history;
@@ -1051,7 +1021,7 @@
     this.path = trim(location.pathname);
     this.hash = location.hash;
     this.search = trim(location.search.substring(1));
-    this.hashSearch = trim(location.hash && location.hash.split('?')[1]);
+    this.hashSearch = trim(location.hash && location.hash.split(QRY)[1]);
     var state = this.originalEvent.state;
     this.data = state && state.data || history.state && history.state.data;
   };
@@ -1063,8 +1033,7 @@
       return new Observable(function (subscriber) {
         var subn = observable.subscribe({
           next: function next(event) {
-            var _event$detail = _slicedToArray(event.detail, 3),
-                routerInstance = _event$detail[2];
+            var routerInstance = event.detail[2];
 
             if (routerInstance === _this) {
               subscriber.next(new RouterEvent(event.detail, event));
@@ -1088,7 +1057,7 @@
         location = _this$config.location,
         hashRouting = _this$config.hashRouting;
     this.popStateSubscription = fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
-      var path = trim(hashRouting ? location.hash.substring(1).split('?')[0] : location.pathname);
+      var path = trim(hashRouting ? location.hash.substring(1).split(QRY)[0] : location.pathname);
 
       if (path) {
         trigger(context, VIRTUAL_PUSHSTATE, [{
@@ -1115,9 +1084,9 @@
   function buildQuery(qsList, key, obj) {
     if (isObject$1(obj)) {
       Object.keys(obj).forEach(function (obKey) {
-        buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? '' : obKey, "]"), obj[obKey]);
+        buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? EMPTY : obKey, "]"), obj[obKey]);
       });
-    } else if (typeof obj !== 'function') {
+    } else if (_typeof(obj) !== TYPEOF_FUNC) {
       qsList.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
     }
   }
@@ -1136,10 +1105,10 @@
       Object.keys(obj).forEach(function (key) {
         buildQuery(qsList, key, obj[key]);
       });
-      return qsList.join('&');
+      return qsList.join(AMP);
     }
 
-    return typeof obj === 'string' ? obj : '';
+    return _typeof(obj) === TYPEOF_STR ? obj : EMPTY;
   }
 
   /*!
@@ -1178,18 +1147,18 @@
 
     qs = trim(qs);
 
-    if (qs.charAt(0) === '?') {
-      qs = qs.replace('?', '');
+    if (qs.charAt(0) === QRY) {
+      qs = qs.replace(QRY, EMPTY);
     }
 
     var queryObject = Object.create(null);
 
     if (qs) {
-      qs.split('&').forEach(function (qq) {
-        var qArr = qq.split('=').map(function (part) {
+      qs.split(AMP).forEach(function (qq) {
+        var qArr = qq.split(EQ).map(function (part) {
           return decodeURIComponent(part);
         });
-        (ifComplex(qArr[0]) ? complex : simple).apply(_this, [].concat(_toConsumableArray(qArr), [queryObject, coerce, false]));
+        (ifComplex(qArr[0]) ? complex : simple).apply(_this, qArr.concat([queryObject, coerce, false]));
       });
     }
 
@@ -1220,7 +1189,7 @@
 
 
   function resolve(ob, isNextNumber) {
-    return isNextNumber ? typeof ob === 'undefined' ? [] : ob : toObject(ob);
+    return isNextNumber ? _typeof(ob) === TYPEOF_UNDEF ? [] : ob : toObject(ob);
   }
   /**
    * Resolves the target object for next iteration
@@ -1233,7 +1202,7 @@
     if (isPureObject(ob)) return {
       ob: ob
     };
-    if (isArr(ob) || typeof ob === 'undefined') return {
+    if (isArr(ob) || _typeof(ob) === TYPEOF_UNDEF) return {
       ob: resolve(ob, isNumber(nextProp))
     };
     return {
@@ -1255,10 +1224,10 @@
     if (match.length === 3) {
       var prop = match[1];
       var nextProp = match[2];
-      key = key.replace(REG_REPLACE_BRACKETS, '');
+      key = key.replace(REG_REPLACE_BRACKETS, EMPTY);
 
       if (ifComplex(key)) {
-        if (nextProp === '') nextProp = '0';
+        if (nextProp === EMPTY) nextProp = '0';
         key = key.replace(REG_REPLACE_NEXTPROP, nextProp);
         complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, coercion);
       } else if (nextProp) {
@@ -1303,16 +1272,16 @@
 
 
   function coerce(value) {
-    if (value == null) return '';
-    if (typeof value !== 'string') return value;
+    if (value == null) return EMPTY;
+    if (_typeof(value) !== TYPEOF_STR) return value;
     if (isNumber(value = trim(value))) return +value;
 
     switch (value) {
       case 'null':
         return null;
 
-      case 'undefined':
-        return undefined;
+      case TYPEOF_UNDEF:
+        return UNDEF;
 
       case 'true':
         return true;
@@ -1338,14 +1307,13 @@
   function resolveQuery(queryString, hashRouting) {
     var location = this.config.location;
     var search = trim(location.search && location.search.substring(1));
-    var existingQuery = hashRouting ? trim(location.hash.split('?')[1]) : trim(search);
+    var existingQuery = hashRouting ? trim(location.hash.split(QRY)[1]) : trim(search);
     if (!existingQuery) return queryString;
     return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
   }
 
-  function set(route) {
-    var replace = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-    var exec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+  function set(route, replace, exec) {
+    exec = exec || true;
     var _this$config = this.config,
         preservePath = _this$config.preservePath,
         hashRouting = _this$config.hashRouting,
@@ -1353,7 +1321,7 @@
     var routeObject = assign({
       replace: replace,
       exec: exec
-    }, typeof route === 'string' ? {
+    }, _typeof(route) === TYPEOF_STR ? {
       route: route
     } : route);
     replace = routeObject.replace;
@@ -1363,8 +1331,8 @@
     var preserveQuery = routeObject.preserveQuery,
         data = routeObject.data,
         _routeObject$pageTitl = routeObject.pageTitle,
-        pageTitle = _routeObject$pageTitl === void 0 ? document.querySelector('head > title').textContent : _routeObject$pageTitl;
-    var routeParts = routeStr.split('?'); // Check if query string is an object
+        pageTitle = _routeObject$pageTitl === void 0 ? null : _routeObject$pageTitl;
+    var routeParts = routeStr.split(QRY); // Check if query string is an object
 
     if (isObject$1(queryString)) {
       queryString = toQueryString(queryString);
@@ -1390,8 +1358,8 @@
       } // Append query string
 
 
-      routeStr = "".concat(routeStr).concat(queryString ? "?".concat(queryString) : '');
-      history[replace ? 'replaceState' : 'pushState']({
+      routeStr = "".concat(routeStr).concat(queryString ? "".concat(QRY + queryString) : EMPTY);
+      history[replace ? REPLACE : PUSH]({
         data: data
       }, pageTitle, routeStr);
 
@@ -1399,7 +1367,7 @@
         trigger(this.config.context, VIRTUAL_PUSHSTATE, [{
           path: unmodifiedRoute,
           hash: hashRouting
-        }, undefined, this]);
+        }, UNDEF, this]);
       }
     } else {
       throw new TypeError(INVALID_ROUTE);
@@ -1414,7 +1382,7 @@
     var _this$config = this.config,
         hash = _this$config.hashRouting,
         location = _this$config.location;
-    var path = trim(hash ? location.hash.substring(1).split('?')[0] : location.pathname);
+    var path = trim(hash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
     return function (observable) {
       return new Observable(function (subscriber) {
         var subn = observable.subscribe(subscriber);
@@ -1426,7 +1394,7 @@
             subscriber.next(new RouterEvent([{
               path: path,
               hash: hash
-            }, undefined, _this]));
+            }, UNDEF, _this]));
           }
         }
 
@@ -1448,7 +1416,7 @@
           location = _getGlobal.location,
           document = _getGlobal.document;
 
-      if (!history.pushState) {
+      if (!history[PUSH]) {
         throw new Error(HISTORY_UNSUPPORTED);
       }
 
@@ -1499,7 +1467,7 @@
     }, {
       key: "destroy",
       value: function destroy(callback) {
-        if (typeof callback === 'function') {
+        if (_typeof(callback) === TYPEOF_FUNC) {
           callback();
         }
 
@@ -1529,7 +1497,7 @@
 
       if (pathRegex.test(path)) {
         var keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
-          return key.replace(':', '');
+          return key.replace(':', EMPTY);
         });
         var values = Array.from(path.match(pathRegex));
         values.shift();
@@ -1542,26 +1510,6 @@
     return params;
   }
 
-  if (!Array.from) {
-    /**
-     * Array.from polyfill in case browser doesn't has it
-     * @param {any} arrayLike Any array like object
-     * @returns {any[]} Array equivalent
-     */
-    Array.from = function (arrayLike) {
-      if (isArr) {
-        return arrayLike;
-      }
-
-      var arr = [];
-
-      for (var i = 0; i < arrayLike.length; i += 1) {
-        arr.push(arrayLike[i]);
-      }
-
-      return arr;
-    };
-  }
   /**
    * Operator to compare a specific route
    * @param {string} routeStr Route string
@@ -1569,11 +1517,10 @@
    * @param {boolean} ignoreCase Ignore case in route string
    */
 
-
   function route(routeStr, routerInstance, ignoreCase) {
-    if (typeof routerInstance === 'boolean') {
+    if (_typeof(routerInstance) === TYPEOF_BOOL) {
       ignoreCase = routerInstance;
-      routerInstance = undefined;
+      routerInstance = UNDEF;
     }
 
     routeStr = trim(routeStr);
@@ -1720,7 +1667,7 @@
     var deep = arguments.length > 1 ? arguments[1] : undefined;
     var cache = {};
 
-    if (typeof keys === 'boolean') {
+    if (_typeof(keys) === TYPEOF_BOOL) {
       deep = keys;
       keys = CACHED_FIELDS;
     }

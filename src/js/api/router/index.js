@@ -1,14 +1,14 @@
 import { assign } from '../../utils/assign';
 import bindRouterEvents from '../bindRouterEvents';
 import set from '../set';
-import { HISTORY_UNSUPPORTED } from '../../utils/constants';
+import { HISTORY_UNSUPPORTED, PUSH, TYPEOF_FUNC } from '../../utils/constants';
 import callOnce from '../callOnce';
 import { getGlobal } from '../../utils/getGlobal';
 
 export default class Router {
   constructor(config = {}) {
     const { history, location, document } = getGlobal();
-    if (!history.pushState) {
+    if (!history[PUSH]) {
       throw new Error(HISTORY_UNSUPPORTED);
     }
     config = assign(
@@ -35,7 +35,7 @@ export default class Router {
     return set.apply(this, props);
   }
   destroy(callback) {
-    if (typeof callback === 'function') {
+    if (typeof callback === TYPEOF_FUNC) {
       callback();
     }
     this.popStateSubscription.unsubscribe(); // Unsubscribe popstate event

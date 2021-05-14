@@ -5,6 +5,13 @@ import {
   REG_VARIABLE,
   REG_REPLACE_BRACKETS,
   REG_REPLACE_NEXTPROP,
+  TYPEOF_UNDEF,
+  UNDEF,
+  TYPEOF_STR,
+  EMPTY,
+  AMP,
+  QRY,
+  EQ,
 } from './constants';
 
 /**
@@ -21,19 +28,17 @@ function ifComplex(q) {
  */
 function lib(qs, coerce) {
   qs = trim(qs);
-  if (qs.charAt(0) === '?') {
-    qs = qs.replace('?', '');
+  if (qs.charAt(0) === QRY) {
+    qs = qs.replace(QRY, EMPTY);
   }
   const queryObject = Object.create(null);
   if (qs) {
-    qs.split('&').forEach((qq) => {
-      const qArr = qq.split('=').map((part) => decodeURIComponent(part));
-      (ifComplex(qArr[0]) ? complex : simple).apply(this, [
-        ...qArr,
-        queryObject,
-        coerce,
-        false,
-      ]);
+    qs.split(AMP).forEach((qq) => {
+      const qArr = qq.split(EQ).map((part) => decodeURIComponent(part));
+      (ifComplex(qArr[0]) ? complex : simple).apply(
+        this,
+        qArr.concat([queryObject, coerce, false])
+      );
     });
   }
   return queryObject;
@@ -59,7 +64,7 @@ function toObject(arr) {
  * @param {boolean} isNumber flag to test if next key is number
  */
 function resolve(ob, isNextNumber) {
-  return isNextNumber ? (typeof ob === 'undefined' ? [] : ob) : toObject(ob);
+  return isNextNumber ? (typeof ob === TYPEOF_UNDEF ? [] : ob) : toObject(ob);
 }
 
 /**
@@ -69,7 +74,7 @@ function resolve(ob, isNextNumber) {
  */
 function resolveObj(ob, nextProp) {
   if (isPureObject(ob)) return { ob };
-  if (isArr(ob) || typeof ob === 'undefined')
+  if (isArr(ob) || typeof ob === TYPEOF_UNDEF)
     return { ob: resolve(ob, isNumber(nextProp)) };
   return { ob: [ob], push: ob !== null };
 }
@@ -85,9 +90,9 @@ function complex(key, value, obj, coercion) {
   if (match.length === 3) {
     const prop = match[1];
     let nextProp = match[2];
-    key = key.replace(REG_REPLACE_BRACKETS, '');
+    key = key.replace(REG_REPLACE_BRACKETS, EMPTY);
     if (ifComplex(key)) {
-      if (nextProp === '') nextProp = '0';
+      if (nextProp === EMPTY) nextProp = '0';
       key = key.replace(REG_REPLACE_NEXTPROP, nextProp);
       complex(
         key,
@@ -137,14 +142,14 @@ function simple(key, value, queryObject, coercion, toArray) {
  * @param {string} value undefined or string value
  */
 function coerce(value) {
-  if (value == null) return '';
-  if (typeof value !== 'string') return value;
+  if (value == null) return EMPTY;
+  if (typeof value !== TYPEOF_STR) return value;
   if (isNumber((value = trim(value)))) return +value;
   switch (value) {
     case 'null':
       return null;
-    case 'undefined':
-      return undefined;
+    case TYPEOF_UNDEF:
+      return UNDEF;
     case 'true':
       return true;
     case 'false':

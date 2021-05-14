@@ -1,11 +1,12 @@
+import { TYPEOF_UNDEF, UNDEF } from './constants';
 import { getGlobal } from './getGlobal';
 import { isArr } from './utils';
 
 // Polyfill custom event
 const g = getGlobal();
-if (typeof g.CustomEvent === 'undefined') {
+if (typeof g.CustomEvent === TYPEOF_UNDEF) {
   const CustomEvent = function (event, params) {
-    params = params || { bubbles: false, cancelable: false, detail: undefined };
+    params = params || { bubbles: false, cancelable: false, detail: UNDEF };
     const evt = document.createEvent('CustomEvent');
     evt.initCustomEvent(
       event,

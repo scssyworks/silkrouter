@@ -1,28 +1,15 @@
-import { trim, isValidRoute, each, isObject, isArr } from '../utils/utils';
+import { trim, isValidRoute, each, isObject } from '../utils/utils';
 import { Observable } from 'rxjs';
-import { INVALID_ROUTE, CACHED_FIELDS } from '../utils/constants';
+import {
+  INVALID_ROUTE,
+  CACHED_FIELDS,
+  UNDEF,
+  TYPEOF_BOOL,
+} from '../utils/constants';
 import { extractParams } from '../utils/params';
 import { deparam as queryDeparam } from '../utils/deparam';
 import Router from '../api/router';
 import { assign } from '../utils/assign';
-
-if (!Array.from) {
-  /**
-   * Array.from polyfill in case browser doesn't has it
-   * @param {any} arrayLike Any array like object
-   * @returns {any[]} Array equivalent
-   */
-  Array.from = function (arrayLike) {
-    if (isArr) {
-      return arrayLike;
-    }
-    const arr = [];
-    for (let i = 0; i < arrayLike.length; i += 1) {
-      arr.push(arrayLike[i]);
-    }
-    return arr;
-  };
-}
 
 /**
  * Operator to compare a specific route
@@ -31,9 +18,9 @@ if (!Array.from) {
  * @param {boolean} ignoreCase Ignore case in route string
  */
 export function route(routeStr, routerInstance, ignoreCase) {
-  if (typeof routerInstance === 'boolean') {
+  if (typeof routerInstance === TYPEOF_BOOL) {
     ignoreCase = routerInstance;
-    routerInstance = undefined;
+    routerInstance = UNDEF;
   }
   routeStr = trim(routeStr);
   if (routerInstance instanceof Router) {
@@ -162,7 +149,7 @@ function deepComparison(first, second, result) {
  */
 export function cache(keys = CACHED_FIELDS, deep) {
   let cache = {};
-  if (typeof keys === 'boolean') {
+  if (typeof keys === TYPEOF_BOOL) {
     deep = keys;
     keys = CACHED_FIELDS;
   }

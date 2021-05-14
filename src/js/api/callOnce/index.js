@@ -1,11 +1,12 @@
 import { Observable } from 'rxjs';
+import { QRY, UNDEF } from '../../utils/constants';
 import { trim } from '../../utils/utils';
 import RouterEvent from '../routerEvent';
 
 export default function callOnce(isDone) {
   const { hashRouting: hash, location } = this.config;
   const path = trim(
-    hash ? location.hash.substring(1).split('?')[0] : location.pathname
+    hash ? location.hash.substring(1).split(QRY)[0] : location.pathname
   );
   return (observable) =>
     new Observable((subscriber) => {
@@ -13,7 +14,7 @@ export default function callOnce(isDone) {
       if (!isDone) {
         isDone = true;
         if (path) {
-          subscriber.next(new RouterEvent([{ path, hash }, undefined, this]));
+          subscriber.next(new RouterEvent([{ path, hash }, UNDEF, this]));
         }
       }
       return () => {

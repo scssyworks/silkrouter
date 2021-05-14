@@ -6,7 +6,7 @@ export default function collate() {
     new Observable((subscriber) => {
       const subn = observable.subscribe({
         next: (event) => {
-          const [, , routerInstance] = event.detail;
+          const routerInstance = event.detail[2];
           if (routerInstance === this) {
             subscriber.next(new RouterEvent(event.detail, event));
           }

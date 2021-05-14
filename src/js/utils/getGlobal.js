@@ -1,3 +1,5 @@
+import { TYPEOF_UNDEF } from './constants';
+
 export function getGlobal() {
-  return typeof globalThis !== 'undefined' ? globalThis : global || self;
+  return typeof globalThis !== TYPEOF_UNDEF ? globalThis : global || self;
 }

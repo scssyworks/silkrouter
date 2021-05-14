@@ -1,3 +1,4 @@
+import { TYPEOF_STR } from './constants';
 import { getGlobal } from './getGlobal';
 import { each } from './utils';
 
@@ -22,7 +23,7 @@ export function trigger(target, eventType, data) {
   if (target instanceof Node) {
     target = [target];
   }
-  if (isValidTarget(target) && typeof eventType === 'string') {
+  if (isValidTarget(target) && typeof eventType === TYPEOF_STR) {
     each(target, (el) => {
       const customEvent = new g.CustomEvent(eventType, {
         bubbles: true,
