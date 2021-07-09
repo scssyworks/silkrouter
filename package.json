@@ -2,34 +2,41 @@
   "name": "silkrouter",
   "version": "4.2.1",
   "description": "Silk router is an app routing library",
-  "main": "dist/umd/silkrouter.js",
-  "module": "dist/esm/silkrouter.esm.js",
+  "main": "dist/umd/silkrouter.min.js",
+  "module": "dist/esm/silkrouter.esm.min.js",
   "types": "src/typings/silkrouter.d.ts",
   "scripts": {
-    "start": "rollup -c --watch --environment SERVE:true",
-    "build": "npm run test && rollup -c",
+    "start": "env-cmd -f ./.env.start rollup -c --watch",
+    "dev": "env-cmd -f ./.env.dev rollup -c",
+    "dev:serve": "env-cmd -f ./.env.start.prod rollup -c",
+    "prod": "env-cmd rollup -c",
+    "build": "npm run test && npm run dev && npm run dev:serve && npm run prod",
     "test": "jest tests/*",
     "deploy": "gh-pages -d dist"
   },
   "author": "scssyworks",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.14.0",
-    "@babel/preset-env": "^7.14.1",
+    "@babel/core": "^7.14.6",
+    "@babel/preset-env": "^7.14.7",
     "@rollup/plugin-babel": "^5.3.0",
-    "@rollup/plugin-commonjs": "^11.1.0",
+    "@rollup/plugin-commonjs": "^19.0.0",
     "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^6.1.0",
-    "@types/jest": "^25.2.3",
+    "@rollup/plugin-node-resolve": "^13.0.0",
+    "@types/jest": "^26.0.24",
     "babel-eslint": "^10.1.0",
-    "gh-pages": "^2.2.0",
-    "jest": "^25.5.4",
-    "rollup": "^2.47.0",
+    "env-cmd": "^10.1.0",
+    "gh-pages": "^3.2.3",
+    "jest": "^27.0.6",
+    "rollup": "^2.52.8",
     "rollup-plugin-eslint": "^7.0.0",
-    "rollup-plugin-livereload": "^1.3.0",
+    "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-serve": "^1.1.0",
     "rollup-plugin-terser": "^7.0.2",
-    "rxjs": "^6.6.7"
+    "rxjs": "^7.2.0"
+  },
+  "peerDependencies": {
+    "rxjs": "^7.2.0"
   },
   "keywords": [
     "router",
@@ -68,9 +75,6 @@
     "url": "https://github.com/scssyworks/silkrouter/issues"
   },
   "homepage": "https://scssyworks.github.io/silkrouter",
-  "peerDependencies": {
-    "rxjs": "^6.5.4"
-  },
   "dependencies": {
     "is-number": "^7.0.0"
   }

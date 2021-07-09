@@ -8,18 +8,57 @@ import livereload from 'rollup-plugin-livereload';
 import pkg from './package.json';
 import json from '@rollup/plugin-json';
 
+const isDevelopment = process.env.MODE.trim() === 'development';
+const startServer = process.env.SERVE.trim() === 'true';
+const input = process.env.INPUT.trim();
+
 const rxjs = 'rxjs';
 
-const commonConfig = {
-  input: 'src/js/index.js',
-  output: {
-    name: 'silkrouter',
-    sourcemap: true,
-  },
+const minExtReg = /\.min\.js$/;
+const umdPathReg = /\/umd\//;
+
+const pathMap = {
+  umd: pkg.main,
+  umdDev: pkg.main.replace(minExtReg, '.js'),
+  esm: pkg.module,
+  esmDev: pkg.module.replace(minExtReg, '.js'),
+  iife: pkg.main
+    .replace(umdPathReg, '/render/')
+    .replace(minExtReg, '.iife.min.js'),
+  iifeDev: pkg.main
+    .replace(umdPathReg, '/render/')
+    .replace(minExtReg, '.iife.js'),
+};
+
+const config = {
+  input,
+  output: (startServer ? ['iife'] : ['esm', 'umd']).map((format) => {
+    return {
+      name: pkg.name,
+      sourcemap: isDevelopment,
+      file: isDevelopment ? pathMap[`${format}Dev`] : pathMap[format],
+      format,
+      globals: { rxjs },
+    };
+  }),
+  external: startServer ? [] : [...Object.keys(pkg.peerDependencies)],
   plugins: [
+    ...(isDevelopment && startServer
+      ? [
+          eslint({
+            exclude: [
+              'node_modules/**',
+              'json/**',
+              'package.json',
+              'package-lock.json',
+            ],
+            throwOnError: true,
+          }),
+        ]
+      : []),
     resolve({
       customResolveOptions: {
-        moduleDirectory: 'node_modules',
+        moduleDirectories: ['node_modules'],
       },
       preferBuiltins: true,
     }),
@@ -28,114 +67,44 @@ const commonConfig = {
       exclude: 'node_modules/**',
       babelHelpers: 'bundled',
     }),
+    ...(isDevelopment
+      ? startServer
+        ? [
+            json({
+              exclude: ['node_modules/**'],
+              compact: true,
+              preferConst: true,
+            }),
+            serve({
+              open: true,
+              contentBase: ['dist'],
+              host: 'localhost',
+              port: '3030',
+              historyApiFallback: true,
+            }),
+            livereload({
+              watch: 'dist',
+              verbose: false,
+            }),
+          ]
+        : []
+      : [
+          ...(startServer
+            ? [
+                json({
+                  exclude: ['node_modules/**'],
+                  compact: true,
+                  preferConst: true,
+                }),
+              ]
+            : []),
+          terser({
+            output: {
+              comments: false,
+            },
+          }),
+        ]),
   ],
 };
 
-// ESM config
-const esmConfig = Object.assign({}, commonConfig);
-esmConfig.external = [...Object.keys(pkg.peerDependencies)];
-esmConfig.output = Object.assign({}, commonConfig.output, {
-  file: 'dist/esm/silkrouter.esm.js',
-  format: 'esm',
-  globals: { rxjs },
-});
-
-// ESM prod config
-const esmProdConfig = Object.assign({}, esmConfig);
-esmProdConfig.output = Object.assign({}, esmConfig.output, {
-  file: 'dist/esm/silkrouter.esm.min.js',
-  sourcemap: false,
-});
-esmProdConfig.plugins = [
-  ...esmConfig.plugins,
-  terser({
-    output: {
-      comments: false,
-    },
-  }),
-];
-
-// UMD config
-const umdConfig = Object.assign({}, commonConfig);
-umdConfig.external = [...Object.keys(pkg.peerDependencies)];
-umdConfig.output = Object.assign({}, commonConfig.output, {
-  file: 'dist/umd/silkrouter.js',
-  format: 'umd',
-  globals: { rxjs },
-});
-umdConfig.plugins = [...commonConfig.plugins];
-
-// Production config
-const umdProdConfig = Object.assign({}, umdConfig);
-umdProdConfig.output = Object.assign({}, umdConfig.output, {
-  file: 'dist/umd/silkrouter.min.js',
-  sourcemap: false,
-});
-umdProdConfig.plugins = [
-  ...umdConfig.plugins,
-  terser({
-    output: {
-      comments: false,
-    },
-  }),
-];
-
-let configurations = [];
-if (process.env.SERVE) {
-  const serveConfig = Object.assign({}, commonConfig);
-  const serveMinConfig = Object.assign({}, commonConfig);
-  serveConfig.input = 'render/index.js';
-  serveMinConfig.input = 'render/index.js';
-  serveConfig.output = Object.assign({}, commonConfig.output, {
-    file: 'dist/render/silkrouter.iife.js',
-    format: 'iife',
-  });
-  serveMinConfig.output = Object.assign({}, commonConfig.output, {
-    file: 'dist/render/silkrouter.iife.min.js',
-    format: 'iife',
-    sourcemap: false,
-  });
-  serveConfig.plugins = [
-    eslint({
-      exclude: [
-        'node_modules/**',
-        'json/**',
-        'package.json',
-        'package-lock.json',
-      ],
-      throwOnError: true,
-    }),
-    ...umdConfig.plugins,
-  ];
-  serveMinConfig.plugins = [
-    ...umdProdConfig.plugins,
-    json({
-      exclude: ['node_modules/**'],
-      compact: true,
-      preferConst: true,
-    }),
-  ];
-  serveConfig.plugins.push(
-    json({
-      exclude: ['node_modules/**'],
-      compact: true,
-      preferConst: true,
-    }),
-    serve({
-      open: true,
-      contentBase: ['dist'],
-      host: 'localhost',
-      port: '3030',
-      historyApiFallback: true,
-    }),
-    livereload({
-      watch: 'dist',
-      verbose: false,
-    })
-  );
-  configurations.push(serveConfig, serveMinConfig);
-} else {
-  configurations.push(esmConfig, esmProdConfig, umdConfig, umdProdConfig);
-}
-
-export default configurations;
+export default [config];
