@@ -19,9 +19,9 @@ jobs:
       - run: npm version ${{github.event.release.tag_name}}
       - run: npm run build
       - run: npm publish
-      - run: npm deploy
         env:
           NPM_TOKEN: ${{secrets.NPM_TOKEN}}
       - run: git push
         env:
           github-token: ${{secrets.GITHUB_TOKEN}}
+      - run: npm run deploy
