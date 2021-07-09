@@ -27,4 +27,4 @@ jobs:
       - run: git push
         env:
           github-token: ${{secrets.GITHUB_TOKEN}}
-      - run: npm deploy
+      - run: npm run deploy
