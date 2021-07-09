@@ -122,11 +122,33 @@
     return (typeof globalThis === "undefined" ? "undefined" : _typeof(globalThis)) !== TYPEOF_UNDEF ? globalThis : global || self;
   }
 
+  /*!
+   * is-number <https://github.com/jonschlinkert/is-number>
+   *
+   * Copyright (c) 2014-present, Jon Schlinkert.
+   * Released under the MIT License.
+   */
+
+  var isNumber = function(num) {
+    if (typeof num === 'number') {
+      return num - num === 0;
+    }
+    if (typeof num === 'string' && num.trim() !== '') {
+      return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+    }
+    return false;
+  };
+
   /**
    * Shorthand for Array.isArray
    */
 
   var isArr = Array.isArray;
+  /**
+   * Shorthand for Object.keys
+   */
+
+  var oKeys = Object.keys;
   /**
    * Safely trims string
    * @param {string} str String
@@ -167,17 +189,18 @@
    */
 
   function each(arrayObj, callback) {
-    if (arrayObj && arrayObj.length) {
-      for (var index = 0; index < arrayObj.length; index += 1) {
-        if (_typeof(callback) === TYPEOF_FUNC) {
-          var continueTheLoop = callback.apply(arrayObj, [arrayObj[index], index]);
+    if (isObject$1(arrayObj)) {
+      var keys = oKeys(arrayObj);
 
-          if (_typeof(continueTheLoop) === TYPEOF_BOOL) {
-            if (continueTheLoop) {
-              continue;
-            } else {
-              break;
-            }
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var cont = callback(arrayObj[key], isNumber(key) ? +key : key);
+
+        if (_typeof(cont) === TYPEOF_BOOL) {
+          if (cont) {
+            continue;
+          } else {
+            break;
           }
         }
       }
@@ -210,11 +233,9 @@
       }
 
       var arr = [];
-
-      for (var i = 0; i < arrayLike.length; i++) {
-        arr.push(arrayLike[i]);
-      }
-
+      each(arrayLike, function (value) {
+        arr.push(value);
+      });
       return arr;
     };
   }
@@ -228,8 +249,8 @@
 
   function loopFunc(ref, target) {
     if (isObject$1(ref)) {
-      Object.keys(ref).forEach(function (key) {
-        target[key] = ref[key];
+      each(ref, function (prop, key) {
+        target[key] = prop;
       });
     }
   }
@@ -241,12 +262,14 @@
 
 
   function assign() {
-    var target = isObject$1(arguments.length <= 0 ? undefined : arguments[0]) ? arguments.length <= 0 ? undefined : arguments[0] : {};
-
-    for (var i = 1; i < arguments.length; i++) {
-      loopFunc(i < 0 || arguments.length <= i ? undefined : arguments[i], target);
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
     }
 
+    var target = isObject$1(args[0]) ? args[0] : {};
+    each(args, function (arg) {
+      loopFunc(arg, target);
+    });
     return target;
   }
 
@@ -973,11 +996,7 @@
       return sourceObj && typeof sourceObj.addEventListener === 'function' && typeof sourceObj.removeEventListener === 'function';
   }
 
-  var g = getGlobal(); // Internal function
-
-  function isValidTarget(target) {
-    return target instanceof NodeList || target instanceof HTMLCollection || Array.isArray(target);
-  }
+  var g = getGlobal();
   /**
    * Function to trigger custom event
    * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
@@ -985,13 +1004,10 @@
    * @param {any[]} data Data to be passed to handler
    */
 
-
   function trigger(target, eventType, data) {
-    if (target instanceof Node) {
-      target = [target];
-    }
+    target = Array.from(target instanceof Node ? [target] : target);
 
-    if (isValidTarget(target) && _typeof(eventType) === TYPEOF_STR) {
+    if (target.length && _typeof(eventType) === TYPEOF_STR) {
       each(target, function (el) {
         var customEvent = new g.CustomEvent(eventType, {
           bubbles: true,
@@ -1083,8 +1099,8 @@
 
   function buildQuery(qsList, key, obj) {
     if (isObject$1(obj)) {
-      Object.keys(obj).forEach(function (obKey) {
-        buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? EMPTY : obKey, "]"), obj[obKey]);
+      each(obj, function (prop, obKey) {
+        buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? EMPTY : obKey, "]"), prop);
       });
     } else if (_typeof(obj) !== TYPEOF_FUNC) {
       qsList.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
@@ -1102,8 +1118,8 @@
     var qsList = [];
 
     if (isObject$1(obj)) {
-      Object.keys(obj).forEach(function (key) {
-        buildQuery(qsList, key, obj[key]);
+      each(obj, function (prop, key) {
+        buildQuery(qsList, key, prop);
       });
       return qsList.join(AMP);
     }
@@ -1111,27 +1127,14 @@
     return _typeof(obj) === TYPEOF_STR ? obj : EMPTY;
   }
 
-  /*!
-   * is-number <https://github.com/jonschlinkert/is-number>
-   *
-   * Copyright (c) 2014-present, Jon Schlinkert.
-   * Released under the MIT License.
-   */
-
-  var isNumber = function(num) {
-    if (typeof num === 'number') {
-      return num - num === 0;
-    }
-    if (typeof num === 'string' && num.trim() !== '') {
-      return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
-    }
-    return false;
-  };
-
+  function obNull() {
+    return Object.create(null);
+  }
   /**
    * Checks if query parameter key is a complex notation
    * @param {string} q
    */
+
 
   function ifComplex(q) {
     return REG_COMPLEX.test(q);
@@ -1151,7 +1154,7 @@
       qs = qs.replace(QRY, EMPTY);
     }
 
-    var queryObject = Object.create(null);
+    var queryObject = obNull();
 
     if (qs) {
       qs.split(AMP).forEach(function (qq) {
@@ -1171,7 +1174,7 @@
 
 
   function toObject(arr) {
-    var convertedObj = Object.create(null);
+    var convertedObj = obNull();
 
     if (isArr(arr)) {
       arr.forEach(function (value, index) {
@@ -1381,7 +1384,8 @@
 
     var _this$config = this.config,
         hash = _this$config.hashRouting,
-        location = _this$config.location;
+        location = _this$config.location,
+        init = _this$config.init;
     var path = trim(hash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
     return function (observable) {
       return new Observable(function (subscriber) {
@@ -1390,7 +1394,7 @@
         if (!isDone) {
           isDone = true;
 
-          if (path) {
+          if (init && path) {
             subscriber.next(new RouterEvent([{
               path: path,
               hash: hash
@@ -1406,9 +1410,7 @@
   }
 
   var Router = /*#__PURE__*/function () {
-    function Router() {
-      var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
+    function Router(config) {
       _classCallCheck(this, Router);
 
       var _getGlobal = getGlobal(),
@@ -1420,7 +1422,9 @@
         throw new Error(HISTORY_UNSUPPORTED);
       }
 
-      config = assign({
+      this.config = Object.freeze(assign({
+        init: true,
+        // Initialize as soon as route handler is attached
         hashRouting: false,
         // Switch to hash routing
         preservePath: false,
@@ -1431,8 +1435,7 @@
         // Should remain unchanged
         history: history // History object
 
-      }, config);
-      this.config = Object.freeze(config);
+      }, config || {}));
       this.__paths__ = [];
       bindRouterEvents.apply(this);
     }
@@ -1501,7 +1504,7 @@
         });
         var values = Array.from(path.match(pathRegex));
         values.shift();
-        keys.forEach(function (key, index) {
+        each(keys, function (key, index) {
           params[key] = values[index];
         });
       }
@@ -1546,7 +1549,7 @@
               }
 
               var params = extractParams(routeStr, incomingRoute);
-              var paramsLength = Object.keys(params).length;
+              var paramsLength = oKeys(params).length;
 
               if (incomingRoute === routeStr || paramsLength > 0) {
                 if (paramsLength > 0) {
@@ -1621,13 +1624,11 @@
               if (paths.length > 0) {
                 var currentRoute = event.route;
                 var match = false;
-
-                for (var i = 0; i < paths.length; i++) {
-                  if (paths[i] === currentRoute || Object.keys(extractParams(paths[i], currentRoute)).length) {
-                    match = true;
-                    break;
+                each(paths, function (path) {
+                  if (path === currentRoute || oKeys(extractParams(path, currentRoute)).length) {
+                    return !(match = true);
                   }
-                }
+                });
 
                 if (!match) {
                   event.noMatch = true;
@@ -1647,7 +1648,7 @@
   }
 
   function deepComparison(first, second, result) {
-    each(Object.keys(first), function (key) {
+    each(oKeys(first), function (key) {
       if (isObject$1(first[key]) && isObject$1(second[key])) {
         deepComparison(first[key], second[key], result);
       } else {
@@ -1850,7 +1851,7 @@
         el.classList.remove('d-none');
       });
 
-      if (e.search) {
+      if (Object.keys(e.search).length) {
         q('.query-data').forEach(function (el) {
           el.querySelector('pre').textContent = JSON.stringify(e.search, null, 2);
           el.classList.remove('d-none');
@@ -1951,13 +1952,7 @@
     window.route = route;
     window.deparam = deparam;
     window.noMatch = noMatch;
-    window.cache = cache; // Test route
-
-    var testRoute = new Router();
-    testRoute.subscribe(function (e) {
-      console.log(e.data);
-    });
-    window.testRoute = testRoute;
+    window.cache = cache;
   }
 
   initializeRouting();

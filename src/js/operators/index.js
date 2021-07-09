@@ -1,4 +1,4 @@
-import { trim, isValidRoute, each, isObject } from '../utils/utils';
+import { trim, isValidRoute, each, isObject, oKeys } from '../utils/utils';
 import { Observable } from 'rxjs';
 import {
   INVALID_ROUTE,
@@ -40,7 +40,7 @@ export function route(routeStr, routerInstance, ignoreCase) {
               incomingRoute = incomingRoute.toLowerCase();
             }
             const params = extractParams(routeStr, incomingRoute);
-            const paramsLength = Object.keys(params).length;
+            const paramsLength = oKeys(params).length;
             if (incomingRoute === routeStr || paramsLength > 0) {
               if (paramsLength > 0) {
                 event.params = params;
@@ -107,15 +107,14 @@ export function noMatch(routerInstance) {
             if (paths.length > 0) {
               const currentRoute = event.route;
               let match = false;
-              for (let i = 0; i < paths.length; i++) {
+              each(paths, (path) => {
                 if (
-                  paths[i] === currentRoute ||
-                  Object.keys(extractParams(paths[i], currentRoute)).length
+                  path === currentRoute ||
+                  oKeys(extractParams(path, currentRoute)).length
                 ) {
-                  match = true;
-                  break;
+                  return !(match = true);
                 }
-              }
+              });
               if (!match) {
                 event.noMatch = true;
                 subscriber.next(event);
@@ -133,7 +132,7 @@ export function noMatch(routerInstance) {
 }
 
 function deepComparison(first, second, result) {
-  each(Object.keys(first), (key) => {
+  each(oKeys(first), (key) => {
     if (isObject(first[key]) && isObject(second[key])) {
       deepComparison(first[key], second[key], result);
     } else {

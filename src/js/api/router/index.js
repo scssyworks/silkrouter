@@ -6,22 +6,24 @@ import callOnce from '../callOnce';
 import { getGlobal } from '../../utils/getGlobal';
 
 export default class Router {
-  constructor(config = {}) {
+  constructor(config) {
     const { history, location, document } = getGlobal();
     if (!history[PUSH]) {
       throw new Error(HISTORY_UNSUPPORTED);
     }
-    config = assign(
-      {
-        hashRouting: false, // Switch to hash routing
-        preservePath: false, // Works for hash routing
-        context: document.body, // To change the context of "vpushstate" event
-        location, // Should remain unchanged
-        history, // History object
-      },
-      config
+    this.config = Object.freeze(
+      assign(
+        {
+          init: true, // Initialize as soon as route handler is attached
+          hashRouting: false, // Switch to hash routing
+          preservePath: false, // Works for hash routing
+          context: document.body, // To change the context of "vpushstate" event
+          location, // Should remain unchanged
+          history, // History object
+        },
+        config || {}
+      )
     );
-    this.config = Object.freeze(config);
     this.__paths__ = [];
     bindRouterEvents.apply(this);
   }

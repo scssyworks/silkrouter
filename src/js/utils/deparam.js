@@ -14,6 +14,10 @@ import {
   EQ,
 } from './constants';
 
+function obNull() {
+  return Object.create(null);
+}
+
 /**
  * Checks if query parameter key is a complex notation
  * @param {string} q
@@ -31,7 +35,7 @@ function lib(qs, coerce) {
   if (qs.charAt(0) === QRY) {
     qs = qs.replace(QRY, EMPTY);
   }
-  const queryObject = Object.create(null);
+  const queryObject = obNull();
   if (qs) {
     qs.split(AMP).forEach((qq) => {
       const qArr = qq.split(EQ).map((part) => decodeURIComponent(part));
@@ -49,7 +53,7 @@ function lib(qs, coerce) {
  * @param {array} arr
  */
 function toObject(arr) {
-  var convertedObj = Object.create(null);
+  var convertedObj = obNull();
   if (isArr(arr)) {
     arr.forEach((value, index) => {
       convertedObj[index] = value;
