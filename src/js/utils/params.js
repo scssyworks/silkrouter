@@ -1,4 +1,5 @@
 import { EMPTY, REG_ROUTE_PARAMS } from './constants';
+import { each } from './utils';
 
 /**
  * Parses current path and returns params object
@@ -20,7 +21,7 @@ export function extractParams(expr, path) {
       );
       const values = Array.from(path.match(pathRegex));
       values.shift();
-      keys.forEach((key, index) => {
+      each(keys, (key, index) => {
         params[key] = values[index];
       });
     }

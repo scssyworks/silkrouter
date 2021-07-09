@@ -150,7 +150,7 @@ function initializeRouting() {
     q('.params-data, .query-next-step').forEach((el) => {
       el.classList.remove('d-none');
     });
-    if (e.search) {
+    if (Object.keys(e.search).length) {
       q('.query-data').forEach((el) => {
         el.querySelector('pre').textContent = JSON.stringify(e.search, null, 2);
         el.classList.remove('d-none');
@@ -268,13 +268,6 @@ function setGlobals() {
   window.deparam = deparam;
   window.noMatch = noMatch;
   window.cache = cache;
-
-  // Test route
-  const testRoute = new Router();
-  testRoute.subscribe((e) => {
-    console.log(e.data);
-  });
-  window.testRoute = testRoute;
 }
 
 initializeRouting();

@@ -4,7 +4,7 @@ import { trim } from '../../utils/utils';
 import RouterEvent from '../routerEvent';
 
 export default function callOnce(isDone) {
-  const { hashRouting: hash, location } = this.config;
+  const { hashRouting: hash, location, init } = this.config;
   const path = trim(
     hash ? location.hash.substring(1).split(QRY)[0] : location.pathname
   );
@@ -13,7 +13,7 @@ export default function callOnce(isDone) {
       const subn = observable.subscribe(subscriber);
       if (!isDone) {
         isDone = true;
-        if (path) {
+        if (init && path) {
           subscriber.next(new RouterEvent([{ path, hash }, UNDEF, this]));
         }
       }

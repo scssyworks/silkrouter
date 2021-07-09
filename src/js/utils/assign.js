@@ -1,4 +1,4 @@
-import { isObject } from './utils';
+import { each, isObject } from './utils';
 
 /**
  * Inner loop function for assign
@@ -8,8 +8,8 @@ import { isObject } from './utils';
  */
 function loopFunc(ref, target) {
   if (isObject(ref)) {
-    Object.keys(ref).forEach(function (key) {
-      target[key] = ref[key];
+    each(ref, (prop, key) => {
+      target[key] = prop;
     });
   }
 }
@@ -21,8 +21,8 @@ function loopFunc(ref, target) {
  */
 export function assign(...args) {
   const target = isObject(args[0]) ? args[0] : {};
-  for (let i = 1; i < args.length; i++) {
-    loopFunc(args[i], target);
-  }
+  each(args, (arg) => {
+    loopFunc(arg, target);
+  });
   return target;
 }

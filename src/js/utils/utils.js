@@ -1,8 +1,8 @@
+import isNumber from 'is-number';
 import {
   EMPTY,
   REG_PATHNAME,
   TYPEOF_BOOL,
-  TYPEOF_FUNC,
   TYPEOF_OBJ,
   TYPEOF_STR,
 } from './constants';
@@ -11,6 +11,11 @@ import {
  * Shorthand for Array.isArray
  */
 export const isArr = Array.isArray;
+
+/**
+ * Shorthand for Object.keys
+ */
+export const oKeys = Object.keys;
 
 /**
  * Safely trims string
@@ -60,19 +65,16 @@ export function hasOwn(ob, key) {
  * @param {function} callback Callback function
  */
 export function each(arrayObj, callback) {
-  if (arrayObj && arrayObj.length) {
-    for (let index = 0; index < arrayObj.length; index += 1) {
-      if (typeof callback === TYPEOF_FUNC) {
-        const continueTheLoop = callback.apply(arrayObj, [
-          arrayObj[index],
-          index,
-        ]);
-        if (typeof continueTheLoop === TYPEOF_BOOL) {
-          if (continueTheLoop) {
-            continue;
-          } else {
-            break;
-          }
+  if (isObject(arrayObj)) {
+    const keys = oKeys(arrayObj);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const cont = callback(arrayObj[key], isNumber(key) ? +key : key);
+      if (typeof cont === TYPEOF_BOOL) {
+        if (cont) {
+          continue;
+        } else {
+          break;
         }
       }
     }

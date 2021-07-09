@@ -1,6 +1,6 @@
 import { TYPEOF_UNDEF, UNDEF } from './constants';
 import { getGlobal } from './getGlobal';
-import { isArr } from './utils';
+import { each, isArr } from './utils';
 
 // Polyfill custom event
 const g = getGlobal();
@@ -29,9 +29,9 @@ if (!Array.from) {
       return arrayLike;
     }
     const arr = [];
-    for (let i = 0; i < arrayLike.length; i++) {
-      arr.push(arrayLike[i]);
-    }
+    each(arrayLike, (value) => {
+      arr.push(value);
+    });
     return arr;
   };
 }
