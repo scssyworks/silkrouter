@@ -28,4 +28,4 @@ jobs:
             NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
       - run: git push
         env:
-            NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+            github-token: ${{secrets.GITHUB_TOKEN}}
