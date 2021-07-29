@@ -25,7 +25,12 @@ jobs:
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      - run: git commit -am "[Automated Message] Published latest version to NPM"
       - run: git push origin HEAD:master
         env:
           github-token: ${{secrets.GITHUB_TOKEN}}
-      - run: npm run deploy
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: dist
