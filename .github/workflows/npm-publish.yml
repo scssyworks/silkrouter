@@ -21,7 +21,7 @@ jobs:
       - run: npm test
       - run: npm version ${{github.event.release.tag_name}} --no-git-tag-version --force
       - run: npm run build
-      - run: npm publish --access publish
+      - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
       - run: git push
