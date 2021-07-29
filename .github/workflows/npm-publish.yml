@@ -19,7 +19,7 @@ jobs:
       - run: git config --global user.email "contactsachinsingh@gmail.com"
       - run: npm ci
       - run: npm test
-      - run: npm version ${{github.event.release.tag_name}}
+      - run: npm version ${{github.event.release.tag_name}} --no-git-tag-version --force
       - run: npm run build
       - run: npm publish --access publish
         env:
