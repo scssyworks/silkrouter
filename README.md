@@ -1,4 +1,4 @@
-[![Build](https://github.com/scssyworks/silkrouter/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/scssyworks/silkrouter/actions/workflows/npm-publish.yml) ![License](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.js?label=unminified)
+[![Node.js CI](https://github.com/scssyworks/silkrouter/actions/workflows/node.js.yml/badge.svg?branch=master)](https://github.com/scssyworks/silkrouter/actions/workflows/node.js.yml) ![License](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.js?label=unminified)
 
 **If you are searching for version 3 documentation (previous version), please click on the link below:**<br>
 https://github.com/scssyworks/silkrouter/blob/master/READMEv3.md
@@ -15,11 +15,11 @@ npm install --save silkrouter rxjs
 
 # What's new?
 
-Silk router uses the new `Observer` pattern compared to `EventEmitter` pattern in previous versions. Almost 80% of the code has been re-written. You can use a bunch of operators provided by `rxjs` and `silkrouter` along with your own.
+Silk router uses the `Observer` pattern instead of `EventEmitter` pattern used in previous versions. Almost 80% of the code has been re-written. You can use a bunch of operators provided by `rxjs` as well as `silkrouter`. You can create your own operators if you want.
 
 # RxJS
 
-Silk router uses classes such as `Observables` and `Subscription` provided by `rxjs`. We do not bundle them to keep file size small. You need to install `rxjs` separately.
+Silk router uses classes such as `Observables` and `Subscription` provided by `rxjs`. RxJS is a peer dependency which means you need to install it separately.
 
 # How to use Silk router
 
@@ -69,9 +69,9 @@ You can `pipe` as many operators you want. Please refer to API section below for
 
 ## Classes
 
-| Class      | Description               | Options and Example                                                                                                                                                                                                                                                                                                                                                  |
-| :--------- | :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Router** | Creates a router instance | ` new Router({ /*Router options*/ })`<br><br>Router options:<br><br> **hashRouting**[optional] - Enables hash routing (default: `false`)<br> **preservePath**[optional] - Preserves existing `pathname` when hashRouting is enabled (default: `false`)<br> **context**[optional] - Element reference to bind `vpushstate` synthetic event (default: `document.body`) |
+| Class      | Description               | Options and Example                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| :--------- | :------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Router** | Creates a router instance | ` new Router({ /*Router options*/ })`<br><br>Router options:<br><br> **hashRouting**[optional] - Enables hash routing (default: `false`)<br> **preservePath**[optional] - Preserves existing `pathname` when hashRouting is enabled (default: `false`)<br> **context**[optional] - Element reference to bind `vpushstate` synthetic event (default: `document.body`)<br> **init**[optional] - Enable/disable handler execution on initialization (default: `true`) |
 
 ## Router methods
 
@@ -186,4 +186,4 @@ Similar to route parameters and query strings, data passed this way is also pers
 
 # Contribution
 
-Please feel free to raise pull requests for new features or existing code fixes. For any queries please reach out to me at contactsachinsingh@gmail.com
+Please feel free to raise pull requests for new code fixes and features.
