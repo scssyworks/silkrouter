@@ -3,20 +3,20 @@
 (function () {
   'use strict';
 
-  function _typeof(obj) {
+  function _typeof$1(obj) {
     "@babel/helpers - typeof";
 
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof = function (obj) {
+      _typeof$1 = function (obj) {
         return typeof obj;
       };
     } else {
-      _typeof = function (obj) {
+      _typeof$1 = function (obj) {
         return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
       };
     }
 
-    return _typeof(obj);
+    return _typeof$1(obj);
   }
 
   function _classCallCheck(instance, Constructor) {
@@ -39,21 +39,6 @@
     if (protoProps) _defineProperties(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties(Constructor, staticProps);
     return Constructor;
-  }
-
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
-
-    return obj;
   }
 
   function _toConsumableArray(arr) {
@@ -95,31 +80,26 @@
   var POP_STATE = 'popstate';
   var REG_ROUTE_PARAMS = /:[^/]+/g;
   var REG_PATHNAME = /^\/(?=[^?]*)/;
-  var REG_COMPLEX = /\[/;
-  var REG_VARIABLE = /([^[]+)\[([^[]*)\]/;
-  var REG_REPLACE_BRACKETS = /\[([^[]*)\]/;
-  var REG_REPLACE_NEXTPROP = /[^[]+/;
   var HISTORY_UNSUPPORTED = 'Current browser does not support history object';
   var INVALID_ROUTE = 'Route string is not a pure route';
   var VIRTUAL_PUSHSTATE = 'vpushstate';
   var CACHED_FIELDS = ['route', 'hashRouting', 'path', 'hash', 'search', 'hashSearch', 'data'];
   var AMP = '&';
   var QRY = '?';
-  var EQ = '=';
   var EMPTY = '';
-  var UNDEF = void 0;
-  var TYPEOF_STR = _typeof(EMPTY);
-  var TYPEOF_BOOL = _typeof(true);
-  var TYPEOF_UNDEF = _typeof(UNDEF);
-  var TYPEOF_OBJ = _typeof({});
-  _typeof(0);
-  var TYPEOF_FUNC = _typeof(function () {});
+  var UNDEF$1 = void 0;
+  var TYPEOF_STR$1 = _typeof$1(EMPTY);
+  var TYPEOF_BOOL = _typeof$1(true);
+  var TYPEOF_UNDEF$1 = _typeof$1(UNDEF$1);
+  var TYPEOF_OBJ = _typeof$1({});
+  _typeof$1(0);
+  var TYPEOF_FUNC = _typeof$1(function () {});
   var STATE = 'State';
   var PUSH = "push".concat(STATE);
   var REPLACE = "replace".concat(STATE);
 
   function getGlobal() {
-    return (typeof globalThis === "undefined" ? "undefined" : _typeof(globalThis)) !== TYPEOF_UNDEF ? globalThis : global || self;
+    return (typeof globalThis === "undefined" ? "undefined" : _typeof$1(globalThis)) !== TYPEOF_UNDEF$1 ? globalThis : global || self;
   }
 
   /*!
@@ -129,7 +109,7 @@
    * Released under the MIT License.
    */
 
-  var isNumber = function(num) {
+  var isNumber$1 = function(num) {
     if (typeof num === 'number') {
       return num - num === 0;
     }
@@ -143,7 +123,7 @@
    * Shorthand for Array.isArray
    */
 
-  var isArr = Array.isArray;
+  var isArr$1 = Array.isArray;
   /**
    * Shorthand for Object.keys
    */
@@ -155,23 +135,15 @@
    */
 
   function trim(str) {
-    return _typeof(str) === TYPEOF_STR ? str.trim() : EMPTY;
+    return _typeof$1(str) === TYPEOF_STR$1 ? str.trim() : EMPTY;
   }
   /**
    * Checks if value is an object
    * @param {*} value Any type of value
    */
 
-  function isObject(value) {
-    return value && _typeof(value) === TYPEOF_OBJ;
-  }
-  /**
-   * Checks if key is a true object
-   * @param {*} value Any type of value
-   */
-
-  function isPureObject(value) {
-    return isObject(value) && !isArr(value);
+  function isObject$1(value) {
+    return value && _typeof$1(value) === TYPEOF_OBJ;
   }
   /**
    * Checks if given route is valid
@@ -180,7 +152,7 @@
    */
 
   function isValidRoute(route) {
-    return _typeof(route) === TYPEOF_STR && REG_PATHNAME.test(route);
+    return _typeof$1(route) === TYPEOF_STR$1 && REG_PATHNAME.test(route);
   }
   /**
    * Loops over an array like object
@@ -189,14 +161,14 @@
    */
 
   function each(arrayObj, callback) {
-    if (isObject(arrayObj)) {
+    if (isObject$1(arrayObj)) {
       var keys = oKeys(arrayObj);
 
       for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
-        var cont = callback(arrayObj[key], isNumber(key) ? +key : key);
+        var cont = callback(arrayObj[key], isNumber$1(key) ? +key : key);
 
-        if (_typeof(cont) === TYPEOF_BOOL) {
+        if (_typeof$1(cont) === TYPEOF_BOOL) {
           if (cont) {
             continue;
           } else {
@@ -209,12 +181,12 @@
 
   var g$1 = getGlobal();
 
-  if (_typeof(g$1.CustomEvent) === TYPEOF_UNDEF) {
+  if (_typeof$1(g$1.CustomEvent) === TYPEOF_UNDEF$1) {
     var CustomEvent = function CustomEvent(event, params) {
       params = params || {
         bubbles: false,
         cancelable: false,
-        detail: UNDEF
+        detail: UNDEF$1
       };
       var evt = document.createEvent('CustomEvent');
       evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
@@ -228,7 +200,7 @@
 
   if (!Array.from) {
     Array.from = function (arrayLike) {
-      if (isArr(arrayLike)) {
+      if (isArr$1(arrayLike)) {
         return arrayLike;
       }
 
@@ -248,7 +220,7 @@
    */
 
   function loopFunc(ref, target) {
-    if (isObject(ref)) {
+    if (isObject$1(ref)) {
       each(ref, function (prop, key) {
         target[key] = prop;
       });
@@ -266,7 +238,7 @@
       args[_key] = arguments[_key];
     }
 
-    var target = isObject(args[0]) ? args[0] : {};
+    var target = isObject$1(args[0]) ? args[0] : {};
     each(args, function (arg) {
       loopFunc(arg, target);
     });
@@ -1291,7 +1263,7 @@
   function trigger(target, eventType, data) {
     target = Array.from(target instanceof Node ? [target] : target);
 
-    if (target.length && _typeof(eventType) === TYPEOF_STR) {
+    if (target.length && _typeof$1(eventType) === TYPEOF_STR$1) {
       each(target, function (el) {
         var customEvent = new g.CustomEvent(eventType, {
           bubbles: true,
@@ -1382,11 +1354,11 @@
    */
 
   function buildQuery(qsList, key, obj) {
-    if (isObject(obj)) {
+    if (isObject$1(obj)) {
       each(obj, function (prop, obKey) {
-        buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? EMPTY : obKey, "]"), prop);
+        buildQuery(qsList, "".concat(key, "[").concat(isArr$1(obj) ? EMPTY : obKey, "]"), prop);
       });
-    } else if (_typeof(obj) !== TYPEOF_FUNC) {
+    } else if (_typeof$1(obj) !== TYPEOF_FUNC) {
       qsList.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
     }
   }
@@ -1401,59 +1373,159 @@
   function toQueryString(obj) {
     var qsList = [];
 
-    if (isObject(obj)) {
+    if (isObject$1(obj)) {
       each(obj, function (prop, key) {
         buildQuery(qsList, key, prop);
       });
       return qsList.join(AMP);
     }
 
-    return _typeof(obj) === TYPEOF_STR ? obj : EMPTY;
+    return _typeof$1(obj) === TYPEOF_STR$1 ? obj : EMPTY;
   }
+
+  /*!
+   * Deparam plugin converts query string to a valid JavaScript object
+   * Released under MIT license
+   * @name Deparam.js
+   * @author Sachin Singh <https://github.com/scssyworks/deparam.js>
+   * @version 3.0.2
+   * @license MIT
+   */
+  function _typeof(obj) {
+    "@babel/helpers - typeof";
+
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  /*!
+   * is-number <https://github.com/jonschlinkert/is-number>
+   *
+   * Copyright (c) 2014-present, Jon Schlinkert.
+   * Released under the MIT License.
+   */
+
+  var isNumber = function(num) {
+    if (typeof num === 'number') {
+      return num - num === 0;
+    }
+    if (typeof num === 'string' && num.trim() !== '') {
+      return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+    }
+    return false;
+  };
+
+  var UNDEF = void 0; // Results to undefined
+  // Typeof undefined
+
+  var TYPEOF_UNDEF = _typeof(UNDEF); // Typeof string
+
+
+  var TYPEOF_STR = _typeof(''); // Vars
+
+
+  var isBrowser = (typeof window === "undefined" ? "undefined" : _typeof(window)) !== TYPEOF_UNDEF; // location var
+
+  var loc = isBrowser ? window.location : null; // Shorthand for built-ins
+
+  var isArr = Array.isArray;
+  /**
+   * Checks if current key is safe
+   * @param {string} key Current key
+   * @returns {boolean}
+   */
+
+  function isSafe(key) {
+    return ['__proto__', 'prototype'].indexOf(key) === -1;
+  }
+  /**
+   * Shorthand for Object.prototype.hasOwnProperty
+   * @param {any} obj Any object
+   * @param {string} key key
+   * @returns {boolean} true or false if object has the property
+   */
+
+
+  function hasOwn(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+  }
+  /**
+   * Returns true of input is an object and not an array
+   * @param {any} key Checks if input is an object and not an array
+   * @returns {boolean} true or false
+   */
+
+
+  function isObject(key) {
+    return _typeof(key) === 'object' && key !== null && !isArr(key);
+  }
+  /**
+   * Returns true of input query string is complex
+   * @param {string} q Query string
+   * @returns {boolean} true or false
+   */
+
+
+  function ifComplex(q) {
+    return /\[/.test(q);
+  }
+  /**
+   * Returns an object without a prototype
+   * @returns {{[key in string|number]: any}} Object without __proto__
+   */
+
 
   function obNull() {
     return Object.create(null);
   }
   /**
-   * Checks if query parameter key is a complex notation
-   * @param {string} q
-   */
-
-
-  function ifComplex(q) {
-    return REG_COMPLEX.test(q);
-  }
-  /**
-   * Converts query string to JavaScript object
-   * @param {string} qs query string argument (defaults to url query string)
+   * Returns a parsed query object
+   * @param {string} qs Query string
+   * @param {boolean} coerce Coerce values
+   * @returns {{[key in string|number]: any}} Query object
    */
 
 
   function lib(qs, coerce) {
     var _this = this;
 
-    qs = trim(qs);
-
-    if (qs.charAt(0) === QRY) {
-      qs = qs.replace(QRY, EMPTY);
+    if (isBrowser && _typeof(qs) !== TYPEOF_STR) {
+      qs = loc.search;
     }
 
+    qs = qs.substring(qs.charAt(0) === '?');
+    var queryParamList = qs.split('&');
     var queryObject = obNull();
 
     if (qs) {
-      qs.split(AMP).forEach(function (qq) {
-        var qArr = qq.split(EQ).map(function (part) {
+      queryParamList.forEach(function (qq) {
+        var qArr = qq.split('=').map(function (part) {
           return decodeURIComponent(part);
         });
-        (ifComplex(qArr[0]) ? complex : simple).apply(_this, qArr.concat([queryObject, coerce, false]));
+
+        if (ifComplex(qArr[0])) {
+          complex.apply(_this, [].concat(qArr).concat([queryObject, coerce]));
+        } else {
+          simple.apply(_this, [qArr, queryObject, false, coerce]);
+        }
       });
     }
 
     return queryObject;
   }
   /**
-   * Converts an array to an object
-   * @param {array} arr
+   * Converts an array to equivalent object
+   * @param {any[]} arr Any array
+   * @returns {any} Any object
    */
 
 
@@ -1469,24 +1541,27 @@
     return convertedObj;
   }
   /**
-   * Resolves an array to object if required
-   * @param {array} ob An array object
-   * @param {boolean} isNumber flag to test if next key is number
+   * Converts array to an object if required
+   * @param {any} ob Any object
+   * @param {booleab} isNextNumber Test for next key
+   * @returns {any} Any object
    */
 
 
   function resolve(ob, isNextNumber) {
-    return isNextNumber ? _typeof(ob) === TYPEOF_UNDEF ? [] : ob : toObject(ob);
+    if (_typeof(ob) === TYPEOF_UNDEF) return isNextNumber ? [] : obNull();
+    return isNextNumber ? ob : toObject(ob);
   }
   /**
    * Resolves the target object for next iteration
-   * @param {Object} ob current reference object
+   * @param {any} ob current reference object
    * @param {string} nextProp reference property in current object
+   * @returns {any} Resolved object for next iteration
    */
 
 
   function resolveObj(ob, nextProp) {
-    if (isPureObject(ob)) return {
+    if (isObject(ob)) return {
       ob: ob
     };
     if (isArr(ob) || _typeof(ob) === TYPEOF_UNDEF) return {
@@ -1499,69 +1574,81 @@
   }
   /**
    * Handles complex query parameters
-   * @param {string} key
-   * @param {string} value
-   * @param {Object} obj
+   * @param {string} key Query key
+   * @param {string} value Query value
+   * @param {Object} obj Query object
+   * @returns {void}
    */
 
 
-  function complex(key, value, obj, coercion) {
-    var match = key.match(REG_VARIABLE) || [];
+  function complex(key, value, obj, doCoerce) {
+    var match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
 
     if (match.length === 3) {
       var prop = match[1];
       var nextProp = match[2];
-      key = key.replace(REG_REPLACE_BRACKETS, EMPTY);
+      key = key.replace(/\[([^\[]*)\]/, '');
 
       if (ifComplex(key)) {
-        if (nextProp === EMPTY) nextProp = '0';
-        key = key.replace(REG_REPLACE_NEXTPROP, nextProp);
-        complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, coercion);
+        if (nextProp === '') nextProp = '0';
+        key = key.replace(/[^\[]+/, nextProp);
+        complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, doCoerce);
       } else if (nextProp) {
-        var resolved = resolveObj(obj[prop], nextProp);
-        obj[prop] = resolved.ob;
-        var coercedValue = coercion ? coerce(value) : value;
+        if (isSafe(prop) && isSafe(nextProp)) {
+          var _resolveObj = resolveObj(obj[prop], nextProp),
+              ob = _resolveObj.ob,
+              push = _resolveObj.push;
 
-        if (resolved.push) {
-          obj[prop].push(_defineProperty({}, nextProp, coercedValue));
-        } else {
-          obj[prop][nextProp] = coercedValue;
+          obj[prop] = ob;
+          var nextOb = push ? obNull() : obj[prop];
+          nextOb[nextProp] = coerce(value, !doCoerce);
+
+          if (push) {
+            obj[prop].push(nextOb);
+          }
         }
       } else {
-        simple(prop, value, obj, coercion, true);
+        simple([match[1], value], obj, true, doCoerce);
       }
     }
   }
   /**
    * Handles simple query
-   * @param {array} qArr
-   * @param {Object} queryObject
-   * @param {boolean} toArray
+   * @param {array} qArr Query list
+   * @param {Object} queryObject Query object
+   * @param {boolean} toArray Test for conversion to array
+   * @returns {void}
    */
 
 
-  function simple(key, value, queryObject, coercion, toArray) {
-    if (coercion) {
-      value = coerce(value);
-    }
+  function simple(qArr, queryObject, toArray, doCoerce) {
+    var key = qArr[0];
+    var value = qArr[1];
 
-    if (key in queryObject) {
-      queryObject[key] = isArr(queryObject[key]) ? queryObject[key] : [queryObject[key]];
-      queryObject[key].push(value);
-    } else {
-      queryObject[key] = toArray ? [value] : value;
+    if (isSafe(key)) {
+      value = coerce(value, !doCoerce);
+
+      if (hasOwn(queryObject, key)) {
+        queryObject[key] = isArr(queryObject[key]) ? queryObject[key] : [queryObject[key]];
+        queryObject[key].push(value);
+      } else {
+        queryObject[key] = toArray ? [value] : value;
+      }
     }
   }
   /**
-   * Restores values to their original type
-   * @param {string} value undefined or string value
+   * Converts input value to their appropriate types
+   * @param {any} value Input value
+   * @param {boolean} skip Test for skipping coercion
+   * @returns {any} Coerced value
    */
 
 
-  function coerce(value) {
-    if (value == null) return EMPTY;
-    if (_typeof(value) !== TYPEOF_STR) return value;
-    if (isNumber(value = trim(value))) return +value;
+  function coerce(value, skip) {
+    if (value == null) return '';
+    if (skip || _typeof(value) !== TYPEOF_STR) return value;
+    value = value.trim();
+    if (isNumber(value)) return +value;
 
     switch (value) {
       case 'null':
@@ -1608,7 +1695,7 @@
     var routeObject = assign({
       replace: replace,
       exec: exec
-    }, _typeof(route) === TYPEOF_STR ? {
+    }, _typeof$1(route) === TYPEOF_STR$1 ? {
       route: route
     } : route);
     replace = routeObject.replace;
@@ -1621,7 +1708,7 @@
         pageTitle = _routeObject$pageTitl === void 0 ? null : _routeObject$pageTitl;
     var routeParts = routeStr.split(QRY); // Check if query string is an object
 
-    if (isObject(queryString)) {
+    if (isObject$1(queryString)) {
       queryString = toQueryString(queryString);
     } // Resolve to URL query string if it's not explicitly passed
 
@@ -1654,7 +1741,7 @@
         trigger(this.config.context, VIRTUAL_PUSHSTATE, [{
           path: unmodifiedRoute,
           hash: hashRouting
-        }, UNDEF, this]);
+        }, UNDEF$1, this]);
       }
     } else {
       throw new TypeError(INVALID_ROUTE);
@@ -1682,7 +1769,7 @@
             subscriber.next(new RouterEvent([{
               path: path,
               hash: hash
-            }, UNDEF, _this]));
+            }, UNDEF$1, _this]));
           }
         }
 
@@ -1754,7 +1841,7 @@
     }, {
       key: "destroy",
       value: function destroy(callback) {
-        if (_typeof(callback) === TYPEOF_FUNC) {
+        if (_typeof$1(callback) === TYPEOF_FUNC) {
           callback();
         }
 
@@ -1805,9 +1892,9 @@
    */
 
   function route(routeStr, routerInstance, ignoreCase) {
-    if (_typeof(routerInstance) === TYPEOF_BOOL) {
+    if (_typeof$1(routerInstance) === TYPEOF_BOOL) {
       ignoreCase = routerInstance;
-      routerInstance = UNDEF;
+      routerInstance = UNDEF$1;
     }
 
     routeStr = trim(routeStr);
@@ -1933,7 +2020,7 @@
 
   function deepComparison(first, second, result) {
     each(oKeys(first), function (key) {
-      if (isObject(first[key]) && isObject(second[key])) {
+      if (isObject$1(first[key]) && isObject$1(second[key])) {
         deepComparison(first[key], second[key], result);
       } else {
         result["break"] = first[key] !== second[key];
@@ -1952,7 +2039,7 @@
     var deep = arguments.length > 1 ? arguments[1] : undefined;
     var cache = {};
 
-    if (_typeof(keys) === TYPEOF_BOOL) {
+    if (_typeof$1(keys) === TYPEOF_BOOL) {
       deep = keys;
       keys = CACHED_FIELDS;
     }
@@ -1962,7 +2049,7 @@
         var subn = observable.subscribe({
           next: function next(event) {
             each(keys, function (key) {
-              if (deep && isObject(event[key]) && isObject(cache[key])) {
+              if (deep && isObject$1(event[key]) && isObject$1(cache[key])) {
                 var result = {};
                 deepComparison(event[key], cache[key], result);
 
@@ -1989,7 +2076,7 @@
     };
   }
 
-  const name="silkrouter";const version="4.2.1";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",prod:"env-cmd rollup -c",build:"npm run test && npm run dev && npm run dev:serve && npm run prod",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.14.6","@babel/preset-env":"^7.14.7","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-commonjs":"^19.0.0","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^13.0.0","@types/jest":"^26.0.24","babel-eslint":"^10.1.0","env-cmd":"^10.1.0","gh-pages":"^3.2.3",jest:"^27.0.6",rollup:"^2.52.8","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2",rxjs:"^7.2.0"};const peerDependencies={rxjs:"^7.2.0"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"is-number":"^7.0.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,peerDependencies:peerDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies};
+  const name="silkrouter";const version="4.2.7";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",prod:"env-cmd rollup -c",build:"npm run test && npm run dev && npm run dev:serve && npm run prod",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const devDependencies={"@babel/core":"^7.14.6","@babel/preset-env":"^7.14.7","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-commonjs":"^19.0.0","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^13.0.0","@types/jest":"^26.0.24","babel-eslint":"^10.1.0","env-cmd":"^10.1.0","gh-pages":"^3.2.3",jest:"^27.0.6",rollup:"^2.52.8","rollup-plugin-eslint":"^7.0.0","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2",rxjs:"^7.2.0"};const peerDependencies={rxjs:"^7.2.0"};const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"deparam.js":"^3.0.3","is-number":"^7.0.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,devDependencies:devDependencies,peerDependencies:peerDependencies,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies};
 
   function q(selector) {
     var _document;

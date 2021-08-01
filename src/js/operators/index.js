@@ -1,4 +1,5 @@
 import { trim, isValidRoute, each, isObject, oKeys } from '../utils/utils';
+import queryDeparam from 'deparam.js';
 import { Observable } from 'rxjs';
 import {
   INVALID_ROUTE,
@@ -7,7 +8,6 @@ import {
   TYPEOF_BOOL,
 } from '../utils/constants';
 import { extractParams } from '../utils/params';
-import { deparam as queryDeparam } from '../utils/deparam';
 import Router from '../api/router';
 import { assign } from '../utils/assign';
 

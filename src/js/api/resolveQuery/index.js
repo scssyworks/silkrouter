@@ -1,7 +1,7 @@
+import deparam from 'deparam.js';
 import { trim } from '../../utils/utils';
 import { toQueryString } from '../../utils/query';
 import { assign } from '../../utils/assign';
-import { deparam } from '../../utils/deparam';
 import { QRY } from '../../utils/constants';
 
 /**
