@@ -1,11 +1,6 @@
 import isNumber from 'is-number';
-import {
-  EMPTY,
-  REG_PATHNAME,
-  TYPEOF_BOOL,
-  TYPEOF_OBJ,
-  TYPEOF_STR,
-} from './constants';
+import isObject from 'is-object';
+import { EMPTY, REG_PATHNAME, TYPEOF_BOOL, TYPEOF_STR } from './constants';
 
 /**
  * Shorthand for Array.isArray
@@ -23,22 +18,6 @@ export const oKeys = Object.keys;
  */
 export function trim(str) {
   return typeof str === TYPEOF_STR ? str.trim() : EMPTY;
-}
-
-/**
- * Checks if value is an object
- * @param {*} value Any type of value
- */
-export function isObject(value) {
-  return value && typeof value === TYPEOF_OBJ;
-}
-
-/**
- * Checks if key is a true object
- * @param {*} value Any type of value
- */
-export function isPureObject(value) {
-  return isObject(value) && !isArr(value);
 }
 
 /**

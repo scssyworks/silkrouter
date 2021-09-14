@@ -76,7 +76,8 @@
   },
   "homepage": "https://scssyworks.github.io/silkrouter",
   "dependencies": {
-    "deparam.js": "^3.0.3",
-    "is-number": "^7.0.0"
+    "deparam.js": "^3.0.4",
+    "is-number": "^7.0.0",
+    "is-object": "^1.0.2"
   }
 }

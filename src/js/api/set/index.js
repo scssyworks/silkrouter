@@ -1,3 +1,4 @@
+import isObject from 'is-object';
 import { trigger } from '../../utils/triggerEvent';
 import {
   VIRTUAL_PUSHSTATE,
@@ -9,7 +10,7 @@ import {
   REPLACE,
   PUSH,
 } from '../../utils/constants';
-import { isValidRoute, trim, isObject } from '../../utils/utils';
+import { isValidRoute, trim } from '../../utils/utils';
 import { toQueryString } from '../../utils/query';
 import resolveQuery from '../resolveQuery';
 import { assign } from '../../utils/assign';
