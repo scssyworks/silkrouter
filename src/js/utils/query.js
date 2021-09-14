@@ -1,5 +1,6 @@
+import isObject from 'is-object';
 import { AMP, EMPTY, TYPEOF_FUNC, TYPEOF_STR } from './constants';
-import { each, isArr, isObject } from './utils';
+import { each, isArr } from './utils';
 
 /**
  * Builds query string recursively

@@ -1,4 +1,5 @@
-import { trim, isValidRoute, each, isObject, oKeys } from '../utils/utils';
+import { trim, isValidRoute, each, oKeys } from '../utils/utils';
+import isObject from 'is-object';
 import queryDeparam from 'deparam.js';
 import { Observable } from 'rxjs';
 import {
