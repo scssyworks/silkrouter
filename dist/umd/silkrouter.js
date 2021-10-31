@@ -2,7 +2,7 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs')) :
   typeof define === 'function' && define.amd ? define(['exports', 'rxjs'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.silkrouter = {}, global.rxjs));
-}(this, (function (exports, rxjs) { 'use strict';
+})(this, (function (exports, rxjs) { 'use strict';
 
   function _typeof$1(obj) {
     "@babel/helpers - typeof";
@@ -345,7 +345,7 @@
    * Released under MIT license
    * @name Deparam.js
    * @author Sachin Singh <https://github.com/scssyworks/deparam.js>
-   * @version 3.0.4
+   * @version 3.0.5
    * @license MIT
    */
   function _typeof(obj) {
@@ -1047,5 +1047,5 @@
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 //# sourceMappingURL=silkrouter.js.map
