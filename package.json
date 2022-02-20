@@ -16,56 +16,21 @@
   },
   "author": "scssyworks",
   "license": "MIT",
-  "devDependencies": {
-    "@babel/core": "^7.16.0",
-    "@babel/preset-env": "^7.16.0",
-    "@rollup/plugin-babel": "^5.3.0",
-    "@rollup/plugin-commonjs": "^21.0.1",
-    "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.0.6",
-    "@types/jest": "^27.0.2",
-    "babel-eslint": "^10.1.0",
-    "env-cmd": "^10.1.0",
-    "gh-pages": "^3.2.3",
-    "jest": "^27.3.1",
-    "rollup": "^2.58.3",
-    "rollup-plugin-eslint": "^7.0.0",
-    "rollup-plugin-livereload": "^2.0.5",
-    "rollup-plugin-serve": "^1.1.0",
-    "rollup-plugin-terser": "^7.0.2",
-    "rxjs": "^7.4.0"
-  },
-  "peerDependencies": {
-    "rxjs": "^7.4.0"
-  },
   "keywords": [
     "router",
     "routing",
-    "single page apps",
-    "single page application",
-    "SPA",
-    "silk",
-    "silk router",
-    "history",
-    "browser",
-    "url",
-    "hash",
-    "hash routing",
-    "pushState",
-    "popstate",
-    "hashchange",
-    "observables",
-    "observer",
-    "subscriber",
-    "subscribe",
-    "subscription",
-    "rxjs",
-    "reactivex"
+    "browser router",
+    "library",
+    "framework",
+    "silkrouter",
+    "vanilla"
   ],
   "files": [
     "dist/umd/",
     "dist/esm/",
-    "src/typings/"
+    "src/typings/",
+    "LICENSE",
+    "README.md"
   ],
   "repository": {
     "type": "git",
@@ -79,5 +44,24 @@
     "deparam.js": "^3.0.5",
     "is-number": "^7.0.0",
     "is-object": "^1.0.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.17.5",
+    "@babel/preset-env": "^7.16.11",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@types/jest": "^27.4.0",
+    "babel-eslint": "^10.1.0",
+    "env-cmd": "^10.1.0",
+    "gh-pages": "^3.2.3",
+    "jest": "^27.5.1",
+    "rollup": "^2.67.3",
+    "rollup-plugin-eslint": "^7.0.0",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-serve": "^1.1.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rxjs": "^7.5.4"
   }
 }
