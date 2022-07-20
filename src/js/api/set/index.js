@@ -1,5 +1,5 @@
-import isObject from 'is-object';
-import { trigger } from '../../utils/triggerEvent';
+import { isObject } from "deparam.js";
+import { trigger } from "../../utils/triggerEvent";
 import {
   VIRTUAL_PUSHSTATE,
   INVALID_ROUTE,
@@ -9,11 +9,11 @@ import {
   QRY,
   REPLACE,
   PUSH,
-} from '../../utils/constants';
-import { isValidRoute, trim } from '../../utils/utils';
-import { toQueryString } from '../../utils/query';
-import resolveQuery from '../resolveQuery';
-import { assign } from '../../utils/assign';
+} from "../../utils/constants";
+import { isValidRoute, trim } from "../../utils/utils";
+import { toQueryString } from "../../utils/query";
+import resolveQuery from "../resolveQuery";
+import { assign } from "../../utils/assign";
 
 export default function set(route, replace, exec) {
   exec = exec || true;

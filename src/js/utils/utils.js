@@ -1,6 +1,5 @@
-import isNumber from 'is-number';
-import isObject from 'is-object';
-import { EMPTY, REG_PATHNAME, TYPEOF_BOOL, TYPEOF_STR } from './constants';
+import { isNumber, isObject } from "deparam.js";
+import { EMPTY, REG_PATHNAME, TYPEOF_BOOL, TYPEOF_STR } from "./constants";
 
 /**
  * Shorthand for Array.isArray
