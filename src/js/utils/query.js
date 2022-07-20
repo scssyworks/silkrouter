@@ -1,6 +1,6 @@
-import isObject from 'is-object';
-import { AMP, EMPTY, TYPEOF_FUNC, TYPEOF_STR } from './constants';
-import { each, isArr } from './utils';
+import { isObject } from "deparam.js";
+import { AMP, EMPTY, TYPEOF_FUNC, TYPEOF_STR } from "./constants";
+import { each, isArr } from "./utils";
 
 /**
  * Builds query string recursively

@@ -1,5 +1,5 @@
-import isObject from 'is-object';
-import { each } from './utils';
+import { isObject } from "deparam.js";
+import { each } from "./utils";
 
 /**
  * Inner loop function for assign
