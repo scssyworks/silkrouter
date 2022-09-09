@@ -1,13 +1,11 @@
 import { Observable } from 'rxjs';
-import { QRY, UNDEF } from '../../utils/constants';
-import { trim } from '../../utils/utils';
+import { UNDEF } from '../../utils/constants';
+import { getPath } from '../../utils/getPath';
 import RouterEvent from '../routerEvent';
 
 export default function callOnce(isDone) {
   const { hashRouting: hash, location, init } = this.config;
-  const path = trim(
-    hash ? location.hash.substring(1).split(QRY)[0] : location.pathname
-  );
+  const path = getPath(hash, location);
   return (observable) =>
     new Observable((subscriber) => {
       const subn = observable.subscribe(subscriber);

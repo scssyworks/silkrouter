@@ -1,6 +1,8 @@
-import { isObject } from "deparam.js";
-import { AMP, EMPTY, TYPEOF_FUNC, TYPEOF_STR } from "./constants";
-import { each, isArr } from "./utils";
+import { isObject } from 'deparam.js';
+import { AMP, EMPTY, TYPEOF_FUNC, TYPEOF_STR } from './constants';
+import { each, isArr } from './utils';
+
+export const encode = encodeURIComponent;
 
 /**
  * Builds query string recursively
@@ -15,7 +17,7 @@ function buildQuery(qsList, key, obj) {
       buildQuery(qsList, `${key}[${isArr(obj) ? EMPTY : obKey}]`, prop);
     });
   } else if (typeof obj !== TYPEOF_FUNC) {
-    qsList.push(`${encodeURIComponent(key)}=${encodeURIComponent(obj)}`);
+    qsList.push(`${encode(key)}=${encode(obj)}`);
   }
 }
 

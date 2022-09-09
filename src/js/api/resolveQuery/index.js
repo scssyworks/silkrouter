@@ -13,9 +13,9 @@ import { QRY } from '../../utils/constants';
 export default function resolveQuery(queryString, hashRouting) {
   const { location } = this.config;
   const search = trim(location.search && location.search.substring(1));
-  const existingQuery = hashRouting
-    ? trim(location.hash.split(QRY)[1])
-    : trim(search);
+  const existingQuery = trim(
+    hashRouting ? location.hash.split(QRY)[1] : search
+  );
   if (!existingQuery) return queryString;
   return toQueryString(
     assign(deparam(search), deparam(existingQuery), deparam(queryString))
