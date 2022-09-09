@@ -3,17 +3,11 @@ import { Observable, fromEvent } from 'rxjs';
 function _typeof$1(obj) {
   "@babel/helpers - typeof";
 
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    _typeof$1 = function (obj) {
-      return typeof obj;
-    };
-  } else {
-    _typeof$1 = function (obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-  }
-
-  return _typeof$1(obj);
+  return _typeof$1 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+    return typeof obj;
+  } : function (obj) {
+    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+  }, _typeof$1(obj);
 }
 
 function _classCallCheck(instance, Constructor) {
@@ -35,7 +29,19 @@ function _defineProperties(target, props) {
 function _createClass(Constructor, protoProps, staticProps) {
   if (protoProps) _defineProperties(Constructor.prototype, protoProps);
   if (staticProps) _defineProperties(Constructor, staticProps);
+  Object.defineProperty(Constructor, "prototype", {
+    writable: false
+  });
   return Constructor;
+}
+
+/**
+ * Function to extend an object with new and updated properties
+ * @private
+ * @returns {object}
+ */
+function assign() {
+  return Object.assign.apply(Object, arguments);
 }
 
 /**
@@ -44,7 +50,7 @@ function _createClass(Constructor, protoProps, staticProps) {
 var POP_STATE = 'popstate';
 var REG_ROUTE_PARAMS = /:[^/]+/g;
 var REG_PATHNAME = /^\/(?=[^?]*)/;
-var HISTORY_UNSUPPORTED = 'Current browser does not support history object';
+var HISTORY_UNSUPPORTED = 'History unsupported!';
 var INVALID_ROUTE = 'Route string is not a pure route';
 var VIRTUAL_PUSHSTATE = 'vpushstate';
 var CACHED_FIELDS = ['route', 'hashRouting', 'path', 'hash', 'search', 'hashSearch', 'data'];
@@ -67,297 +73,21 @@ function getGlobal() {
 }
 
 /*!
- * is-number <https://github.com/jonschlinkert/is-number>
- *
- * Copyright (c) 2014-present, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-var isNumber$1 = function(num) {
-  if (typeof num === 'number') {
-    return num - num === 0;
-  }
-  if (typeof num === 'string' && num.trim() !== '') {
-    return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
-  }
-  return false;
-};
-
-var isObject$1 = function isObject(x) {
-	return typeof x === 'object' && x !== null;
-};
-
-/**
- * Shorthand for Array.isArray
- */
-
-var isArr$1 = Array.isArray;
-/**
- * Shorthand for Object.keys
- */
-
-var oKeys = Object.keys;
-/**
- * Safely trims string
- * @param {string} str String
- */
-
-function trim(str) {
-  return _typeof$1(str) === TYPEOF_STR$1 ? str.trim() : EMPTY;
-}
-/**
- * Checks if given route is valid
- * @private
- * @param {string} route Route string
- */
-
-function isValidRoute(route) {
-  return _typeof$1(route) === TYPEOF_STR$1 && REG_PATHNAME.test(route);
-}
-/**
- * Loops over an array like object
- * @param {object} arrayObj Array or array like object
- * @param {function} callback Callback function
- */
-
-function each(arrayObj, callback) {
-  if (isObject$1(arrayObj)) {
-    var keys = oKeys(arrayObj);
-
-    for (var i = 0; i < keys.length; i++) {
-      var key = keys[i];
-      var cont = callback(arrayObj[key], isNumber$1(key) ? +key : key);
-
-      if (_typeof$1(cont) === TYPEOF_BOOL) {
-        if (cont) {
-          continue;
-        } else {
-          break;
-        }
-      }
-    }
-  }
-}
-
-var g$1 = getGlobal();
-
-if (_typeof$1(g$1.CustomEvent) === TYPEOF_UNDEF$1) {
-  var CustomEvent = function CustomEvent(event, params) {
-    params = params || {
-      bubbles: false,
-      cancelable: false,
-      detail: UNDEF$1
-    };
-    var evt = document.createEvent('CustomEvent');
-    evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-    return evt;
-  };
-
-  CustomEvent.prototype = g$1.Event.prototype;
-  g$1.CustomEvent = CustomEvent;
-} // Polyfill Array.from
-
-
-if (!Array.from) {
-  Array.from = function (arrayLike) {
-    if (isArr$1(arrayLike)) {
-      return arrayLike;
-    }
-
-    var arr = [];
-    each(arrayLike, function (value) {
-      arr.push(value);
-    });
-    return arr;
-  };
-}
-
-/**
- * Inner loop function for assign
- * @private
- * @param {object} ref Argument object
- * @param {object} target First object
- */
-
-function loopFunc(ref, target) {
-  if (isObject$1(ref)) {
-    each(ref, function (prop, key) {
-      target[key] = prop;
-    });
-  }
-}
-/**
- * Polyfill for Object.assign only smaller and with less features
- * @private
- * @returns {object}
- */
-
-
-function assign() {
-  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-    args[_key] = arguments[_key];
-  }
-
-  var target = isObject$1(args[0]) ? args[0] : {};
-  each(args, function (arg) {
-    loopFunc(arg, target);
-  });
-  return target;
-}
-
-var g = getGlobal();
-/**
- * Function to trigger custom event
- * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
- * @param {string} eventType Event type
- * @param {any[]} data Data to be passed to handler
- */
-
-function trigger(target, eventType, data) {
-  target = Array.from(target instanceof Node ? [target] : target);
-
-  if (target.length && _typeof$1(eventType) === TYPEOF_STR$1) {
-    each(target, function (el) {
-      var customEvent = new g.CustomEvent(eventType, {
-        bubbles: true,
-        cancelable: true,
-        detail: data || []
-      });
-      el.dispatchEvent(customEvent);
-    });
-  }
-}
-
-var RouterEvent = function RouterEvent(routeInfo, currentEvent) {
-  _classCallCheck(this, RouterEvent);
-
-  // Set relevant parameters
-  var routeObject = routeInfo[0];
-  var originalEvent = routeInfo[1];
-  var routerInstance = routeInfo[2];
-  var _routerInstance$confi = routerInstance.config,
-      location = _routerInstance$confi.location,
-      history = _routerInstance$confi.history;
-  this.route = routeObject.path;
-  this.hashRouting = routeObject.hash;
-  this.routerInstance = routerInstance;
-  this.virtualEvent = currentEvent || {};
-  this.originalEvent = originalEvent || {};
-  this.path = trim(location.pathname);
-  this.hash = location.hash;
-  this.search = trim(location.search.substring(1));
-  this.hashSearch = trim(location.hash && location.hash.split(QRY)[1]);
-  var state = this.originalEvent.state;
-  this.data = state && state.data || history.state && history.state.data;
-};
-
-function collate() {
-  var _this = this;
-
-  return function (observable) {
-    return new Observable(function (subscriber) {
-      var subn = observable.subscribe({
-        next: function next(event) {
-          var routerInstance = event.detail[2];
-
-          if (routerInstance === _this) {
-            subscriber.next(new RouterEvent(event.detail, event));
-          }
-        },
-        error: subscriber.error,
-        complete: subscriber.complete
-      });
-      return function () {
-        subn.unsubscribe();
-      };
-    });
-  };
-}
-
-function bindRouterEvents() {
-  var _this = this;
-
-  var _this$config = this.config,
-      context = _this$config.context,
-      location = _this$config.location,
-      hashRouting = _this$config.hashRouting;
-  this.popStateSubscription = fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
-    var path = trim(hashRouting ? location.hash.substring(1).split(QRY)[0] : location.pathname);
-
-    if (path) {
-      trigger(context, VIRTUAL_PUSHSTATE, [{
-        path: path,
-        hash: hashRouting
-      }, e, _this]);
-    }
-  });
-  this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(this));
-
-  if (hashRouting && !location.hash) {
-    this.set('/', true, false); // Replace current hash path without executing anythings
-  }
-}
-
-/**
- * Builds query string recursively
- * @private
- * @param {string[]} qsList List of query string key value pairs
- * @param {*} key Key
- * @param {*} obj Value
- */
-
-function buildQuery(qsList, key, obj) {
-  if (isObject$1(obj)) {
-    each(obj, function (prop, obKey) {
-      buildQuery(qsList, "".concat(key, "[").concat(isArr$1(obj) ? EMPTY : obKey, "]"), prop);
-    });
-  } else if (_typeof$1(obj) !== TYPEOF_FUNC) {
-    qsList.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
-  }
-}
-/**
- * Converts an object to a query string
- * @private
- * @param {object} obj Object which should be converted to a string
- * @returns {string}
- */
-
-
-function toQueryString(obj) {
-  var qsList = [];
-
-  if (isObject$1(obj)) {
-    each(obj, function (prop, key) {
-      buildQuery(qsList, key, prop);
-    });
-    return qsList.join(AMP);
-  }
-
-  return _typeof$1(obj) === TYPEOF_STR$1 ? obj : EMPTY;
-}
-
-/*!
  * Deparam plugin converts query string to a valid JavaScript object
  * Released under MIT license
  * @name Deparam.js
  * @author Sachin Singh <https://github.com/scssyworks/deparam.js>
- * @version 3.0.5
+ * @version 3.0.6
  * @license MIT
  */
 function _typeof(obj) {
   "@babel/helpers - typeof";
 
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    _typeof = function (obj) {
-      return typeof obj;
-    };
-  } else {
-    _typeof = function (obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-  }
-
-  return _typeof(obj);
+  return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+    return typeof obj;
+  } : function (obj) {
+    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+  }, _typeof(obj);
 }
 
 /*!
@@ -387,12 +117,12 @@ var UNDEF = void 0; // Results to undefined
 var TYPEOF_UNDEF = _typeof(UNDEF); // Typeof string
 
 
-var TYPEOF_STR = _typeof(''); // location var
+var TYPEOF_STR = _typeof(""); // location var
 
 
 var loc = (typeof window === "undefined" ? "undefined" : _typeof(window)) !== TYPEOF_UNDEF ? window.location : null; // Shorthand for built-ins
 
-var isArr = Array.isArray;
+var isArr$1 = Array.isArray;
 /**
  * Checks if current key is safe
  * @param {string} key Current key
@@ -400,7 +130,7 @@ var isArr = Array.isArray;
  */
 
 function isSafe(key) {
-  return ['__proto__', 'prototype'].indexOf(key) === -1;
+  return ["__proto__", "prototype"].indexOf(key) === -1;
 }
 /**
  * Shorthand for Object.prototype.hasOwnProperty
@@ -444,15 +174,15 @@ function lib(qs, coerce) {
   var _this = this;
 
   if (_typeof(qs) !== TYPEOF_STR) {
-    qs = loc ? loc.search : '';
+    qs = loc ? loc.search : "";
   }
 
-  qs = qs.substring(qs.charAt(0) === '?');
+  qs = qs.substring(qs.charAt(0) === "?");
   var queryObject = obNull();
 
   if (qs) {
-    qs.split('&').forEach(function (qq) {
-      var qArr = qq.split('=').map(function (part) {
+    qs.split("&").forEach(function (qq) {
+      var qArr = qq.split("=").map(function (part) {
         return decodeURIComponent(part);
       });
 
@@ -476,7 +206,7 @@ function lib(qs, coerce) {
 function toObject(arr) {
   var convertedObj = obNull();
 
-  if (isArr(arr)) {
+  if (isArr$1(arr)) {
     arr.forEach(function (value, index) {
       convertedObj[index] = value;
     });
@@ -505,10 +235,10 @@ function resolve(ob, isNextNumber) {
 
 
 function resolveObj(ob, nextProp) {
-  if (isObject(ob) && !isArr(ob)) return {
+  if (isObject(ob) && !isArr$1(ob)) return {
     ob: ob
   };
-  if (isArr(ob) || _typeof(ob) === TYPEOF_UNDEF) return {
+  if (isArr$1(ob) || _typeof(ob) === TYPEOF_UNDEF) return {
     ob: resolve(ob, isNumber(nextProp))
   };
   return {
@@ -531,10 +261,10 @@ function complex(key, value, obj, doCoerce) {
   if (match.length === 3) {
     var prop = match[1];
     var nextProp = match[2];
-    key = key.replace(/\[([^\[]*)\]/, '');
+    key = key.replace(/\[([^\[]*)\]/, "");
 
     if (ifComplex(key)) {
-      if (nextProp === '') nextProp = '0';
+      if (nextProp === "") nextProp = "0";
       key = key.replace(/[^\[]+/, nextProp);
       complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, doCoerce);
     } else if (nextProp) {
@@ -573,7 +303,7 @@ function simple(qArr, queryObject, toArray, doCoerce) {
     value = coerce(value, !doCoerce);
 
     if (hasOwn(queryObject, key)) {
-      queryObject[key] = isArr(queryObject[key]) ? queryObject[key] : [queryObject[key]];
+      queryObject[key] = isArr$1(queryObject[key]) ? queryObject[key] : [queryObject[key]];
       queryObject[key].push(value);
     } else {
       queryObject[key] = toArray ? [value] : value;
@@ -591,7 +321,7 @@ function simple(qArr, queryObject, toArray, doCoerce) {
 function coerce(value, skip) {
   // eslint-disable-next-line
   if (value == null) {
-    return '';
+    return "";
   }
 
   if (skip || _typeof(value) !== TYPEOF_STR) {
@@ -605,24 +335,209 @@ function coerce(value, skip) {
   }
 
   switch (value) {
-    case 'null':
+    case "null":
       return null;
 
     case TYPEOF_UNDEF:
       return UNDEF;
 
-    case 'true':
+    case "true":
       return true;
 
-    case 'false':
+    case "false":
       return false;
 
-    case 'NaN':
+    case "NaN":
       return NaN;
 
     default:
       return value;
   }
+}
+
+/**
+ * Shorthand for Array.isArray
+ */
+
+var isArr = Array.isArray;
+/**
+ * Shorthand for Object.keys
+ */
+
+var oKeys = Object.keys;
+/**
+ * Safely trims string
+ * @param {string} str String
+ */
+
+function trim(str) {
+  return _typeof$1(str) === TYPEOF_STR$1 ? str.trim() : EMPTY;
+}
+/**
+ * Checks if given route is valid
+ * @private
+ * @param {string} route Route string
+ */
+
+function isValidRoute(route) {
+  return REG_PATHNAME.test(route);
+}
+/**
+ * Loops over an array like object
+ * @param {object} arrayObj Array or array like object
+ * @param {function} callback Callback function
+ */
+
+function each(arrayObj, callback) {
+  if (isObject(arrayObj)) {
+    var keys = oKeys(arrayObj);
+
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      var cont = callback(arrayObj[key], isNumber(key) ? +key : key);
+
+      if (_typeof$1(cont) === TYPEOF_BOOL) {
+        if (cont) {
+          continue;
+        } else {
+          break;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Function to trigger custom event
+ * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
+ * @param {string} eventType Event type
+ * @param {any[]} data Data to be passed to handler
+ */
+
+function trigger(target, eventType, data) {
+  target = Array.from(target instanceof Node ? [target] : target);
+
+  if (target.length && _typeof$1(eventType) === TYPEOF_STR$1) {
+    each(target, function (el) {
+      var customEvent = new getGlobal().CustomEvent(eventType, {
+        bubbles: true,
+        cancelable: true,
+        detail: data || []
+      });
+      el.dispatchEvent(customEvent);
+    });
+  }
+}
+
+var RouterEvent = /*#__PURE__*/_createClass(function RouterEvent(routeInfo, currentEvent) {
+  _classCallCheck(this, RouterEvent);
+
+  // Set relevant parameters
+  var routeObject = routeInfo[0];
+  var originalEvent = routeInfo[1];
+  var routerInstance = routeInfo[2];
+  var _routerInstance$confi = routerInstance.config,
+      location = _routerInstance$confi.location,
+      history = _routerInstance$confi.history;
+  this.route = routeObject.path;
+  this.hashRouting = routeObject.hash;
+  this.routerInstance = routerInstance;
+  this.virtualEvent = currentEvent || {};
+  this.originalEvent = originalEvent || {};
+  this.path = trim(location.pathname);
+  this.hash = location.hash;
+  this.search = trim(location.search.substring(1));
+  this.hashSearch = trim(location.hash && location.hash.split(QRY)[1]);
+  var state = this.originalEvent.state;
+  this.data = state && state.data || history.state && history.state.data;
+});
+
+function collate() {
+  var _this = this;
+
+  return function (observable) {
+    return new Observable(function (subscriber) {
+      var subn = observable.subscribe({
+        next: function next(event) {
+          var routerInstance = event.detail[2];
+
+          if (routerInstance === _this) {
+            subscriber.next(new RouterEvent(event.detail, event));
+          }
+        },
+        error: subscriber.error,
+        complete: subscriber.complete
+      });
+      return function () {
+        subn.unsubscribe();
+      };
+    });
+  };
+}
+
+var getPath = function getPath(isHash, location) {
+  return trim(isHash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
+};
+
+function bindRouterEvents(inst) {
+  var _inst$config = inst.config,
+      context = _inst$config.context,
+      location = _inst$config.location,
+      hash = _inst$config.hashRouting;
+  inst.popStateSubscription = fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
+    var path = getPath(hash, location);
+
+    if (path) {
+      trigger(context, VIRTUAL_PUSHSTATE, [{
+        path: path,
+        hash: hash
+      }, e, inst]);
+    }
+  });
+  inst.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(inst));
+
+  if (hash && !location.hash) {
+    inst.set('/', true, false); // Replace current hash path without executing anythings
+  }
+}
+
+var encode = encodeURIComponent;
+/**
+ * Builds query string recursively
+ * @private
+ * @param {string[]} qsList List of query string key value pairs
+ * @param {*} key Key
+ * @param {*} obj Value
+ */
+
+function buildQuery(qsList, key, obj) {
+  if (isObject(obj)) {
+    each(obj, function (prop, obKey) {
+      buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? EMPTY : obKey, "]"), prop);
+    });
+  } else if (_typeof$1(obj) !== TYPEOF_FUNC) {
+    qsList.push("".concat(encode(key), "=").concat(encode(obj)));
+  }
+}
+/**
+ * Converts an object to a query string
+ * @private
+ * @param {object} obj Object which should be converted to a string
+ * @returns {string}
+ */
+
+
+function toQueryString(obj) {
+  var qsList = [];
+
+  if (isObject(obj)) {
+    each(obj, function (prop, key) {
+      buildQuery(qsList, key, prop);
+    });
+    return qsList.join(AMP);
+  }
+
+  return _typeof$1(obj) === TYPEOF_STR$1 ? obj : EMPTY;
 }
 
 /**
@@ -635,7 +550,7 @@ function coerce(value, skip) {
 function resolveQuery(queryString, hashRouting) {
   var location = this.config.location;
   var search = trim(location.search && location.search.substring(1));
-  var existingQuery = hashRouting ? trim(location.hash.split(QRY)[1]) : trim(search);
+  var existingQuery = trim(hashRouting ? location.hash.split(QRY)[1] : search);
   if (!existingQuery) return queryString;
   return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
 }
@@ -662,7 +577,7 @@ function set(route, replace, exec) {
       pageTitle = _routeObject$pageTitl === void 0 ? null : _routeObject$pageTitl;
   var routeParts = routeStr.split(QRY); // Check if query string is an object
 
-  if (isObject$1(queryString)) {
+  if (isObject(queryString)) {
     queryString = toQueryString(queryString);
   } // Resolve to URL query string if it's not explicitly passed
 
@@ -711,7 +626,7 @@ function callOnce(isDone) {
       hash = _this$config.hashRouting,
       location = _this$config.location,
       init = _this$config.init;
-  var path = trim(hash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
+  var path = getPath(hash, location);
   return function (observable) {
     return new Observable(function (subscriber) {
       var subn = observable.subscribe(subscriber);
@@ -762,7 +677,7 @@ var Router = /*#__PURE__*/function () {
 
     }, config || {}));
     this.__paths__ = [];
-    bindRouterEvents.apply(this);
+    bindRouterEvents(this);
   }
 
   _createClass(Router, [{
@@ -779,9 +694,9 @@ var Router = /*#__PURE__*/function () {
   }, {
     key: "subscribe",
     value: function subscribe() {
-      var _this$listeners$pipe;
+      var _this$pipe;
 
-      return (_this$listeners$pipe = this.listeners.pipe(callOnce.apply(this))).subscribe.apply(_this$listeners$pipe, arguments);
+      return (_this$pipe = this.pipe()).subscribe.apply(_this$pipe, arguments);
     }
   }, {
     key: "set",
@@ -974,7 +889,7 @@ function noMatch(routerInstance) {
 
 function deepComparison(first, second, result) {
   each(oKeys(first), function (key) {
-    if (isObject$1(first[key]) && isObject$1(second[key])) {
+    if (isObject(first[key]) && isObject(second[key])) {
       deepComparison(first[key], second[key], result);
     } else {
       result["break"] = first[key] !== second[key];
@@ -1003,7 +918,7 @@ function cache() {
       var subn = observable.subscribe({
         next: function next(event) {
           each(keys, function (key) {
-            if (deep && isObject$1(event[key]) && isObject$1(cache[key])) {
+            if (deep && isObject(event[key]) && isObject(cache[key])) {
               var result = {};
               deepComparison(event[key], cache[key], result);
 
