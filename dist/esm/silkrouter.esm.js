@@ -36,12 +36,21 @@ function _createClass(Constructor, protoProps, staticProps) {
 }
 
 /**
+ * Function to extend an object with new and updated properties
+ * @private
+ * @returns {object}
+ */
+function assign() {
+  return Object.assign.apply(Object, arguments);
+}
+
+/**
  * Router constants
  */
 var POP_STATE = 'popstate';
 var REG_ROUTE_PARAMS = /:[^/]+/g;
 var REG_PATHNAME = /^\/(?=[^?]*)/;
-var HISTORY_UNSUPPORTED = 'Current browser does not support history object';
+var HISTORY_UNSUPPORTED = 'History unsupported!';
 var INVALID_ROUTE = 'Route string is not a pure route';
 var VIRTUAL_PUSHSTATE = 'vpushstate';
 var CACHED_FIELDS = ['route', 'hashRouting', 'path', 'hash', 'search', 'hashSearch', 'data'];
@@ -371,7 +380,7 @@ function trim(str) {
  */
 
 function isValidRoute(route) {
-  return _typeof$1(route) === TYPEOF_STR$1 && REG_PATHNAME.test(route);
+  return REG_PATHNAME.test(route);
 }
 /**
  * Loops over an array like object
@@ -398,73 +407,6 @@ function each(arrayObj, callback) {
   }
 }
 
-var g$1 = getGlobal();
-
-if (_typeof$1(g$1.CustomEvent) === TYPEOF_UNDEF$1) {
-  var CustomEvent = function CustomEvent(event, params) {
-    params = params || {
-      bubbles: false,
-      cancelable: false,
-      detail: UNDEF$1
-    };
-    var evt = document.createEvent('CustomEvent');
-    evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-    return evt;
-  };
-
-  CustomEvent.prototype = g$1.Event.prototype;
-  g$1.CustomEvent = CustomEvent;
-} // Polyfill Array.from
-
-
-if (!Array.from) {
-  Array.from = function (arrayLike) {
-    if (isArr(arrayLike)) {
-      return arrayLike;
-    }
-
-    var arr = [];
-    each(arrayLike, function (value) {
-      arr.push(value);
-    });
-    return arr;
-  };
-}
-
-/**
- * Inner loop function for assign
- * @private
- * @param {object} ref Argument object
- * @param {object} target First object
- */
-
-function loopFunc(ref, target) {
-  if (isObject(ref)) {
-    each(ref, function (prop, key) {
-      target[key] = prop;
-    });
-  }
-}
-/**
- * Polyfill for Object.assign only smaller and with less features
- * @private
- * @returns {object}
- */
-
-
-function assign() {
-  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-    args[_key] = arguments[_key];
-  }
-
-  var target = isObject(args[0]) ? args[0] : {};
-  each(args, function (arg) {
-    loopFunc(arg, target);
-  });
-  return target;
-}
-
-var g = getGlobal();
 /**
  * Function to trigger custom event
  * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
@@ -477,7 +419,7 @@ function trigger(target, eventType, data) {
 
   if (target.length && _typeof$1(eventType) === TYPEOF_STR$1) {
     each(target, function (el) {
-      var customEvent = new g.CustomEvent(eventType, {
+      var customEvent = new getGlobal().CustomEvent(eventType, {
         bubbles: true,
         cancelable: true,
         detail: data || []
@@ -533,30 +475,33 @@ function collate() {
   };
 }
 
-function bindRouterEvents() {
-  var _this = this;
+var getPath = function getPath(isHash, location) {
+  return trim(isHash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
+};
 
-  var _this$config = this.config,
-      context = _this$config.context,
-      location = _this$config.location,
-      hashRouting = _this$config.hashRouting;
-  this.popStateSubscription = fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
-    var path = trim(hashRouting ? location.hash.substring(1).split(QRY)[0] : location.pathname);
+function bindRouterEvents(inst) {
+  var _inst$config = inst.config,
+      context = _inst$config.context,
+      location = _inst$config.location,
+      hash = _inst$config.hashRouting;
+  inst.popStateSubscription = fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
+    var path = getPath(hash, location);
 
     if (path) {
       trigger(context, VIRTUAL_PUSHSTATE, [{
         path: path,
-        hash: hashRouting
-      }, e, _this]);
+        hash: hash
+      }, e, inst]);
     }
   });
-  this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(this));
+  inst.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(inst));
 
-  if (hashRouting && !location.hash) {
-    this.set('/', true, false); // Replace current hash path without executing anythings
+  if (hash && !location.hash) {
+    inst.set('/', true, false); // Replace current hash path without executing anythings
   }
 }
 
+var encode = encodeURIComponent;
 /**
  * Builds query string recursively
  * @private
@@ -571,7 +516,7 @@ function buildQuery(qsList, key, obj) {
       buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? EMPTY : obKey, "]"), prop);
     });
   } else if (_typeof$1(obj) !== TYPEOF_FUNC) {
-    qsList.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
+    qsList.push("".concat(encode(key), "=").concat(encode(obj)));
   }
 }
 /**
@@ -605,7 +550,7 @@ function toQueryString(obj) {
 function resolveQuery(queryString, hashRouting) {
   var location = this.config.location;
   var search = trim(location.search && location.search.substring(1));
-  var existingQuery = hashRouting ? trim(location.hash.split(QRY)[1]) : trim(search);
+  var existingQuery = trim(hashRouting ? location.hash.split(QRY)[1] : search);
   if (!existingQuery) return queryString;
   return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
 }
@@ -681,7 +626,7 @@ function callOnce(isDone) {
       hash = _this$config.hashRouting,
       location = _this$config.location,
       init = _this$config.init;
-  var path = trim(hash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
+  var path = getPath(hash, location);
   return function (observable) {
     return new Observable(function (subscriber) {
       var subn = observable.subscribe(subscriber);
@@ -732,7 +677,7 @@ var Router = /*#__PURE__*/function () {
 
     }, config || {}));
     this.__paths__ = [];
-    bindRouterEvents.apply(this);
+    bindRouterEvents(this);
   }
 
   _createClass(Router, [{
@@ -749,9 +694,9 @@ var Router = /*#__PURE__*/function () {
   }, {
     key: "subscribe",
     value: function subscribe() {
-      var _this$listeners$pipe;
+      var _this$pipe;
 
-      return (_this$listeners$pipe = this.listeners.pipe(callOnce.apply(this))).subscribe.apply(_this$listeners$pipe, arguments);
+      return (_this$pipe = this.pipe()).subscribe.apply(_this$pipe, arguments);
     }
   }, {
     key: "set",
