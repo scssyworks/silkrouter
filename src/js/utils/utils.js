@@ -1,5 +1,5 @@
-import { isNumber, isObject } from "deparam.js";
-import { EMPTY, REG_PATHNAME, TYPEOF_BOOL, TYPEOF_STR } from "./constants";
+import { isNumber, isObject } from 'deparam.js';
+import { EMPTY, REG_PATHNAME, TYPEOF_BOOL, TYPEOF_STR } from './constants';
 
 /**
  * Shorthand for Array.isArray
@@ -25,7 +25,7 @@ export function trim(str) {
  * @param {string} route Route string
  */
 export function isValidRoute(route) {
-  return typeof route === TYPEOF_STR && REG_PATHNAME.test(route);
+  return REG_PATHNAME.test(route);
 }
 
 /**

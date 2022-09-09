@@ -72,432 +72,12 @@
   }
 
   /**
-   * Router constants
-   */
-  var POP_STATE = 'popstate';
-  var REG_ROUTE_PARAMS = /:[^/]+/g;
-  var REG_PATHNAME = /^\/(?=[^?]*)/;
-  var HISTORY_UNSUPPORTED = 'Current browser does not support history object';
-  var INVALID_ROUTE = 'Route string is not a pure route';
-  var VIRTUAL_PUSHSTATE = 'vpushstate';
-  var CACHED_FIELDS = ['route', 'hashRouting', 'path', 'hash', 'search', 'hashSearch', 'data'];
-  var AMP = '&';
-  var QRY = '?';
-  var EMPTY = '';
-  var UNDEF$1 = void 0;
-  var TYPEOF_STR$1 = _typeof$1(EMPTY);
-  var TYPEOF_BOOL = _typeof$1(true);
-  var TYPEOF_UNDEF$1 = _typeof$1(UNDEF$1);
-  _typeof$1({});
-  _typeof$1(0);
-  var TYPEOF_FUNC = _typeof$1(function () {});
-  var STATE = 'State';
-  var PUSH = "push".concat(STATE);
-  var REPLACE = "replace".concat(STATE);
-
-  function getGlobal() {
-    return (typeof globalThis === "undefined" ? "undefined" : _typeof$1(globalThis)) !== TYPEOF_UNDEF$1 ? globalThis : global || self;
-  }
-
-  /*!
-   * Deparam plugin converts query string to a valid JavaScript object
-   * Released under MIT license
-   * @name Deparam.js
-   * @author Sachin Singh <https://github.com/scssyworks/deparam.js>
-   * @version 3.0.6
-   * @license MIT
-   */
-  function _typeof(obj) {
-    "@babel/helpers - typeof";
-
-    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-      return typeof obj;
-    } : function (obj) {
-      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    }, _typeof(obj);
-  }
-
-  /*!
-   * is-number <https://github.com/jonschlinkert/is-number>
-   *
-   * Copyright (c) 2014-present, Jon Schlinkert.
-   * Released under the MIT License.
-   */
-
-  var isNumber = function(num) {
-    if (typeof num === 'number') {
-      return num - num === 0;
-    }
-    if (typeof num === 'string' && num.trim() !== '') {
-      return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
-    }
-    return false;
-  };
-
-  var isObject = function isObject(x) {
-  	return typeof x === 'object' && x !== null;
-  };
-
-  var UNDEF = void 0; // Results to undefined
-  // Typeof undefined
-
-  var TYPEOF_UNDEF = _typeof(UNDEF); // Typeof string
-
-
-  var TYPEOF_STR = _typeof(""); // location var
-
-
-  var loc = (typeof window === "undefined" ? "undefined" : _typeof(window)) !== TYPEOF_UNDEF ? window.location : null; // Shorthand for built-ins
-
-  var isArr$1 = Array.isArray;
-  /**
-   * Checks if current key is safe
-   * @param {string} key Current key
-   * @returns {boolean}
-   */
-
-  function isSafe(key) {
-    return ["__proto__", "prototype"].indexOf(key) === -1;
-  }
-  /**
-   * Shorthand for Object.prototype.hasOwnProperty
-   * @param {any} obj Any object
-   * @param {string} key key
-   * @returns {boolean} true or false if object has the property
-   */
-
-
-  function hasOwn(obj, key) {
-    return Object.prototype.hasOwnProperty.call(obj, key);
-  }
-  /**
-   * Returns true of input query string is complex
-   * @param {string} q Query string
-   * @returns {boolean} true or false
-   */
-
-
-  function ifComplex(q) {
-    return /\[/.test(q);
-  }
-  /**
-   * Returns an object without a prototype
-   * @returns {{[key in string|number]: any}} Object without __proto__
-   */
-
-
-  function obNull() {
-    return Object.create(null);
-  }
-  /**
-   * Returns a parsed query object
-   * @param {string} qs Query string
-   * @param {boolean} coerce Coerce values
-   * @returns {{[key in string|number]: any}} Query object
-   */
-
-
-  function lib(qs, coerce) {
-    var _this = this;
-
-    if (_typeof(qs) !== TYPEOF_STR) {
-      qs = loc ? loc.search : "";
-    }
-
-    qs = qs.substring(qs.charAt(0) === "?");
-    var queryObject = obNull();
-
-    if (qs) {
-      qs.split("&").forEach(function (qq) {
-        var qArr = qq.split("=").map(function (part) {
-          return decodeURIComponent(part);
-        });
-
-        if (ifComplex(qArr[0])) {
-          complex.apply(_this, [].concat(qArr).concat([queryObject, coerce]));
-        } else {
-          simple.apply(_this, [qArr, queryObject, false, coerce]);
-        }
-      });
-    }
-
-    return queryObject;
-  }
-  /**
-   * Converts an array to equivalent object
-   * @param {any[]} arr Any array
-   * @returns {any} Any object
-   */
-
-
-  function toObject(arr) {
-    var convertedObj = obNull();
-
-    if (isArr$1(arr)) {
-      arr.forEach(function (value, index) {
-        convertedObj[index] = value;
-      });
-    }
-
-    return convertedObj;
-  }
-  /**
-   * Converts array to an object if required
-   * @param {any} ob Any object
-   * @param {booleab} isNextNumber Test for next key
-   * @returns {any} Any object
-   */
-
-
-  function resolve(ob, isNextNumber) {
-    if (_typeof(ob) === TYPEOF_UNDEF) return isNextNumber ? [] : obNull();
-    return isNextNumber ? ob : toObject(ob);
-  }
-  /**
-   * Resolves the target object for next iteration
-   * @param {any} ob current reference object
-   * @param {string} nextProp reference property in current object
-   * @returns {any} Resolved object for next iteration
-   */
-
-
-  function resolveObj(ob, nextProp) {
-    if (isObject(ob) && !isArr$1(ob)) return {
-      ob: ob
-    };
-    if (isArr$1(ob) || _typeof(ob) === TYPEOF_UNDEF) return {
-      ob: resolve(ob, isNumber(nextProp))
-    };
-    return {
-      ob: [ob],
-      push: ob !== null
-    };
-  }
-  /**
-   * Handles complex query parameters
-   * @param {string} key Query key
-   * @param {string} value Query value
-   * @param {Object} obj Query object
-   * @returns {void}
-   */
-
-
-  function complex(key, value, obj, doCoerce) {
-    var match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
-
-    if (match.length === 3) {
-      var prop = match[1];
-      var nextProp = match[2];
-      key = key.replace(/\[([^\[]*)\]/, "");
-
-      if (ifComplex(key)) {
-        if (nextProp === "") nextProp = "0";
-        key = key.replace(/[^\[]+/, nextProp);
-        complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, doCoerce);
-      } else if (nextProp) {
-        if (isSafe(prop) && isSafe(nextProp)) {
-          var _resolveObj = resolveObj(obj[prop], nextProp),
-              ob = _resolveObj.ob,
-              push = _resolveObj.push;
-
-          obj[prop] = ob;
-          var nextOb = push ? obNull() : obj[prop];
-          nextOb[nextProp] = coerce(value, !doCoerce);
-
-          if (push) {
-            obj[prop].push(nextOb);
-          }
-        }
-      } else {
-        simple([match[1], value], obj, true, doCoerce);
-      }
-    }
-  }
-  /**
-   * Handles simple query
-   * @param {array} qArr Query list
-   * @param {Object} queryObject Query object
-   * @param {boolean} toArray Test for conversion to array
-   * @returns {void}
-   */
-
-
-  function simple(qArr, queryObject, toArray, doCoerce) {
-    var key = qArr[0];
-    var value = qArr[1];
-
-    if (isSafe(key)) {
-      value = coerce(value, !doCoerce);
-
-      if (hasOwn(queryObject, key)) {
-        queryObject[key] = isArr$1(queryObject[key]) ? queryObject[key] : [queryObject[key]];
-        queryObject[key].push(value);
-      } else {
-        queryObject[key] = toArray ? [value] : value;
-      }
-    }
-  }
-  /**
-   * Converts input value to their appropriate types
-   * @param {any} value Input value
-   * @param {boolean} skip Test for skipping coercion
-   * @returns {any} Coerced value
-   */
-
-
-  function coerce(value, skip) {
-    // eslint-disable-next-line
-    if (value == null) {
-      return "";
-    }
-
-    if (skip || _typeof(value) !== TYPEOF_STR) {
-      return value;
-    }
-
-    value = value.trim();
-
-    if (isNumber(value)) {
-      return +value;
-    }
-
-    switch (value) {
-      case "null":
-        return null;
-
-      case TYPEOF_UNDEF:
-        return UNDEF;
-
-      case "true":
-        return true;
-
-      case "false":
-        return false;
-
-      case "NaN":
-        return NaN;
-
-      default:
-        return value;
-    }
-  }
-
-  /**
-   * Shorthand for Array.isArray
-   */
-
-  var isArr = Array.isArray;
-  /**
-   * Shorthand for Object.keys
-   */
-
-  var oKeys = Object.keys;
-  /**
-   * Safely trims string
-   * @param {string} str String
-   */
-
-  function trim(str) {
-    return _typeof$1(str) === TYPEOF_STR$1 ? str.trim() : EMPTY;
-  }
-  /**
-   * Checks if given route is valid
-   * @private
-   * @param {string} route Route string
-   */
-
-  function isValidRoute(route) {
-    return _typeof$1(route) === TYPEOF_STR$1 && REG_PATHNAME.test(route);
-  }
-  /**
-   * Loops over an array like object
-   * @param {object} arrayObj Array or array like object
-   * @param {function} callback Callback function
-   */
-
-  function each(arrayObj, callback) {
-    if (isObject(arrayObj)) {
-      var keys = oKeys(arrayObj);
-
-      for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        var cont = callback(arrayObj[key], isNumber(key) ? +key : key);
-
-        if (_typeof$1(cont) === TYPEOF_BOOL) {
-          if (cont) {
-            continue;
-          } else {
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  var g$1 = getGlobal();
-
-  if (_typeof$1(g$1.CustomEvent) === TYPEOF_UNDEF$1) {
-    var CustomEvent = function CustomEvent(event, params) {
-      params = params || {
-        bubbles: false,
-        cancelable: false,
-        detail: UNDEF$1
-      };
-      var evt = document.createEvent('CustomEvent');
-      evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-      return evt;
-    };
-
-    CustomEvent.prototype = g$1.Event.prototype;
-    g$1.CustomEvent = CustomEvent;
-  } // Polyfill Array.from
-
-
-  if (!Array.from) {
-    Array.from = function (arrayLike) {
-      if (isArr(arrayLike)) {
-        return arrayLike;
-      }
-
-      var arr = [];
-      each(arrayLike, function (value) {
-        arr.push(value);
-      });
-      return arr;
-    };
-  }
-
-  /**
-   * Inner loop function for assign
-   * @private
-   * @param {object} ref Argument object
-   * @param {object} target First object
-   */
-
-  function loopFunc(ref, target) {
-    if (isObject(ref)) {
-      each(ref, function (prop, key) {
-        target[key] = prop;
-      });
-    }
-  }
-  /**
-   * Polyfill for Object.assign only smaller and with less features
+   * Function to extend an object with new and updated properties
    * @private
    * @returns {object}
    */
-
-
   function assign() {
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    var target = isObject(args[0]) ? args[0] : {};
-    each(args, function (arg) {
-      loopFunc(arg, target);
-    });
-    return target;
+    return Object.assign.apply(Object, arguments);
   }
 
   /******************************************************************************
@@ -2481,7 +2061,369 @@
 
   new Observable(noop);
 
-  var g = getGlobal();
+  /**
+   * Router constants
+   */
+  var POP_STATE = 'popstate';
+  var REG_ROUTE_PARAMS = /:[^/]+/g;
+  var REG_PATHNAME = /^\/(?=[^?]*)/;
+  var HISTORY_UNSUPPORTED = 'History unsupported!';
+  var INVALID_ROUTE = 'Route string is not a pure route';
+  var VIRTUAL_PUSHSTATE = 'vpushstate';
+  var CACHED_FIELDS = ['route', 'hashRouting', 'path', 'hash', 'search', 'hashSearch', 'data'];
+  var AMP = '&';
+  var QRY = '?';
+  var EMPTY = '';
+  var UNDEF$1 = void 0;
+  var TYPEOF_STR$1 = _typeof$1(EMPTY);
+  var TYPEOF_BOOL = _typeof$1(true);
+  var TYPEOF_UNDEF$1 = _typeof$1(UNDEF$1);
+  _typeof$1({});
+  _typeof$1(0);
+  var TYPEOF_FUNC = _typeof$1(function () {});
+  var STATE = 'State';
+  var PUSH = "push".concat(STATE);
+  var REPLACE = "replace".concat(STATE);
+
+  function getGlobal() {
+    return (typeof globalThis === "undefined" ? "undefined" : _typeof$1(globalThis)) !== TYPEOF_UNDEF$1 ? globalThis : global || self;
+  }
+
+  /*!
+   * Deparam plugin converts query string to a valid JavaScript object
+   * Released under MIT license
+   * @name Deparam.js
+   * @author Sachin Singh <https://github.com/scssyworks/deparam.js>
+   * @version 3.0.6
+   * @license MIT
+   */
+  function _typeof(obj) {
+    "@babel/helpers - typeof";
+
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    }, _typeof(obj);
+  }
+
+  /*!
+   * is-number <https://github.com/jonschlinkert/is-number>
+   *
+   * Copyright (c) 2014-present, Jon Schlinkert.
+   * Released under the MIT License.
+   */
+
+  var isNumber = function(num) {
+    if (typeof num === 'number') {
+      return num - num === 0;
+    }
+    if (typeof num === 'string' && num.trim() !== '') {
+      return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+    }
+    return false;
+  };
+
+  var isObject = function isObject(x) {
+  	return typeof x === 'object' && x !== null;
+  };
+
+  var UNDEF = void 0; // Results to undefined
+  // Typeof undefined
+
+  var TYPEOF_UNDEF = _typeof(UNDEF); // Typeof string
+
+
+  var TYPEOF_STR = _typeof(""); // location var
+
+
+  var loc = (typeof window === "undefined" ? "undefined" : _typeof(window)) !== TYPEOF_UNDEF ? window.location : null; // Shorthand for built-ins
+
+  var isArr$1 = Array.isArray;
+  /**
+   * Checks if current key is safe
+   * @param {string} key Current key
+   * @returns {boolean}
+   */
+
+  function isSafe(key) {
+    return ["__proto__", "prototype"].indexOf(key) === -1;
+  }
+  /**
+   * Shorthand for Object.prototype.hasOwnProperty
+   * @param {any} obj Any object
+   * @param {string} key key
+   * @returns {boolean} true or false if object has the property
+   */
+
+
+  function hasOwn(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+  }
+  /**
+   * Returns true of input query string is complex
+   * @param {string} q Query string
+   * @returns {boolean} true or false
+   */
+
+
+  function ifComplex(q) {
+    return /\[/.test(q);
+  }
+  /**
+   * Returns an object without a prototype
+   * @returns {{[key in string|number]: any}} Object without __proto__
+   */
+
+
+  function obNull() {
+    return Object.create(null);
+  }
+  /**
+   * Returns a parsed query object
+   * @param {string} qs Query string
+   * @param {boolean} coerce Coerce values
+   * @returns {{[key in string|number]: any}} Query object
+   */
+
+
+  function lib(qs, coerce) {
+    var _this = this;
+
+    if (_typeof(qs) !== TYPEOF_STR) {
+      qs = loc ? loc.search : "";
+    }
+
+    qs = qs.substring(qs.charAt(0) === "?");
+    var queryObject = obNull();
+
+    if (qs) {
+      qs.split("&").forEach(function (qq) {
+        var qArr = qq.split("=").map(function (part) {
+          return decodeURIComponent(part);
+        });
+
+        if (ifComplex(qArr[0])) {
+          complex.apply(_this, [].concat(qArr).concat([queryObject, coerce]));
+        } else {
+          simple.apply(_this, [qArr, queryObject, false, coerce]);
+        }
+      });
+    }
+
+    return queryObject;
+  }
+  /**
+   * Converts an array to equivalent object
+   * @param {any[]} arr Any array
+   * @returns {any} Any object
+   */
+
+
+  function toObject(arr) {
+    var convertedObj = obNull();
+
+    if (isArr$1(arr)) {
+      arr.forEach(function (value, index) {
+        convertedObj[index] = value;
+      });
+    }
+
+    return convertedObj;
+  }
+  /**
+   * Converts array to an object if required
+   * @param {any} ob Any object
+   * @param {booleab} isNextNumber Test for next key
+   * @returns {any} Any object
+   */
+
+
+  function resolve(ob, isNextNumber) {
+    if (_typeof(ob) === TYPEOF_UNDEF) return isNextNumber ? [] : obNull();
+    return isNextNumber ? ob : toObject(ob);
+  }
+  /**
+   * Resolves the target object for next iteration
+   * @param {any} ob current reference object
+   * @param {string} nextProp reference property in current object
+   * @returns {any} Resolved object for next iteration
+   */
+
+
+  function resolveObj(ob, nextProp) {
+    if (isObject(ob) && !isArr$1(ob)) return {
+      ob: ob
+    };
+    if (isArr$1(ob) || _typeof(ob) === TYPEOF_UNDEF) return {
+      ob: resolve(ob, isNumber(nextProp))
+    };
+    return {
+      ob: [ob],
+      push: ob !== null
+    };
+  }
+  /**
+   * Handles complex query parameters
+   * @param {string} key Query key
+   * @param {string} value Query value
+   * @param {Object} obj Query object
+   * @returns {void}
+   */
+
+
+  function complex(key, value, obj, doCoerce) {
+    var match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
+
+    if (match.length === 3) {
+      var prop = match[1];
+      var nextProp = match[2];
+      key = key.replace(/\[([^\[]*)\]/, "");
+
+      if (ifComplex(key)) {
+        if (nextProp === "") nextProp = "0";
+        key = key.replace(/[^\[]+/, nextProp);
+        complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, doCoerce);
+      } else if (nextProp) {
+        if (isSafe(prop) && isSafe(nextProp)) {
+          var _resolveObj = resolveObj(obj[prop], nextProp),
+              ob = _resolveObj.ob,
+              push = _resolveObj.push;
+
+          obj[prop] = ob;
+          var nextOb = push ? obNull() : obj[prop];
+          nextOb[nextProp] = coerce(value, !doCoerce);
+
+          if (push) {
+            obj[prop].push(nextOb);
+          }
+        }
+      } else {
+        simple([match[1], value], obj, true, doCoerce);
+      }
+    }
+  }
+  /**
+   * Handles simple query
+   * @param {array} qArr Query list
+   * @param {Object} queryObject Query object
+   * @param {boolean} toArray Test for conversion to array
+   * @returns {void}
+   */
+
+
+  function simple(qArr, queryObject, toArray, doCoerce) {
+    var key = qArr[0];
+    var value = qArr[1];
+
+    if (isSafe(key)) {
+      value = coerce(value, !doCoerce);
+
+      if (hasOwn(queryObject, key)) {
+        queryObject[key] = isArr$1(queryObject[key]) ? queryObject[key] : [queryObject[key]];
+        queryObject[key].push(value);
+      } else {
+        queryObject[key] = toArray ? [value] : value;
+      }
+    }
+  }
+  /**
+   * Converts input value to their appropriate types
+   * @param {any} value Input value
+   * @param {boolean} skip Test for skipping coercion
+   * @returns {any} Coerced value
+   */
+
+
+  function coerce(value, skip) {
+    // eslint-disable-next-line
+    if (value == null) {
+      return "";
+    }
+
+    if (skip || _typeof(value) !== TYPEOF_STR) {
+      return value;
+    }
+
+    value = value.trim();
+
+    if (isNumber(value)) {
+      return +value;
+    }
+
+    switch (value) {
+      case "null":
+        return null;
+
+      case TYPEOF_UNDEF:
+        return UNDEF;
+
+      case "true":
+        return true;
+
+      case "false":
+        return false;
+
+      case "NaN":
+        return NaN;
+
+      default:
+        return value;
+    }
+  }
+
+  /**
+   * Shorthand for Array.isArray
+   */
+
+  var isArr = Array.isArray;
+  /**
+   * Shorthand for Object.keys
+   */
+
+  var oKeys = Object.keys;
+  /**
+   * Safely trims string
+   * @param {string} str String
+   */
+
+  function trim(str) {
+    return _typeof$1(str) === TYPEOF_STR$1 ? str.trim() : EMPTY;
+  }
+  /**
+   * Checks if given route is valid
+   * @private
+   * @param {string} route Route string
+   */
+
+  function isValidRoute(route) {
+    return REG_PATHNAME.test(route);
+  }
+  /**
+   * Loops over an array like object
+   * @param {object} arrayObj Array or array like object
+   * @param {function} callback Callback function
+   */
+
+  function each(arrayObj, callback) {
+    if (isObject(arrayObj)) {
+      var keys = oKeys(arrayObj);
+
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var cont = callback(arrayObj[key], isNumber(key) ? +key : key);
+
+        if (_typeof$1(cont) === TYPEOF_BOOL) {
+          if (cont) {
+            continue;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+  }
+
   /**
    * Function to trigger custom event
    * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
@@ -2494,7 +2436,7 @@
 
     if (target.length && _typeof$1(eventType) === TYPEOF_STR$1) {
       each(target, function (el) {
-        var customEvent = new g.CustomEvent(eventType, {
+        var customEvent = new getGlobal().CustomEvent(eventType, {
           bubbles: true,
           cancelable: true,
           detail: data || []
@@ -2550,30 +2492,33 @@
     };
   }
 
-  function bindRouterEvents() {
-    var _this = this;
+  var getPath = function getPath(isHash, location) {
+    return trim(isHash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
+  };
 
-    var _this$config = this.config,
-        context = _this$config.context,
-        location = _this$config.location,
-        hashRouting = _this$config.hashRouting;
-    this.popStateSubscription = fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
-      var path = trim(hashRouting ? location.hash.substring(1).split(QRY)[0] : location.pathname);
+  function bindRouterEvents(inst) {
+    var _inst$config = inst.config,
+        context = _inst$config.context,
+        location = _inst$config.location,
+        hash = _inst$config.hashRouting;
+    inst.popStateSubscription = fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
+      var path = getPath(hash, location);
 
       if (path) {
         trigger(context, VIRTUAL_PUSHSTATE, [{
           path: path,
-          hash: hashRouting
-        }, e, _this]);
+          hash: hash
+        }, e, inst]);
       }
     });
-    this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(this));
+    inst.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(inst));
 
-    if (hashRouting && !location.hash) {
-      this.set('/', true, false); // Replace current hash path without executing anythings
+    if (hash && !location.hash) {
+      inst.set('/', true, false); // Replace current hash path without executing anythings
     }
   }
 
+  var encode = encodeURIComponent;
   /**
    * Builds query string recursively
    * @private
@@ -2588,7 +2533,7 @@
         buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? EMPTY : obKey, "]"), prop);
       });
     } else if (_typeof$1(obj) !== TYPEOF_FUNC) {
-      qsList.push("".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj)));
+      qsList.push("".concat(encode(key), "=").concat(encode(obj)));
     }
   }
   /**
@@ -2622,7 +2567,7 @@
   function resolveQuery(queryString, hashRouting) {
     var location = this.config.location;
     var search = trim(location.search && location.search.substring(1));
-    var existingQuery = hashRouting ? trim(location.hash.split(QRY)[1]) : trim(search);
+    var existingQuery = trim(hashRouting ? location.hash.split(QRY)[1] : search);
     if (!existingQuery) return queryString;
     return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
   }
@@ -2698,7 +2643,7 @@
         hash = _this$config.hashRouting,
         location = _this$config.location,
         init = _this$config.init;
-    var path = trim(hash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
+    var path = getPath(hash, location);
     return function (observable) {
       return new Observable(function (subscriber) {
         var subn = observable.subscribe(subscriber);
@@ -2749,7 +2694,7 @@
 
       }, config || {}));
       this.__paths__ = [];
-      bindRouterEvents.apply(this);
+      bindRouterEvents(this);
     }
 
     _createClass(Router, [{
@@ -2766,9 +2711,9 @@
     }, {
       key: "subscribe",
       value: function subscribe() {
-        var _this$listeners$pipe;
+        var _this$pipe;
 
-        return (_this$listeners$pipe = this.listeners.pipe(callOnce.apply(this))).subscribe.apply(_this$listeners$pipe, arguments);
+        return (_this$pipe = this.pipe()).subscribe.apply(_this$pipe, arguments);
       }
     }, {
       key: "set",
@@ -3017,7 +2962,7 @@
     };
   }
 
-  const name="silkrouter";const version="4.2.10";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",prod:"env-cmd rollup -c",build:"npm run test && npm run dev && npm run dev:serve && npm run prod",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"deparam.js":"^3.0.6"};const devDependencies={"@babel/core":"^7.18.9","@babel/eslint-parser":"^7.18.9","@babel/preset-env":"^7.18.9","@rollup/plugin-babel":"^5.3.1","@rollup/plugin-commonjs":"^22.0.1","@rollup/plugin-eslint":"^8.0.2","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^13.3.0","@types/jest":"^28.1.6","env-cmd":"^10.1.0",eslint:"^8.20.0","gh-pages":"^4.0.0",jest:"^28.1.3",rollup:"^2.77.0","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.0","rollup-plugin-terser":"^7.0.2",rxjs:"^7.5.6"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies};
+  const name="silkrouter";const version="4.2.10";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",prod:"env-cmd rollup -c",build:"npm run test && npm run dev && npm run dev:serve && npm run prod",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"deparam.js":"^3.0.6"};const devDependencies={"@babel/core":"^7.18.9","@babel/eslint-parser":"^7.18.9","@babel/preset-env":"^7.18.9","@rollup/plugin-babel":"^5.3.1","@rollup/plugin-commonjs":"^22.0.1","@rollup/plugin-eslint":"^8.0.2","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^13.3.0","@types/jest":"^28.1.6","env-cmd":"^10.1.0",eslint:"^8.20.0","gh-pages":"^4.0.0",jest:"^28.1.3",rollup:"^2.77.0","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.0","rollup-plugin-terser":"^7.0.2",rxjs:"^7.5.6"};const peerDependencies={rxjs:"^7.5.6"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
 
   function q(selector) {
     var _document;

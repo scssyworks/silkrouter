@@ -25,13 +25,13 @@ export default class Router {
       )
     );
     this.__paths__ = [];
-    bindRouterEvents.apply(this);
+    bindRouterEvents(this);
   }
   pipe(...ops) {
     return this.listeners.pipe(callOnce.apply(this), ...ops);
   }
   subscribe(...fns) {
-    return this.listeners.pipe(callOnce.apply(this)).subscribe(...fns);
+    return this.pipe().subscribe(...fns);
   }
   set(...props) {
     return set.apply(this, props);
