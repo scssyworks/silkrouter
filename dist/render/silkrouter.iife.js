@@ -2414,9 +2414,7 @@
         var cont = callback(arrayObj[key], isNumber(key) ? +key : key);
 
         if (_typeof$1(cont) === TYPEOF_BOOL) {
-          if (cont) {
-            continue;
-          } else {
+          if (!cont) {
             break;
           }
         }
@@ -2436,7 +2434,8 @@
 
     if (target.length && _typeof$1(eventType) === TYPEOF_STR$1) {
       each(target, function (el) {
-        var customEvent = new getGlobal().CustomEvent(eventType, {
+        var win = getGlobal();
+        var customEvent = new win.CustomEvent(eventType, {
           bubbles: true,
           cancelable: true,
           detail: data || []
@@ -2568,12 +2567,21 @@
     var location = this.config.location;
     var search = trim(location.search && location.search.substring(1));
     var existingQuery = trim(hashRouting ? location.hash.split(QRY)[1] : search);
-    if (!existingQuery) return queryString;
+
+    if (!existingQuery) {
+      return queryString;
+    }
+
     return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
   }
 
-  function set(route, replace, exec) {
-    exec = exec || true;
+  function set(route, replace, doExec) {
+    var exec = true;
+
+    if (_typeof$1(doExec) === TYPEOF_BOOL) {
+      exec = doExec;
+    }
+
     var _this$config = this.config,
         preservePath = _this$config.preservePath,
         hashRouting = _this$config.hashRouting,
@@ -2962,7 +2970,7 @@
     };
   }
 
-  const name="silkrouter";const version="4.2.10";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",prod:"env-cmd rollup -c",build:"npm run test && npm run dev && npm run dev:serve && npm run prod",test:"jest tests/*",deploy:"gh-pages -d dist"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"deparam.js":"^3.0.6"};const devDependencies={"@babel/core":"^7.18.9","@babel/eslint-parser":"^7.18.9","@babel/preset-env":"^7.18.9","@rollup/plugin-babel":"^5.3.1","@rollup/plugin-commonjs":"^22.0.1","@rollup/plugin-eslint":"^8.0.2","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^13.3.0","@types/jest":"^28.1.6","env-cmd":"^10.1.0",eslint:"^8.20.0","gh-pages":"^4.0.0",jest:"^28.1.3",rollup:"^2.77.0","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.0","rollup-plugin-terser":"^7.0.2",rxjs:"^7.5.6"};const peerDependencies={rxjs:"^7.5.6"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
+  const name="silkrouter";const version="4.2.15";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",prod:"env-cmd rollup -c",build:"npm run test && npm run dev && npm run dev:serve && npm run prod",test:"jest tests/*",deploy:"gh-pages -d dist",format:"rome format ./src --write",lint:"rome check ./src","check:sanity":"npm run lint && npm run format"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"deparam.js":"^3.0.6"};const devDependencies={"@babel/core":"^7.18.9","@babel/eslint-parser":"^7.18.9","@babel/preset-env":"^7.18.9","@rollup/plugin-babel":"^5.3.1","@rollup/plugin-commonjs":"^22.0.1","@rollup/plugin-eslint":"^8.0.2","@rollup/plugin-json":"^4.1.0","@rollup/plugin-node-resolve":"^13.3.0","@types/jest":"^28.1.6","env-cmd":"^10.1.0",eslint:"^8.20.0","gh-pages":"^4.0.0",jest:"^28.1.3",rollup:"^2.77.0","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.0","rollup-plugin-terser":"^7.0.2",rome:"^10.0.1",rxjs:"^7.5.6"};const peerDependencies={rxjs:"^7.5.6"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
 
   function q(selector) {
     var _document;
