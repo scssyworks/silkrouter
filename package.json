@@ -12,7 +12,10 @@
     "prod": "env-cmd rollup -c",
     "build": "npm run test && npm run dev && npm run dev:serve && npm run prod",
     "test": "jest tests/*",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "format": "rome format ./src --write",
+    "lint": "rome check ./src",
+    "check:sanity": "npm run lint && npm run format"
   },
   "author": "scssyworks",
   "license": "MIT",
@@ -43,7 +46,8 @@
   "files": [
     "dist/umd/",
     "dist/esm/",
-    "src/typings/"
+    "src/typings/",
+    "LICENSE"
   ],
   "repository": {
     "type": "git",
@@ -74,6 +78,7 @@
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-serve": "^2.0.0",
     "rollup-plugin-terser": "^7.0.2",
+    "rome": "^10.0.1",
     "rxjs": "^7.5.6"
   },
   "peerDependencies": {

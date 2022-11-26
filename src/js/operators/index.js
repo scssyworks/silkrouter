@@ -1,15 +1,15 @@
-import { trim, isValidRoute, each, oKeys } from "../utils/utils";
-import queryDeparam, { isObject } from "deparam.js";
-import { Observable } from "rxjs";
+import { trim, isValidRoute, each, oKeys } from '../utils/utils';
+import queryDeparam, { isObject } from 'deparam.js';
+import { Observable } from 'rxjs';
 import {
   INVALID_ROUTE,
   CACHED_FIELDS,
   UNDEF,
   TYPEOF_BOOL,
-} from "../utils/constants";
-import { extractParams } from "../utils/params";
-import Router from "../api/router";
-import { assign } from "../utils/assign";
+} from '../utils/constants';
+import { extractParams } from '../utils/params';
+import Router from '../api/router';
+import { assign } from '../utils/assign';
 
 /**
  * Operator to compare a specific route

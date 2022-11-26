@@ -1,5 +1,5 @@
-import { isObject } from "deparam.js";
-import { trigger } from "../../utils/triggerEvent";
+import { isObject } from 'deparam.js';
+import { trigger } from '../../utils/triggerEvent';
 import {
   VIRTUAL_PUSHSTATE,
   INVALID_ROUTE,
@@ -9,14 +9,18 @@ import {
   QRY,
   REPLACE,
   PUSH,
-} from "../../utils/constants";
-import { isValidRoute, trim } from "../../utils/utils";
-import { toQueryString } from "../../utils/query";
-import resolveQuery from "../resolveQuery";
-import { assign } from "../../utils/assign";
+  TYPEOF_BOOL,
+} from '../../utils/constants';
+import { isValidRoute, trim } from '../../utils/utils';
+import { toQueryString } from '../../utils/query';
+import resolveQuery from '../resolveQuery';
+import { assign } from '../../utils/assign';
 
-export default function set(route, replace, exec) {
-  exec = exec || true;
+export default function set(route, replace, doExec) {
+  let exec = true;
+  if (typeof doExec === TYPEOF_BOOL) {
+    exec = doExec;
+  }
   const { preservePath, hashRouting, history } = this.config;
   const routeObject = assign(
     { replace, exec },
