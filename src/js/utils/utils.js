@@ -49,9 +49,7 @@ export function each(arrayObj, callback) {
       const key = keys[i];
       const cont = callback(arrayObj[key], isNumber(key) ? +key : key);
       if (typeof cont === TYPEOF_BOOL) {
-        if (cont) {
-          continue;
-        } else {
+        if (!cont) {
           break;
         }
       }

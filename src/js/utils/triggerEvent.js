@@ -12,7 +12,8 @@ export function trigger(target, eventType, data) {
   target = Array.from(target instanceof Node ? [target] : target);
   if (target.length && typeof eventType === TYPEOF_STR) {
     each(target, (el) => {
-      const customEvent = new getGlobal().CustomEvent(eventType, {
+      const win = getGlobal();
+      const customEvent = new win.CustomEvent(eventType, {
         bubbles: true,
         cancelable: true,
         detail: data || [],

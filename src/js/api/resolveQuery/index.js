@@ -16,7 +16,9 @@ export default function resolveQuery(queryString, hashRouting) {
   const existingQuery = trim(
     hashRouting ? location.hash.split(QRY)[1] : search
   );
-  if (!existingQuery) return queryString;
+  if (!existingQuery) {
+    return queryString;
+  }
   return toQueryString(
     assign(deparam(search), deparam(existingQuery), deparam(queryString))
   );
