@@ -397,9 +397,7 @@ function each(arrayObj, callback) {
       var cont = callback(arrayObj[key], isNumber(key) ? +key : key);
 
       if (_typeof$1(cont) === TYPEOF_BOOL) {
-        if (cont) {
-          continue;
-        } else {
+        if (!cont) {
           break;
         }
       }
@@ -419,7 +417,8 @@ function trigger(target, eventType, data) {
 
   if (target.length && _typeof$1(eventType) === TYPEOF_STR$1) {
     each(target, function (el) {
-      var customEvent = new getGlobal().CustomEvent(eventType, {
+      var win = getGlobal();
+      var customEvent = new win.CustomEvent(eventType, {
         bubbles: true,
         cancelable: true,
         detail: data || []
@@ -551,12 +550,21 @@ function resolveQuery(queryString, hashRouting) {
   var location = this.config.location;
   var search = trim(location.search && location.search.substring(1));
   var existingQuery = trim(hashRouting ? location.hash.split(QRY)[1] : search);
-  if (!existingQuery) return queryString;
+
+  if (!existingQuery) {
+    return queryString;
+  }
+
   return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
 }
 
-function set(route, replace, exec) {
-  exec = exec || true;
+function set(route, replace, doExec) {
+  var exec = true;
+
+  if (_typeof$1(doExec) === TYPEOF_BOOL) {
+    exec = doExec;
+  }
+
   var _this$config = this.config,
       preservePath = _this$config.preservePath,
       hashRouting = _this$config.hashRouting,
