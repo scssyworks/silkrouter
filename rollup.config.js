@@ -1,38 +1,38 @@
-import resolve from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
-import babel from "@rollup/plugin-babel";
-import { terser } from "rollup-plugin-terser";
-import eslint from "@rollup/plugin-eslint";
-import serve from "rollup-plugin-serve";
-import livereload from "rollup-plugin-livereload";
-import pkg from "./package.json";
-import json from "@rollup/plugin-json";
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import babel from '@rollup/plugin-babel';
+import terser from '@rollup/plugin-terser';
+import eslint from '@rollup/plugin-eslint';
+import serve from 'rollup-plugin-serve';
+import livereload from 'rollup-plugin-livereload';
+import pkg from './package.json';
+import json from '@rollup/plugin-json';
 
-const isDevelopment = process.env.MODE.trim() === "development";
-const startServer = process.env.SERVE.trim() === "true";
+const isDevelopment = process.env.MODE.trim() === 'development';
+const startServer = process.env.SERVE.trim() === 'true';
 const input = process.env.INPUT.trim();
 
-const rxjs = "rxjs";
+const rxjs = 'rxjs';
 
 const minExtReg = /\.min\.js$/;
 const umdPathReg = /\/umd\//;
 
 const pathMap = {
   umd: pkg.main,
-  umdDev: pkg.main.replace(minExtReg, ".js"),
+  umdDev: pkg.main.replace(minExtReg, '.js'),
   esm: pkg.module,
-  esmDev: pkg.module.replace(minExtReg, ".js"),
+  esmDev: pkg.module.replace(minExtReg, '.js'),
   iife: pkg.main
-    .replace(umdPathReg, "/render/")
-    .replace(minExtReg, ".iife.min.js"),
+    .replace(umdPathReg, '/render/')
+    .replace(minExtReg, '.iife.min.js'),
   iifeDev: pkg.main
-    .replace(umdPathReg, "/render/")
-    .replace(minExtReg, ".iife.js"),
+    .replace(umdPathReg, '/render/')
+    .replace(minExtReg, '.iife.js'),
 };
 
 const config = {
   input,
-  output: (startServer ? ["iife"] : ["esm", "umd"]).map((format) => {
+  output: (startServer ? ['iife'] : ['esm', 'umd']).map((format) => {
     return {
       name: pkg.name,
       sourcemap: isDevelopment,
@@ -47,10 +47,10 @@ const config = {
       ? [
           eslint({
             exclude: [
-              "node_modules/**",
-              "json/**",
-              "package.json",
-              "package-lock.json",
+              'node_modules/**',
+              'json/**',
+              'package.json',
+              'package-lock.json',
             ],
             throwOnError: true,
           }),
@@ -58,32 +58,32 @@ const config = {
       : []),
     resolve({
       customResolveOptions: {
-        moduleDirectories: ["node_modules"],
+        moduleDirectories: ['node_modules'],
       },
       preferBuiltins: true,
     }),
     commonjs(),
     babel({
-      exclude: "node_modules/**",
-      babelHelpers: "bundled",
+      exclude: 'node_modules/**',
+      babelHelpers: 'bundled',
     }),
     ...(isDevelopment
       ? startServer
         ? [
             json({
-              exclude: ["node_modules/**"],
+              exclude: ['node_modules/**'],
               compact: true,
               preferConst: true,
             }),
             serve({
               open: true,
-              contentBase: ["dist"],
-              host: "localhost",
-              port: "3030",
+              contentBase: ['dist'],
+              host: 'localhost',
+              port: '3030',
               historyApiFallback: true,
             }),
             livereload({
-              watch: "dist",
+              watch: 'dist',
               verbose: false,
             }),
           ]
@@ -92,7 +92,7 @@ const config = {
           ...(startServer
             ? [
                 json({
-                  exclude: ["node_modules/**"],
+                  exclude: ['node_modules/**'],
                   compact: true,
                   preferConst: true,
                 }),

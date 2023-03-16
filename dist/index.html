@@ -1,345 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="icon" href="https://rollupjs.org/favicon.png" type="image/png" />
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-    />
-    <title>Rollup Plugin</title>
-    <style>
-      [tabindex] {
-        cursor: pointer !important;
-        outline: none;
-      }
 
-      h1.unset {
-        margin: 0;
-        padding: 10px 0;
-        font-size: 16px;
-      }
-      .decorated {
-        margin-top: 16px;
-        display: block;
-        color: #3e3e3e;
-        padding: 20px;
-        border-radius: 4px;
-        background-color: #efefef;
-      }
-      .decorated pre {
-        margin: 0;
-        font-size: 100%;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link rel="icon" href="https://rollupjs.org/favicon.png" type="image/png" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+    integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+  <title>Rollup Plugin</title>
+  <style>
+    [tabindex] {
+      cursor: pointer !important;
+      outline: none;
+    }
 
-      .decorated .comment,
-      .decorated .comment .str,
-      .decorated .comment .keyword,
-      .decorated .comment .fat-arrow .decorated .comment .method {
-        color: #aaa;
-        font-weight: normal;
-      }
+    h1.unset {
+      margin: 0;
+      padding: 10px 0;
+      font-size: 16px;
+    }
 
-      .decorated .str {
-        color: #b22222;
-      }
+    pre {
+      margin-top: 16px;
+      display: block;
+      color: #3e3e3e;
+      border-radius: 4px;
+      background-color: #efefef;
+    }
 
-      .decorated .fat-arrow,
-      .decorated .keyword,
-      .decorated .method {
-        font-weight: bold;
-      }
+    .hljs {
+      background: transparent !important;
+    }
 
-      .decorated .fat-arrow,
-      .decorated .keyword {
-        color: #1e90ff;
-      }
+    .inner-nav a {
+      background-color: #e9e9e9;
+      margin-right: 4px;
+    }
+  </style>
+</head>
 
-      .decorated .method {
-        color: #c0a803;
-      }
-
-      .inner-nav a {
-        background-color: #e9e9e9;
-        margin-right: 4px;
-      }
-    </style>
-  </head>
-  <body>
-    <section class="container pt-4 pb-4">
-      <div class="navbar navbar-light bg-light rounded mb-4">
-        <h1 class="unset">
-          <a
-            href="https://github.com/scssyworks/silkrouter"
-            class="navbar-brand"
-            >SILKROUTER</a
-          >
-        </h1>
-        <div class="version text-muted">
-          Version: <span class="bold">Loading...</span>
-        </div>
+<body>
+  <section class="container pt-4 pb-4">
+    <div class="navbar navbar-light bg-light rounded mb-4">
+      <h1 class="unset">
+        <a href="https://github.com/scssyworks/silkrouter" class="navbar-brand">SILKROUTER</a>
+      </h1>
+      <div class="version text-muted">
+        Version: <span class="bold">Loading...</span>
       </div>
-      <nav class="nav nav-pills">
-        <li class="nav-item">
-          <a tabindex="0" data-route="/" class="nav-link">Introduction</a>
-        </li>
-        <li class="nav-item">
-          <a tabindex="0" data-route="/tab2/" class="nav-link">Hash router</a>
-        </li>
-        <li class="nav-item">
-          <a tabindex="0" data-route="/tab3/" class="nav-link">Pass data</a>
-        </li>
-        <li class="nav-item">
-          <a tabindex="0" data-route="/tab4/" class="nav-link">Caching</a>
-        </li>
-      </nav>
-    </section>
-    <section class="container content pt-4 pb-4 d-none" data-section="/">
-      <h2>Welcome!</h2>
-      <article class="pt-4">
-        Welcome to the brand new demo page for Silk router. This demo is
-        designed to be interactive so that you can learn and experiment with the
-        new router plugin.
-      </article>
-      <article class="pt-4">
-        <strong>Install</strong>
-        <code class="version decorated">
-          npm install --save silkrouter<b>@<span></span></b> rxjs
-        </code>
-      </article>
-      <article class="pt-4">
-        <strong>Getting started</strong>
-        <p class="mt-4">Initialize</p>
-        <code class="decorated">
-          <pre>
-                    const router = new Router();
-                </pre
-          >
-        </code>
-        <p class="mt-4">Subscribe</p>
-        <code class="decorated">
-          <pre>
-                    router.subscribe((e) => {
-                        console.log(e.route); // --> '/' (Current active route)
-                    });
-                </pre
-          >
-        </code>
-        <p class="mt-4">Trigger</p>
-        <code class="decorated">
-          <pre>
-                    router.set('/');
-                </pre
-          >
-        </code>
-      </article>
-      <article class="pt-4">
-        <strong>Configure</strong>
-        <code class="decorated">
-          <pre>
-                    const router = new Router({
-                        <b>hashRouting</b>: true, // Switch to hash routing. <b>Default: false</b>
-                        <b>preservePath</b>: false, // If 'true' it will preserve current URL path. Works only for hash routing. <b>Default: false</b>
-                        <b>context</b>: document.body // Silkrouter triggers 'vpushstate' event for history changes and navigation. You can listen to it on this element. <b>Default: document.body</b>
-                    });
-                </pre>
-        </code>
-      </article>
-    </section>
-    <section class="container content pt-4 pb-4 d-none" data-section="/tab2">
-      <h2>Hash routing</h2>
+    </div>
+    <nav class="nav nav-pills">
+      <li class="nav-item">
+        <a tabindex="0" data-route="/" class="nav-link">Introduction</a>
+      </li>
+      <li class="nav-item">
+        <a tabindex="0" data-route="/tab2/" class="nav-link">Hash router</a>
+      </li>
+      <li class="nav-item">
+        <a tabindex="0" data-route="/tab3/" class="nav-link">Pass data</a>
+      </li>
+      <li class="nav-item">
+        <a tabindex="0" data-route="/tab4/" class="nav-link">Caching</a>
+      </li>
+    </nav>
+  </section>
+  <section class="container content pt-4 pb-4 d-none" data-section="/">
+    <h2>Welcome!</h2>
+    <article class="pt-4">
+      Welcome to the demo page for Silk router. This is an interactive demo where you can learn about how
+      <b>silkrouter</b> works.
       <p>
-        Click on one of the tabs below and observe how application reacts to
-        route changes.
+        <b>Warning: </b>Do not refresh the as parts of demo might not work!
       </p>
-      <nav class="nav inner-nav nav-pills">
-        <li class="nav-item">
-          <a
-            tabindex="0"
-            data-route="/child-tab1"
-            data-relative
-            class="nav-link"
-            >/child-tab1</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            tabindex="0"
-            data-route="/child-tab2"
-            data-relative
-            class="nav-link"
-            >/child-tab2</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            tabindex="0"
-            data-route="/child-tab3"
-            data-relative
-            class="nav-link"
-            >/child-tab3</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            tabindex="0"
-            data-route="/child-tab4"
-            data-relative
-            class="nav-link"
-            >/child-tab4</a
-          >
-        </li>
-      </nav>
-      <p class="mt-4">
-        Click on the radio button below to enable hash routing.
-      </p>
-      <input type="radio" class="check-hash" id="checkHash" />
-      <label for="checkHash">Click me!</label>
-      <br />
-      <button class="btn btn-primary clear-session mt-4">
-        Clear radio input
-      </button>
-      <p class="mt-4">
-        <strong>Implementation</strong>
-      </p>
-      <p class="mt-4">Hash routing implementation is straight forward.</p>
-      <code class="decorated">
-        <pre>
-                // Create a new instance with hashRouting enabled
-                const hashRouter = new Router({
-                    hashRouting: true
-                });
-            </pre
-        >
-      </code>
-    </section>
-    <section class="container content pt-4 pb-4 d-none" data-section="/tab3">
-      <h2>Pass data</h2>
-      <p class="mt-4">Route listener can accepts data via</p>
-      <ol>
-        <li>Query string</li>
-        <li>Route parameters</li>
-        <li>History state object</li>
-      </ol>
-      <p>
-        This information is persisted in router event object. To demonstrate how
-        this works, click on the button below:
-      </p>
-      <button class="btn btn-primary append-param">
-        Append "/john/doe" to current URL
-      </button>
-      <p class="mt-4">
-        This will activate a route <b>"/tab3/:firstname/:lastname"</b>. Your
-        data will appear below:
-      </p>
-      <code class="decorated params-data d-none">
-        <pre></pre>
-      </code>
-      <p class="mt-4 query-next-step d-none">
-        Awesome! Now click the button below to append query string to the
-        current URL.
-      </p>
-      <button class="btn btn-primary append-query query-next-step d-none mb-4">
-        Append "?q=HelloWorld" to current URL
-      </button>
-      <code class="decorated query-data d-none">
-        <pre></pre>
-      </code>
-      <p class="mt-4 data-next-step d-none">
-        Excellent! Now click the button below to set current URL state.
-      </p>
-      <button class="btn btn-primary append-data data-next-step d-none mb-4">
-        Set "data" as "Hi there!"
-      </button>
-      <code class="decorated state-data d-none">
-        <pre></pre>
-      </code>
-      <p class="mt-4 pass-data-tutorial d-none">
-        <strong>Implementation</strong>
-      </p>
-      <p class="mt-4 pass-data-tutorial d-none">
-        To activate a route that accepts route parameters, silkrouter ships a
-        special operator called <code>route</code>.
-      </p>
-      <code class="pass-data-tutorial decorated d-none">
-        <pre>
-                router
-                    .pipe(
-                        route('/tab3/:firstname/:lastname')
-                    )
-                    .subscribe(e => { console.log(e.params); });
-            </pre
-        >
-      </code>
-      <p class="mt-4 pass-data-tutorial d-none">
-        Query strings on the other hand are passed to all listeners by default
-        (if they exist). You can access them via <code>event.search</code> and
-        <code>event.hashSearch</code> properties. You can also pass query
-        strings as data, and router will take care of the rest.
-      </p>
-      <code class="decorated pass-data-tutorial d-none">
-        <pre>
-                router.set({
-                    route: '/tab3/john/doe',
-                    queryString: 'q=helloworld'
-                });
-            </pre
-        >
-      </code>
-      <p class="mt-4 pass-data-tutorial d-none">
-        Similarly you can also pass data explicitly which is persisted in
-        <code>history.state</code> object.
-      </p>
-      <code class="decorated pass-data-tutorial d-none">
-        <pre>
-                router.set({
-                    route: '/tab3/john/doe',
-                    queryString: 'q=helloworld',
-                    data: 'Hello World'
-                });
-            </pre
-        >
-      </code>
-      <p class="mt-4 pass-data-tutorial d-none">
-        You can access this data using <code>event.data</code> property.
-      </p>
-    </section>
-    <section class="container content pt-4 pb-4 d-none" data-section="/tab4">
-      <h2>Caching</h2>
-      <p>
-        Silkrouter allows you to cache <code>event</code> object and triggers a
-        handler only if that is changed.
-      </p>
-      <p>Caching is quite useful in terms of optimization.</p>
-      <p>Caching can be enabled via <code>cache</code> operator.</p>
-      <code class="decorated">
-        <pre>
-                const router = new Router();
-                router
-                    .pipe(cache()) // Allows caching with shallow comparison
-                    .subscribe(() => { ... });
-            </pre
-        >
-      </code>
-      <code class="decorated">
-        <pre>
-                const router = new Router();
-                router
-                    .pipe(cache(true)) // Allows caching with deep comparison
-                    .subscribe(() => { ... });
-            </pre
-        >
-      </code>
-    </section>
-    <script>
-      const scr = document.createElement('script');
-      scr.src =
-        location.hostname === 'scssyworks.github.io'
-          ? '/silkrouter/render/silkrouter.iife.min.js'
-          : '/render/silkrouter.iife.js';
-      document.body.appendChild(scr);
-    </script>
-  </body>
+    </article>
+    <article class="pt-4">
+      <strong>Install</strong>
+      <pre><code class="highlight-javascript">
+      npm install --save silkrouter rxjs
+      </code></pre>
+    </article>
+    <article class="pt-4">
+      <strong>Getting started</strong>
+      <p class="mt-4">Initialize</p>
+      <pre><code class="highlight-javascript">
+      const router = new Router();
+      </code></pre>
+      <p class="mt-4">Subscribe</p>
+      <pre><code class="highlight-javascript">
+      router.subscribe((e) => {
+          console.log(e.route); // --> '/' (Current active route)
+      });
+      </code></pre>
+      <p class="mt-4">Trigger</p>
+      <pre><code class="highlight-javascript">
+      router.set('/');
+      </code></pre>
+    </article>
+    <article class="pt-4">
+      <strong>Configure</strong>
+      <pre><code class="highlight-javascript">
+      const router = new Router({
+          hashRouting: true, // Switch to hash routing. Default: false
+          preservePath: false, // If 'true' it will preserve current URL path. Works only for hash routing. Default: false
+          context: document.body // Silkrouter triggers 'vpushstate' event for history changes and navigation. You can listen to it on this element. Default: document.body
+      });
+      </code></pre>
+    </article>
+  </section>
+  <section class="container content pt-4 pb-4 d-none" data-section="/tab2">
+    <h2>Hash routing</h2>
+    <p>
+      Click on one of the tabs below and observe how application reacts to
+      route changes.
+    </p>
+    <nav class="nav inner-nav nav-pills">
+      <li class="nav-item">
+        <a tabindex="0" data-route="/child-tab1" data-relative class="nav-link">/child-tab1</a>
+      </li>
+      <li class="nav-item">
+        <a tabindex="0" data-route="/child-tab2" data-relative class="nav-link">/child-tab2</a>
+      </li>
+      <li class="nav-item">
+        <a tabindex="0" data-route="/child-tab3" data-relative class="nav-link">/child-tab3</a>
+      </li>
+      <li class="nav-item">
+        <a tabindex="0" data-route="/child-tab4" data-relative class="nav-link">/child-tab4</a>
+      </li>
+    </nav>
+    <p class="mt-4">
+      Click on the radio button below to enable hash routing.
+    </p>
+    <input type="radio" class="check-hash" id="checkHash" />
+    <label for="checkHash">Click me!</label>
+    <br />
+    <button class="btn btn-primary clear-session mt-4">
+      Clear radio input
+    </button>
+    <p class="mt-4">
+      <strong>Implementation</strong>
+    </p>
+    <p class="mt-4">Hash routing implementation is straight forward.</p>
+    <pre><code class="highlight-javascript">
+    // Create a new instance with hashRouting enabled
+    const hashRouter = new Router({
+        hashRouting: true
+    });
+    </code></pre>
+  </section>
+  <section class="container content pt-4 pb-4 d-none" data-section="/tab3">
+    <h2>Pass data</h2>
+    <p class="mt-4">Route listener can accepts data via</p>
+    <ol>
+      <li>Query string</li>
+      <li>Route parameters</li>
+      <li>History state object</li>
+    </ol>
+    <p>
+      This information is persisted in router event object. To demonstrate how
+      this works, click on the button below:
+    </p>
+    <button class="btn btn-primary append-param">
+      Append "/john/doe" to current URL
+    </button>
+    <p class="mt-4">
+      This will activate a route <b>"/tab3/:firstname/:lastname"</b>. Your
+      data will appear below:
+    </p>
+    <pre><code class="highlight-javascript params-data d-none"></code></pre>
+    <p class="mt-4 query-next-step d-none">
+      Awesome! Now click the button below to append query string to the
+      current URL.
+    </p>
+    <button class="btn btn-primary append-query query-next-step d-none mb-4">
+      Append "?q=HelloWorld" to current URL
+    </button>
+    <pre><code class="highlight-javascript query-data d-none"></code></pre>
+    <p class="mt-4 data-next-step d-none">
+      Excellent! Now click the button below to set current URL state.
+    </p>
+    <button class="btn btn-primary append-data data-next-step d-none mb-4">
+      Set "data" as "Hi there!"
+    </button>
+    <pre><code class="highlight-javascript state-data d-none"></code></pre>
+    <p class="mt-4 pass-data-tutorial d-none">
+      <strong>Implementation</strong>
+    </p>
+    <p class="mt-4 pass-data-tutorial d-none">
+      To activate a route that accepts route parameters, silkrouter ships a
+      special operator called <code>route</code>.
+    </p>
+    <pre><code class="pass-data-tutorial highlight-javascript d-none">
+    router
+        .pipe(
+            route('/tab3/:firstname/:lastname')
+        )
+        .subscribe(e => { console.log(e.params); });
+    </code></pre>
+    <p class="mt-4 pass-data-tutorial d-none">
+      Query strings on the other hand are passed to all listeners by default
+      (if they exist). You can access them via <code>event.search</code> and
+      <code>event.hashSearch</code> properties. You can also pass query
+      strings as data, and router will take care of the rest.
+    </p>
+    <pre><code class="highlight-javascript pass-data-tutorial d-none">
+    router.set({
+        route: '/tab3/john/doe',
+        queryString: 'q=helloworld'
+    });
+    </code></pre>
+    <p class="mt-4 pass-data-tutorial d-none">
+      Similarly you can also pass data explicitly which is persisted in
+      <code>history.state</code> object.
+    </p>
+    <pre><code class="highlight-javascript pass-data-tutorial d-none">
+    router.set({
+        route: '/tab3/john/doe',
+        queryString: 'q=helloworld',
+        data: 'Hello World'
+    });
+    </code></pre>
+    <p class="mt-4 pass-data-tutorial d-none">
+      You can access this data using <code>event.data</code> property.
+    </p>
+  </section>
+  <section class="container content pt-4 pb-4 d-none" data-section="/tab4">
+    <h2>Caching</h2>
+    <p>
+      Silkrouter allows you to cache <code>event</code> object and triggers a
+      handler only if that is changed.
+    </p>
+    <p>Caching is quite useful in terms of optimization.</p>
+    <p>Caching can be enabled via <code>cache</code> operator.</p>
+    <pre><code class="highlight-javascript">
+    const router = new Router();
+    router
+        .pipe(cache()) // Allows caching with shallow comparison
+        .subscribe(() => { ... });
+    </code></pre>
+    <pre><code class="highlight-javascript">
+    const router = new Router();
+    router
+        .pipe(cache(true)) // Allows caching with deep comparison
+        .subscribe(() => { ... });
+    </code></pre>
+  </section>
+  <script>
+    const scr = document.createElement('script');
+    scr.src =
+      location.hostname === 'scssyworks.github.io'
+        ? '/silkrouter/render/silkrouter.iife.min.js'
+        : '/render/silkrouter.iife.js';
+    document.body.appendChild(scr);
+  </script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <script>
+    hljs.highlightAll();
+  </script>
+</body>
+
 </html>

@@ -1,6 +1,6 @@
 [![Node.js CI](https://github.com/scssyworks/silkrouter/actions/workflows/node.js.yml/badge.svg)](https://github.com/scssyworks/silkrouter/actions/workflows/node.js.yml) ![License](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.js?label=unminified)
 
-**If you are searching for version 3 documentation (previous version), please click on the link below:**<br>
+**For version 3 documentation please click on the link below:**<br>
 https://github.com/scssyworks/silkrouter/blob/master/READMEv3.md
 
 # Silk router
@@ -13,17 +13,11 @@ Silk router is a reactive app routing library.
 npm install --save silkrouter rxjs
 ```
 
-# What's new?
+# Dependencies
 
-Silk router uses the `Observer` pattern instead of `EventEmitter` pattern used in previous versions. Almost 80% of the code has been re-written. You can use a bunch of operators provided by `rxjs` as well as `silkrouter`. You can create your own operators if you want.
+Silk router uses `Observable` and `Subscription` classes from `rxjs`. You need to install this package separately.
 
-# RxJS
-
-Silk router uses classes such as `Observables` and `Subscription` provided by `rxjs`. RxJS is a peer dependency which means you need to install it separately.
-
-# How to use Silk router
-
-Silkrouter syntax has changed (and for good).
+# How to use Silk router?
 
 1. Import
 
@@ -39,31 +33,31 @@ import { route } from 'silkrouter/operators';
 const router = new Router();
 ```
 
+You can create multiple instances depending on your requirement.
+
 3. Add a subscriber
 
 ```js
 router.subscribe((e) => {
-  // This is your new generic route syntax
+  // Generic route listener. Listens to every route change.
 });
 ```
 
-4. Use `route` operator to add a path
-
-Use `pipe` method to chain an operator (similar to RxJS)
+4. Add a `route` operator using `pipe` to use path
 
 ```js
 router.pipe(route('/path/to/route')).subscribe((e) => {
-  // This listens to a specific route '/path/to/route'
+  // Listens to a specific route '/path/to/route'
 });
 ```
 
 5. Trigger a route change
 
 ```js
-router.set('/path/to/another/route');
+router.set('/path/to/route');
 ```
 
-You can `pipe` as many operators you want. Please refer to API section below for more details.
+You can `pipe` multiple operators at once. Please refer to API section below for more details.
 
 # API
 
@@ -71,31 +65,31 @@ You can `pipe` as many operators you want. Please refer to API section below for
 
 | Class      | Description               | Options and Example                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | :--------- | :------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Router** | Creates a router instance | ` new Router({ /*Router options*/ })`<br><br>Router options:<br><br> **hashRouting**[optional] - Enables hash routing (default: `false`)<br> **preservePath**[optional] - Preserves existing `pathname` when hashRouting is enabled (default: `false`)<br> **context**[optional] - Element reference to bind `vpushstate` synthetic event (default: `document.body`)<br> **init**[optional] - Enable/disable handler execution on initialization (default: `true`) |
+| **Router** | Creates a router instance | ` new Router({ /*Router options*/ })`<br><br>Router options:<br><br> **hashRouting**[optional] - Enables hash routing (default: `false`)<br> **preservePath**[optional] - Preserves existing `pathname` when hashRouting is enabled (default: `false`)<br> **context**[optional] - Element reference to bind `vpushstate` virtual event. You can bind your own listener to listen to this event for specific use-cases (default: `document.body`)<br> **init**[optional] - Enable/disable handler execution on initialization (default: `true`) |
 
 ## Router methods
 
 | Method        | Description                              | Example                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | :------------ | :--------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **set**       | Sets browser router path                 | `routerIns.set(pathStringOrObject[, replace][, exec])`<br><br>Set parameters:<br><br> **pathStringOrObject** - String or object to configure current path<br>Examples:<br>`routerIns.set('/example/path')`<br>`routerIns.set({ route: '/example/path', /*...otherOptions*/ })`<br>**replace**[optional] - Use history `replaceState` function instead of `pushState` (default: `false`).<br>**exec**[optional] - Disable or enable subscriber execution (default: `true`)<br><br>Path object options: **route, data, queryString, preserveQuery** (bool)**, pageTitle, replace** (bool)**, exec** (bool) |
+| **set**       | Sets browser router path                 | `routerIns.set(path[, replace][, exec])`<br><br>Set parameters:<br><br> **path** - String or object to configure current path<br>Examples:<br>`routerIns.set('/example/path')`<br>`routerIns.set({ route: '/example/path', /*...options*/ })`<br>**replace**[optional] - Enables `history.replaceState` to replace current route instead of pushing a new one (default: `false`).<br>**exec**[optional] - Enables or disables handler (default: `true`)<br><br>Path options: **route, data, queryString, preserveQuery** (bool)**, pageTitle, replace** (bool)**, exec** (bool) |
 | **subscribe** | Returns RxJS subscription                | `routerIns.subscribe(e => { ... })`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| **pipe**      | Pipes operators to return new observable | `routerIns.pipe(route('/example/route')).subscribe(e => { ... })`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **pipe**      | Pipe operators and return new observable | `routerIns.pipe(route('/example/route')).subscribe(e => { ... })`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | **destroy**   | Destroys current router instance         | `routerIns.destroy(() => { /* Unsubscribe your subscriptions here */ })`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ## Operators
 
 | Operator    | Description                                                                      | Example                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | :---------- | :------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **route**   | Set a filter for specific route path                                             | `routerIns.pipe(route(path[, routerIns][, ignoreCase])).subscribe(...)`<br><br>`route` options:<br><br> **path** - Path filter to apply on generic route observer<br> **routerIns**[optional] - Current `Router` instance. Required only if `noMatch` operator is used.<br> **ignoreCase**[optional] - Ignores the case of current route                                                                                                                                                                                                                                                                               |
-| **deparam** | Converts query string to JS object                                               | **Before:** `routerIns.subscribe(e => { console.log(e.search); })`.<br>Output: **a=10&b=20**<br> **After:** `routerIns.pipe(deparam()).subscribe(e => { console.log(e.search); })`.<br>Output: **{ a:"10", b:"20" }**<br><br>`deparam` options:<br><br> **coerce**[optional] - Converts object properties to their correct types                                                                                                                                                                                                                                                                                       |
+| **route**   | Sets a route filter                                             | `routerIns.pipe(route(path[, routerIns][, ignoreCase])).subscribe(...)`<br><br>`route` options:<br><br> **path** - Route path<br> **routerIns**[optional] - Current `Router` instance. Required if `noMatch` operator has to be used.<br> **ignoreCase**[optional] - Ignores the case of current route                                                                                                                                                                                                                                                                               |
+| **deparam** | Converts query string to JS object                                               | **Before:** `routerIns.subscribe(e => { console.log(e.search); })`.<br>Output: **'a=10&b=20'**<br> **After:** `routerIns.pipe(deparam()).subscribe(e => { console.log(e.search); })`.<br>Output: **{ a:"10", b:"20" }**<br><br>`deparam` options:<br><br> **coerce**[optional] - Converts object properties to their correct types                                                                                                                                                                                                                                                                                       |
 | **noMatch** | Adds an optional route for 'page not found'                                      | `routerIns.pipe(noMatch(routerIns)).subscribe(...)`<br><br>`noMatch` options:<br><br> **routerIns** - Router instance for tracking current routes                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| **cache**   | Caches event object to call subscribers only if there is a change in URL or data | `routerIns.pipe(cache([keys][, deep])).subscribe(e => { ... })`<br><br>`cache` options:<br>**keys**[optional] - Event object keys which you want to cache and compare<br>**deep**[optional] - Enable deep comparison (By default shallow comparison is used)<br><br>Examples:<br>1. Perform shallow comparison of all keys (excluding event objects)<br>`routerIns.pipe(cache()).subscribe(e => { ... })`<br>2. Perform deep comparison<br>`routerIns.pipe(cache(true)).subscribe(e => { ... })`<br>3. Perform comparison on selected keys<br>`routerIns.pipe(cache(['route', 'data'], true)).subscribe(e => { ... })` |
+| **cache**   | Caches the event to call subscribers only if there is a change in URL or data | `routerIns.pipe(cache([keys][, deep])).subscribe(e => { ... })`<br><br>`cache` options:<br>**keys**[optional] - Event object keys which you want to cache and compare<br>**deep**[optional] - Enable deep comparison (By default shallow comparison is used)<br><br>Examples:<br>1. Perform shallow comparison of all keys (excluding event objects)<br>`routerIns.pipe(cache()).subscribe(e => { ... })`<br>2. Perform deep comparison<br>`routerIns.pipe(cache(true)).subscribe(e => { ... })`<br>3. Perform comparison on selected keys<br>`routerIns.pipe(cache(['route', 'data'], true)).subscribe(e => { ... })` |
 
 # Examples
 
 ## Enable hash routing
 
-Unlike previous versions of silk router, `hash` routing has to be enabled via flag.
+Unlike previous versions, `hash` routing has to be enabled via flag.
 
 ```js
 const router = new Router({
@@ -103,8 +97,8 @@ const router = new Router({
 });
 ```
 
-Your application will continue to run the same way. Hash routing strips away the dependency to define server-side routes for your application (since hash routing is pretty much client-side).<br><br>
-By default hash routes replaces your current path. In order to keep the current path, you need to pass an additional flag called `preservePath`.
+Your application will continue to run the same way. Hash routing strips away the dependency to define server-side routes for your application.<br><br>
+By default hash route replaces your current path. You need to pass an additional flag called `preservePath` to keep the current path.
 
 ```js
 const router = new Router({
@@ -113,9 +107,9 @@ const router = new Router({
 });
 ```
 
-## Handle error page
+## Handle not found page
 
-Silk router version 4 brings a neat way to handle error pages using operators. It comes with built-in `noMatch` operator which works as an error handler keeping track of routes that have been added previously, and call subsriber only if a route is missing.
+Silk router comes with built-in `noMatch` operator that works as an not-found handler.
 
 ```js
 const router = new Router();
@@ -125,7 +119,7 @@ router.pipe(route('/second/path', router)).subscribe(() => { ... });
 router.pipe(noMatch(router)).subscribe(() => { ... }); // Called only if "first" and "second" paths are not matched
 ```
 
-Make sure to pass the current router instance as parameter.
+Make sure to pass the current router instance as second parameter.
 
 ## Passing data
 
@@ -133,7 +127,7 @@ There are three ways you can pass data.
 
 1. Route params
 2. Query strings
-3. Direct method
+3. Route state
 
 ### Route params
 
