@@ -13,23 +13,20 @@
       return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
     }, _typeof$1(obj);
   }
-
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-
   function _defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+      Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor);
     }
   }
-
   function _createClass(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties(Constructor, staticProps);
@@ -37,6 +34,20 @@
       writable: false
     });
     return Constructor;
+  }
+  function _toPrimitive(input, hint) {
+    if (typeof input !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (typeof res !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
+  function _toPropertyKey(arg) {
+    var key = _toPrimitive(arg, "string");
+    return typeof key === "symbol" ? key : String(key);
   }
 
   /**
@@ -362,44 +373,41 @@
   /**
    * Shorthand for Array.isArray
    */
-
   var isArr = Array.isArray;
+
   /**
    * Shorthand for Object.keys
    */
-
   var oKeys = Object.keys;
+
   /**
    * Safely trims string
    * @param {string} str String
    */
-
   function trim(str) {
     return _typeof$1(str) === TYPEOF_STR$1 ? str.trim() : EMPTY;
   }
+
   /**
    * Checks if given route is valid
    * @private
    * @param {string} route Route string
    */
-
   function isValidRoute(route) {
     return REG_PATHNAME.test(route);
   }
+
   /**
    * Loops over an array like object
    * @param {object} arrayObj Array or array like object
    * @param {function} callback Callback function
    */
-
   function each(arrayObj, callback) {
     if (isObject(arrayObj)) {
       var keys = oKeys(arrayObj);
-
       for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
         var cont = callback(arrayObj[key], isNumber(key) ? +key : key);
-
         if (_typeof$1(cont) === TYPEOF_BOOL) {
           if (!cont) {
             break;
@@ -415,10 +423,8 @@
    * @param {string} eventType Event type
    * @param {any[]} data Data to be passed to handler
    */
-
   function trigger(target, eventType, data) {
     target = Array.from(target instanceof Node ? [target] : target);
-
     if (target.length && _typeof$1(eventType) === TYPEOF_STR$1) {
       each(target, function (el) {
         var win = getGlobal();
@@ -434,14 +440,13 @@
 
   var RouterEvent = /*#__PURE__*/_createClass(function RouterEvent(routeInfo, currentEvent) {
     _classCallCheck(this, RouterEvent);
-
     // Set relevant parameters
     var routeObject = routeInfo[0];
     var originalEvent = routeInfo[1];
     var routerInstance = routeInfo[2];
     var _routerInstance$confi = routerInstance.config,
-        location = _routerInstance$confi.location,
-        history = _routerInstance$confi.history;
+      location = _routerInstance$confi.location,
+      history = _routerInstance$confi.history;
     this.route = routeObject.path;
     this.hashRouting = routeObject.hash;
     this.routerInstance = routerInstance;
@@ -457,13 +462,11 @@
 
   function collate() {
     var _this = this;
-
     return function (observable) {
       return new rxjs.Observable(function (subscriber) {
         var subn = observable.subscribe({
           next: function next(event) {
             var routerInstance = event.detail[2];
-
             if (routerInstance === _this) {
               subscriber.next(new RouterEvent(event.detail, event));
             }
@@ -484,12 +487,11 @@
 
   function bindRouterEvents(inst) {
     var _inst$config = inst.config,
-        context = _inst$config.context,
-        location = _inst$config.location,
-        hash = _inst$config.hashRouting;
+      context = _inst$config.context,
+      location = _inst$config.location,
+      hash = _inst$config.hashRouting;
     inst.popStateSubscription = rxjs.fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
       var path = getPath(hash, location);
-
       if (path) {
         trigger(context, VIRTUAL_PUSHSTATE, [{
           path: path,
@@ -498,13 +500,13 @@
       }
     });
     inst.listeners = rxjs.fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(inst));
-
     if (hash && !location.hash) {
       inst.set('/', true, false); // Replace current hash path without executing anythings
     }
   }
 
   var encode = encodeURIComponent;
+
   /**
    * Builds query string recursively
    * @private
@@ -512,7 +514,6 @@
    * @param {*} key Key
    * @param {*} obj Value
    */
-
   function buildQuery(qsList, key, obj) {
     if (isObject(obj)) {
       each(obj, function (prop, obKey) {
@@ -522,24 +523,21 @@
       qsList.push("".concat(encode(key), "=").concat(encode(obj)));
     }
   }
+
   /**
    * Converts an object to a query string
    * @private
    * @param {object} obj Object which should be converted to a string
    * @returns {string}
    */
-
-
   function toQueryString(obj) {
     var qsList = [];
-
     if (isObject(obj)) {
       each(obj, function (prop, key) {
         buildQuery(qsList, key, prop);
       });
       return qsList.join(AMP);
     }
-
     return _typeof$1(obj) === TYPEOF_STR$1 ? obj : EMPTY;
   }
 
@@ -549,30 +547,25 @@
    * @param {string} queryString Query string
    * @param {string} hashRouting Flag to test if hash routing is enabled
    */
-
   function resolveQuery(queryString, hashRouting) {
     var location = this.config.location;
     var search = trim(location.search && location.search.substring(1));
     var existingQuery = trim(hashRouting ? location.hash.split(QRY)[1] : search);
-
     if (!existingQuery) {
       return queryString;
     }
-
     return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
   }
 
   function set(route, replace, doExec) {
     var exec = true;
-
     if (_typeof$1(doExec) === TYPEOF_BOOL) {
       exec = doExec;
     }
-
     var _this$config = this.config,
-        preservePath = _this$config.preservePath,
-        hashRouting = _this$config.hashRouting,
-        history = _this$config.history;
+      preservePath = _this$config.preservePath,
+      hashRouting = _this$config.hashRouting,
+      history = _this$config.history;
     var routeObject = assign({
       replace: replace,
       exec: exec
@@ -582,42 +575,37 @@
     replace = routeObject.replace;
     exec = routeObject.exec;
     var routeStr = routeObject.route,
-        queryString = routeObject.queryString;
+      queryString = routeObject.queryString;
     var preserveQuery = routeObject.preserveQuery,
-        data = routeObject.data,
-        _routeObject$pageTitl = routeObject.pageTitle,
-        pageTitle = _routeObject$pageTitl === void 0 ? null : _routeObject$pageTitl;
-    var routeParts = routeStr.split(QRY); // Check if query string is an object
-
+      data = routeObject.data,
+      _routeObject$pageTitl = routeObject.pageTitle,
+      pageTitle = _routeObject$pageTitl === void 0 ? null : _routeObject$pageTitl;
+    var routeParts = routeStr.split(QRY);
+    // Check if query string is an object
     if (isObject(queryString)) {
       queryString = toQueryString(queryString);
-    } // Resolve to URL query string if it's not explicitly passed
-
-
+    }
+    // Resolve to URL query string if it's not explicitly passed
     queryString = trim(queryString ? queryString : routeParts[1]);
-    routeStr = trim(routeParts[0]); // Check if query preservation is required. Resolve query accordingly
-
+    routeStr = trim(routeParts[0]);
+    // Check if query preservation is required. Resolve query accordingly
     if (preserveQuery) {
       queryString = resolveQuery.apply(this, [queryString, hashRouting]);
     }
-
     if (isValidRoute(routeStr)) {
       var unmodifiedRoute = routeStr;
-
       if (hashRouting) {
-        routeStr = "/#".concat(routeStr); // Path preservation should only work for hash routing
-
+        routeStr = "/#".concat(routeStr);
+        // Path preservation should only work for hash routing
         if (preservePath) {
           routeStr = "".concat(routeStr.substring(1));
         }
-      } // Append query string
-
-
+      }
+      // Append query string
       routeStr = "".concat(routeStr).concat(queryString ? "".concat(QRY + queryString) : EMPTY);
       history[replace ? REPLACE : PUSH]({
         data: data
       }, pageTitle, routeStr);
-
       if (exec && unmodifiedRoute) {
         trigger(this.config.context, VIRTUAL_PUSHSTATE, [{
           path: unmodifiedRoute,
@@ -627,25 +615,21 @@
     } else {
       throw new TypeError(INVALID_ROUTE);
     }
-
     return this;
   }
 
   function callOnce(isDone) {
     var _this = this;
-
     var _this$config = this.config,
-        hash = _this$config.hashRouting,
-        location = _this$config.location,
-        init = _this$config.init;
+      hash = _this$config.hashRouting,
+      location = _this$config.location,
+      init = _this$config.init;
     var path = getPath(hash, location);
     return function (observable) {
       return new rxjs.Observable(function (subscriber) {
         var subn = observable.subscribe(subscriber);
-
         if (!isDone) {
           isDone = true;
-
           if (init && path) {
             subscriber.next(new RouterEvent([{
               path: path,
@@ -653,7 +637,6 @@
             }, UNDEF$1, _this]));
           }
         }
-
         return function () {
           subn.unsubscribe();
         };
@@ -664,16 +647,13 @@
   var Router = /*#__PURE__*/function () {
     function Router(config) {
       _classCallCheck(this, Router);
-
       var _getGlobal = getGlobal(),
-          history = _getGlobal.history,
-          location = _getGlobal.location,
-          document = _getGlobal.document;
-
+        history = _getGlobal.history,
+        location = _getGlobal.location,
+        document = _getGlobal.document;
       if (!history[PUSH]) {
         throw new Error(HISTORY_UNSUPPORTED);
       }
-
       this.config = Object.freeze(assign({
         init: true,
         // Initialize as soon as route handler is attached
@@ -686,28 +666,23 @@
         location: location,
         // Should remain unchanged
         history: history // History object
-
       }, config || {}));
       this.__paths__ = [];
       bindRouterEvents(this);
     }
-
     _createClass(Router, [{
       key: "pipe",
       value: function pipe() {
         var _this$listeners;
-
         for (var _len = arguments.length, ops = new Array(_len), _key = 0; _key < _len; _key++) {
           ops[_key] = arguments[_key];
         }
-
         return (_this$listeners = this.listeners).pipe.apply(_this$listeners, [callOnce.apply(this)].concat(ops));
       }
     }, {
       key: "subscribe",
       value: function subscribe() {
         var _this$pipe;
-
         return (_this$pipe = this.pipe()).subscribe.apply(_this$pipe, arguments);
       }
     }, {
@@ -716,7 +691,6 @@
         for (var _len2 = arguments.length, props = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
           props[_key2] = arguments[_key2];
         }
-
         return set.apply(this, props);
       }
     }, {
@@ -725,13 +699,10 @@
         if (_typeof$1(callback) === TYPEOF_FUNC) {
           callback();
         }
-
         this.popStateSubscription.unsubscribe(); // Unsubscribe popstate event
-
         this.__paths__.length = 0;
       }
     }]);
-
     return Router;
   }();
 
@@ -742,14 +713,11 @@
    * @param {string} path URL path
    * @returns {object}
    */
-
   function extractParams(expr, path) {
     var params = {};
-
     if (REG_ROUTE_PARAMS.test(expr)) {
       var pathRegex = new RegExp(expr.replace(/\//g, '\\/').replace(/:[^/\\]+/g, '([^\\/]+)'));
       REG_ROUTE_PARAMS.lastIndex = 0;
-
       if (pathRegex.test(path)) {
         var keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
           return key.replace(':', EMPTY);
@@ -761,7 +729,6 @@
         });
       }
     }
-
     return params;
   }
 
@@ -771,43 +738,34 @@
    * @param {Router} routerInstance Current router object [optional]
    * @param {boolean} ignoreCase Ignore case in route string
    */
-
   function route(routeStr, routerInstance, ignoreCase) {
     if (_typeof$1(routerInstance) === TYPEOF_BOOL) {
       ignoreCase = routerInstance;
       routerInstance = UNDEF$1;
     }
-
     routeStr = trim(routeStr);
-
     if (routerInstance instanceof Router) {
       var paths = routerInstance.__paths__;
-
       if (paths.indexOf(routeStr) === -1) {
         paths.push(routeStr);
       }
     }
-
     return function (observable) {
       return new rxjs.Observable(function (subscriber) {
         var subn = observable.subscribe({
           next: function next(event) {
             var incomingRoute = event.route;
-
             if (isValidRoute(routeStr)) {
               if (ignoreCase) {
                 routeStr = routeStr.toLowerCase();
                 incomingRoute = incomingRoute.toLowerCase();
               }
-
               var params = extractParams(routeStr, incomingRoute);
               var paramsLength = oKeys(params).length;
-
               if (incomingRoute === routeStr || paramsLength > 0) {
                 if (paramsLength > 0) {
                   event.params = params;
                 }
-
                 subscriber.next(event);
               }
             } else {
@@ -820,24 +778,21 @@
         return function () {
           if (routerInstance instanceof Router) {
             var _paths = routerInstance.__paths__;
-
             var existingRouteIndex = _paths.indexOf(routeStr);
-
             if (existingRouteIndex > -1) {
               _paths.splice(existingRouteIndex, 1);
             }
           }
-
           subn.unsubscribe();
         };
       });
     };
   }
+
   /**
    * Converts search and hashSearch strings to object
    * @param {boolean} coerce Flag to enable value typecast
    */
-
   function deparam(coerce) {
     return function (observable) {
       return new rxjs.Observable(function (subscriber) {
@@ -860,11 +815,11 @@
       });
     };
   }
+
   /**
    * Modifies current subscriber to detect errors
    * @param {Router} routerInstance Current router object
    */
-
   function noMatch(routerInstance) {
     return function (observable) {
       return new rxjs.Observable(function (subscriber) {
@@ -872,7 +827,6 @@
           next: function next(event) {
             if (routerInstance instanceof Router) {
               var paths = routerInstance.__paths__;
-
               if (paths.length > 0) {
                 var currentRoute = event.route;
                 var match = false;
@@ -881,7 +835,6 @@
                     return !(match = true);
                   }
                 });
-
                 if (!match) {
                   event.noMatch = true;
                   subscriber.next(event);
@@ -898,7 +851,6 @@
       });
     };
   }
-
   function deepComparison(first, second, result) {
     each(oKeys(first), function (key) {
       if (isObject(first[key]) && isObject(second[key])) {
@@ -908,23 +860,20 @@
       }
     });
   }
+
   /**
    * Caches incoming routes to avoid calling handler if there is no change
    * @param {string[]} keys
    * @param {boolean} deep
    */
-
-
   function cache() {
     var keys = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : CACHED_FIELDS;
     var deep = arguments.length > 1 ? arguments[1] : undefined;
     var cache = {};
-
     if (_typeof$1(keys) === TYPEOF_BOOL) {
       deep = keys;
       keys = CACHED_FIELDS;
     }
-
     return function (observable) {
       return new rxjs.Observable(function (subscriber) {
         var subn = observable.subscribe({
@@ -933,7 +882,6 @@
               if (deep && isObject(event[key]) && isObject(cache[key])) {
                 var result = {};
                 deepComparison(event[key], cache[key], result);
-
                 if (result["break"]) {
                   assign(cache, event);
                   subscriber.next(event);
@@ -946,6 +894,7 @@
               }
             });
           },
+
           error: subscriber.error,
           complete: subscriber.complete
         });
