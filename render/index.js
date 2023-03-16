@@ -18,90 +18,17 @@ function q(selector) {
       });
     return elArray;
   }
+  // rome-ignore lint/style/noArguments: Keeping default behaviour of querySelectorAll
   return [...document.querySelectorAll(...arguments)];
 }
 
-function keywordHighlight(text) {
-  [
-    '(new|throw|let|const|var|typeof|instanceof|in|of|import|case|extends|delete)(\\s)',
-    '(function|class|try|catch|finally|do|else)(\\s|{)',
-    '(for|while|if)(\\s|\\()',
-    '(return|break|continue)(\\s|;)',
-  ].forEach((matcher) => {
-    const regex = new RegExp(matcher, 'g');
-    if (regex.test(text)) {
-      text = text.replace(regex, (...args) => {
-        const [, keyword, extra] = args;
-        return `<span class="keyword">${keyword}</span>${extra}`;
-      });
-    }
-  });
-  return text;
-}
-
-function methodHighlight(text) {
-  text = text.replace(
-    /(\.)([^;:'",.())?|\\/^*@%#!~+-[\]{}=]+)(\()/g,
-    (...args) => {
-      const [, dot, method, brace] = args;
-      return `${dot}<span class="method">${method}</span>${brace}`;
-    }
-  );
-  return text;
-}
-
-function suppressComments(text) {
-  text = text.replace(
-    /\/\/[^\n]+/g,
-    (comment) => `<span class="comment">${comment}</span>`
-  );
-  return text;
-}
-
-function highlightFatArrow(text) {
-  text = text.replace(
-    /\s=&gt;\s/g,
-    (fatArrow) => `<span class="fat-arrow">${fatArrow}</span>`
-  );
-  return text;
-}
-
-function highlightString(text) {
-  text = text.replace(
-    /['"`].*['"`]/g,
-    (str) => `<span class="str">${str.replace(/\//g, '&#47;')}</span>`
-  );
-  return text;
-}
-
-function jsHighlight(text) {
-  text = highlightString(text);
-  text = keywordHighlight(text);
-  text = methodHighlight(text);
-  text = suppressComments(text);
-  text = highlightFatArrow(text);
-  return text;
-}
-
-function renderDecorators() {
-  q('code pre').forEach((decorator) => {
-    let html = decorator.innerHTML;
-    const pattern = html.match(/^\s+/);
-    const originalIndent = pattern && pattern[0].length;
-    html = html
-      .split('\n')
-      .map((codePart) => {
-        return codePart.substring(originalIndent);
-      })
-      .join('\n');
-    decorator.innerHTML = jsHighlight(html.trim());
-  });
-}
-
 function renderVersion() {
-  q('.version').forEach(
-    (el) => (el.querySelector('span').textContent = pkg.version)
-  );
+  q('.version').forEach((el) => {
+    const wrapper = el.querySelector('span');
+    if (wrapper) {
+      wrapper.textContent = pkg.version;
+    }
+  });
 }
 
 function initializeRouting() {
@@ -144,7 +71,7 @@ function initializeRouting() {
       ? '/silkrouter/tab3/:firstname/:lastname'
       : '/tab3/:firstname/:lastname';
   router.pipe(route(paramsRoute), deparam(true)).subscribe((e) => {
-    q('.params-data pre').forEach((el) => {
+    q('.params-data').forEach((el) => {
       el.textContent = JSON.stringify(e.params, null, 2);
     });
     q('.params-data, .query-next-step').forEach((el) => {
@@ -152,7 +79,7 @@ function initializeRouting() {
     });
     if (Object.keys(e.search).length) {
       q('.query-data').forEach((el) => {
-        el.querySelector('pre').textContent = JSON.stringify(e.search, null, 2);
+        el.textContent = JSON.stringify(e.search, null, 2);
         el.classList.remove('d-none');
       });
       q('.data-next-step').forEach((el) => {
@@ -161,7 +88,7 @@ function initializeRouting() {
     }
     if (e.data) {
       q('.state-data').forEach((el) => {
-        el.querySelector('pre').textContent = e.data;
+        el.textContent = e.data;
         el.classList.remove('d-none');
       });
       q('.pass-data-tutorial').forEach((el) => {
@@ -271,6 +198,5 @@ function setGlobals() {
 }
 
 initializeRouting();
-renderDecorators();
 renderVersion();
 setGlobals();

@@ -3,10 +3,11 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "correctness": {
-        "useValidTypeof": "off"
+      "suspicious": {
+        "useValidTypeof": "off",
+        "noExplicitAny": "warn"
       },
-      "style": {
+      "complexity": {
         "useOptionalChain": "off"
       }
     }
