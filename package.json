@@ -1,6 +1,6 @@
 {
   "name": "silkrouter",
-  "version": "4.2.16",
+  "version": "4.2.17",
   "description": "Silk router is an app routing library",
   "main": "dist/umd/silkrouter.min.js",
   "module": "dist/esm/silkrouter.esm.min.js",
