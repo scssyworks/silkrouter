@@ -115,9 +115,9 @@ function initializeRouting() {
           ) {
             route = route.replace(/\/silkrouter\//, '/');
           }
-          childRouter.set(route);
+          childRouter.navigate(route);
         } else {
-          router.set(route);
+          router.navigate(route);
         }
       }
     });
@@ -132,7 +132,7 @@ function initializeRouting() {
     });
     q('.append-param').forEach((el) => {
       if (el.contains(e.target)) {
-        router.set(
+        router.navigate(
           `${
             location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''
           }/tab3/john/doe`
@@ -141,7 +141,7 @@ function initializeRouting() {
     });
     q('.append-query').forEach((el) => {
       if (el.contains(e.target)) {
-        router.set({
+        router.navigate({
           route: `${
             location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''
           }/tab3/john/doe`,

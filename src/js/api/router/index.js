@@ -18,14 +18,14 @@ export default class Router {
           hashRouting: false, // Switch to hash routing
           preservePath: false, // Works for hash routing
           context: document.body, // To change the context of "vpushstate" event
-          location, // Should remain unchanged
-          history, // History object
+          location, // Should be used for unit testing purpose
+          history, // Should be used for unit testing purpose
         },
         config || {}
       )
     );
     this.__paths__ = [];
-    bindRouterEvents(this);
+    bindRouterEvents.call(this, this.config);
   }
   pipe(...ops) {
     return this.listeners.pipe(callOnce.apply(this), ...ops);
@@ -33,7 +33,7 @@ export default class Router {
   subscribe(...fns) {
     return this.pipe().subscribe(...fns);
   }
-  set(...props) {
+  navigate(...props) {
     return set.apply(this, props);
   }
   destroy(callback) {

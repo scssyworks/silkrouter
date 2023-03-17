@@ -1557,23 +1557,23 @@
     return trim(isHash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
   };
 
-  function bindRouterEvents(inst) {
-    var _inst$config = inst.config,
-      context = _inst$config.context,
-      location = _inst$config.location,
-      hash = _inst$config.hashRouting;
-    inst.popStateSubscription = fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
+  function bindRouterEvents(config) {
+    var _this = this;
+    var context = config.context,
+      location = config.location,
+      hash = config.hashRouting;
+    this.popStateSubscription = fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
       var path = getPath(hash, location);
       if (path) {
         trigger(context, VIRTUAL_PUSHSTATE, [{
           path: path,
           hash: hash
-        }, e, inst]);
+        }, e, _this]);
       }
     });
-    inst.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(inst));
+    this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(this));
     if (hash && !location.hash) {
-      inst.set('/', true, false); // Replace current hash path without executing anythings
+      this.navigate('/', true, false); // Replace current hash path without executing anythings
     }
   }
 
@@ -1736,11 +1736,11 @@
         context: document.body,
         // To change the context of "vpushstate" event
         location: location,
-        // Should remain unchanged
-        history: history // History object
+        // Should be used for unit testing purpose
+        history: history // Should be used for unit testing purpose
       }, config || {}));
       this.__paths__ = [];
-      bindRouterEvents(this);
+      bindRouterEvents.call(this, this.config);
     }
     _createClass(Router, [{
       key: "pipe",
@@ -1758,8 +1758,8 @@
         return (_this$pipe = this.pipe()).subscribe.apply(_this$pipe, arguments);
       }
     }, {
-      key: "set",
-      value: function set$1() {
+      key: "navigate",
+      value: function navigate() {
         for (var _len2 = arguments.length, props = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
           props[_key2] = arguments[_key2];
         }
@@ -1978,7 +1978,7 @@
     };
   }
 
-  const name="silkrouter";const version="4.2.16";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist",test:"jest tests/*",deploy:"gh-pages -d dist",format:"rome format ./src --write",lint:"rome check ./src","check:sanity":"npm run lint && npm run format"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"deparam.js":"^3.0.6"};const devDependencies={"@babel/core":"^7.21.3","@babel/eslint-parser":"^7.21.3","@babel/preset-env":"^7.20.2","@rollup/plugin-babel":"^6.0.3","@rollup/plugin-commonjs":"^24.0.1","@rollup/plugin-eslint":"^9.0.3","@rollup/plugin-json":"^6.0.0","@rollup/plugin-node-resolve":"^15.0.1","@rollup/plugin-terser":"^0.4.0","@types/jest":"^29.4.4","env-cmd":"^10.1.0",eslint:"^8.36.0","gh-pages":"^5.0.0",jest:"^29.5.0",rollup:"^2.79.1","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.2",rome:"^11.0.0",rxjs:"^7.8.0"};const peerDependencies={rxjs:"^7.8.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
+  const name="silkrouter";const version="4.2.17";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist",test:"jest tests/*",deploy:"gh-pages -d dist",format:"rome format ./src --write",lint:"rome check ./src","check:sanity":"npm run lint && npm run format"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"deparam.js":"^3.0.6"};const devDependencies={"@babel/core":"^7.21.3","@babel/eslint-parser":"^7.21.3","@babel/preset-env":"^7.20.2","@rollup/plugin-babel":"^6.0.3","@rollup/plugin-commonjs":"^24.0.1","@rollup/plugin-eslint":"^9.0.3","@rollup/plugin-json":"^6.0.0","@rollup/plugin-node-resolve":"^15.0.1","@rollup/plugin-terser":"^0.4.0","@types/jest":"^29.4.4","env-cmd":"^10.1.0",eslint:"^8.36.0","gh-pages":"^5.0.0",jest:"^29.5.0",rollup:"^2.79.1","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.2",rome:"^11.0.0",rxjs:"^7.8.0"};const peerDependencies={rxjs:"^7.8.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
 
   function q(selector) {
     var _document;
@@ -2076,9 +2076,9 @@
             if (location.hostname === 'scssyworks.github.io' && childRouter.config.hashRouting) {
               _route = _route.replace(/\/silkrouter\//, '/');
             }
-            childRouter.set(_route);
+            childRouter.navigate(_route);
           } else {
-            router.set(_route);
+            router.navigate(_route);
           }
         }
       });
@@ -2090,12 +2090,12 @@
       });
       q('.append-param').forEach(function (el) {
         if (el.contains(e.target)) {
-          router.set("".concat(location.hostname === 'scssyworks.github.io' ? '/silkrouter' : '', "/tab3/john/doe"));
+          router.navigate("".concat(location.hostname === 'scssyworks.github.io' ? '/silkrouter' : '', "/tab3/john/doe"));
         }
       });
       q('.append-query').forEach(function (el) {
         if (el.contains(e.target)) {
-          router.set({
+          router.navigate({
             route: "".concat(location.hostname === 'scssyworks.github.io' ? '/silkrouter' : '', "/tab3/john/doe"),
             queryString: 'q=HelloWorld'
           });
