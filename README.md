@@ -1,12 +1,11 @@
 [![Node.js CI](https://github.com/scssyworks/silkrouter/actions/workflows/node.js.yml/badge.svg)](https://github.com/scssyworks/silkrouter/actions/workflows/node.js.yml) ![License](https://img.shields.io/github/license/scssyworks/silkrouter) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.min.js?label=minified) ![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.js?label=unminified)
 
-**For version 3 documentation please click on the link below:**<br>
-https://github.com/scssyworks/silkrouter/blob/master/READMEv3.md
-
 # Silk router
 
 Silk router is a reactive app routing library.
 
+# [[NOTE]]
+Silk router version 5 has dropped support for all the older, reluctant to change browsers to focus on only the latest and greatest ones. It not only makes silkrouter faster and lighter, it also allow us to add more functionality to it.
 # Install
 
 ```sh
