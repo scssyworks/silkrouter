@@ -15,6 +15,11 @@ import callOnce from '../callOnce';
  * Core router class to handle basic routing functionality
  */
 export class RouterCore {
+  /**
+   * Router core constructor
+   * @typedef {import('./types').RouterCoreConfig} RouterCoreConfig
+   * @param {RouterCoreConfig} routerCoreConfig Route core configuration
+   */
   constructor({ global, history, context, location, hash }) {
     if (!history[PUSH]) {
       throw new Error(HISTORY_UNSUPPORTED);
@@ -36,6 +41,10 @@ export class RouterCore {
   subscribe(...fns) {
     return this.pipe().subscribe(...fns);
   }
+  /**
+   * Destroys current router instance
+   * @param {() => void} callback Callback for destroy function
+   */
   destroy(callback) {
     if (typeof callback === TYPEOF_FUNC) {
       callback();

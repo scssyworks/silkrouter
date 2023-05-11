@@ -10,8 +10,8 @@ import { QRY } from '../../utils/constants';
  * @param {string} queryString Query string
  * @param {string} hashRouting Flag to test if hash routing is enabled
  */
-export default function resolveQuery(queryString, hashRouting) {
-  const { location } = this.config;
+export default function resolveQuery(config, queryString, hashRouting) {
+  const { location } = config;
   const search = trim(location.search && location.search.substring(1));
   const existingQuery = trim(
     hashRouting ? location.hash.split(QRY)[1] : search

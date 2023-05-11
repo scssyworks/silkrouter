@@ -38,6 +38,7 @@ function initializeRouting() {
   const router = new Router();
   let childRouter = router;
   router.subscribe((e) => {
+    console.log(e);
     const eventRoute =
       location.hostname === 'scssyworks.github.io'
         ? e.route.replace(/\/silkrouter\//, '/')
@@ -141,23 +142,27 @@ function initializeRouting() {
     });
     q('.append-query').forEach((el) => {
       if (el.contains(e.target)) {
-        router.set({
-          route: `${
+        router.set(
+          `${
             location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''
           }/tab3/john/doe`,
-          queryString: 'q=HelloWorld',
-        });
+          {
+            queryString: 'q=HelloWorld',
+          }
+        );
       }
     });
     q('.append-data').forEach((el) => {
       if (el.contains(e.target)) {
-        router.set({
-          route: `${
+        router.set(
+          `${
             location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''
           }/tab3/john/doe`,
-          queryString: 'q=HelloWorld',
-          data: 'Hi there!',
-        });
+          {
+            queryString: 'q=HelloWorld',
+            data: 'Hi there!',
+          }
+        );
       }
     });
   });

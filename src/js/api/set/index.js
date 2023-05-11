@@ -1,64 +1,58 @@
-import { isObject } from 'deparam.js';
 import { trigger } from '../../utils/triggerEvent';
 import {
   VIRTUAL_PUSHSTATE,
   INVALID_ROUTE,
   UNDEF,
-  TYPEOF_STR,
   EMPTY,
   QRY,
   REPLACE,
   PUSH,
-  TYPEOF_BOOL,
 } from '../../utils/constants';
 import { isValidRoute, trim } from '../../utils/utils';
-import { toQueryString } from '../../utils/query';
-import resolveQuery from '../resolveQuery';
-import { assign } from '../../utils/assign';
 
-export default function set(route, replace, doExec) {
-  let exec = true;
-  if (typeof doExec === TYPEOF_BOOL) {
-    exec = doExec;
-  }
-  const { preservePath, hashRouting, history } = this.config;
-  const routeObject = assign(
-    { replace, exec },
-    typeof route === TYPEOF_STR ? { route } : route
-  );
-  replace = routeObject.replace;
-  exec = routeObject.exec;
-  let { route: routeStr, queryString } = routeObject;
-  const { preserveQuery, data, pageTitle = null } = routeObject;
-  const routeParts = routeStr.split(QRY);
-  // Check if query string is an object
-  if (isObject(queryString)) {
-    queryString = toQueryString(queryString);
-  }
+/**
+ * Sets the current route
+ * @private
+ * @typedef {import('./types').RouteConfig} RouteConfig
+ * @param {string} routeStr Route string
+ * @param {RouteConfig} [routeConfig] Route config
+ * @returns {void}
+ */
+export default function set(routeStr, routeConfig = {}) {
+  const [route, qs] = routeStr.split(QRY);
+  const {
+    replace = false,
+    preventDefault = false,
+    queryString = qs,
+    data,
+    pageTitle = null,
+  } = routeConfig;
+  const { preservePath, hashRouting: hash, history, context } = this.config;
   // Resolve to URL query string if it's not explicitly passed
-  queryString = trim(queryString ? queryString : routeParts[1]);
-  routeStr = trim(routeParts[0]);
-  // Check if query preservation is required. Resolve query accordingly
-  if (preserveQuery) {
-    queryString = resolveQuery.apply(this, [queryString, hashRouting]);
-  }
+  routeStr = trim(route);
   if (isValidRoute(routeStr)) {
-    const unmodifiedRoute = routeStr;
-    if (hashRouting) {
-      routeStr = `/#${routeStr}`;
-      // Path preservation should only work for hash routing
-      if (preservePath) {
-        routeStr = `${routeStr.substring(1)}`;
-      }
+    const path = routeStr;
+    if (hash) {
+      routeStr = `${preservePath ? '' : '/'}#${routeStr}`;
     }
     // Append query string
-    routeStr = `${routeStr}${queryString ? `${QRY + queryString}` : EMPTY}`;
-    history[replace ? REPLACE : PUSH]({ data }, pageTitle, routeStr);
-    if (exec && unmodifiedRoute) {
-      trigger(this.config.context, VIRTUAL_PUSHSTATE, [
+    routeStr = `${routeStr}${trim(
+      queryString ? `${QRY + queryString}` : EMPTY
+    )}`;
+    const savedState = history.state || { idx: 0 };
+    history[replace ? REPLACE : PUSH](
+      {
+        data,
+        idx: savedState.idx + 1,
+      },
+      pageTitle,
+      routeStr
+    );
+    if (!preventDefault && path) {
+      trigger(context, VIRTUAL_PUSHSTATE, [
         {
-          path: unmodifiedRoute,
-          hash: hashRouting,
+          path,
+          hash,
         },
         UNDEF,
         this,
@@ -67,5 +61,4 @@ export default function set(route, replace, doExec) {
   } else {
     throw new TypeError(INVALID_ROUTE);
   }
-  return this;
 }

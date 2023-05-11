@@ -3,34 +3,47 @@ import set from '../set';
 import { getGlobal } from '../../utils/getGlobal';
 import { RouterCore } from './RouterCore';
 
+/**
+ * Browser router to handle routing logic
+ */
 export class Router extends RouterCore {
+  /**
+   * Router constructor
+   * @typedef {import('./types').RouterConfig} RouterConfig
+   * @param {RouterConfig} config
+   */
   constructor(config = {}) {
     const global = getGlobal();
     const { history, location, document } = global;
     const context = document.body;
-    const browserConfig = assign(
-      {
-        init: true, // Initialize as soon as route handler is attached
-        hashRouting: false, // Switch to hash routing
-        preservePath: false, // Works for hash routing
-      },
-      config
-    );
     super({
       global,
       history,
       location,
       context,
-      hash: browserConfig.hashRouting,
+      hash: config.hashRouting,
     });
     this.config = Object.freeze(
-      assign(browserConfig, { context, history, location })
+      assign({ init: true, hashRouting: false, preservePath: false }, config, {
+        context,
+        history,
+        location,
+      })
     );
-    if (browserConfig.hashRouting && !location.hash) {
-      this.set('/', true, false);
+    if (config.hashRouting && !location.hash) {
+      this.set('/', {
+        replace: true,
+        preventDefault: true, // Don't execute route handlers
+      });
     }
   }
-  set(...props) {
-    return set.apply(this, props);
+  /**
+   * Sets the current route path
+   * @typedef {import('../set/types').RouteConfig} RouteConfig
+   * @param {string} path Route path
+   * @param {RouteConfig} routeConfig Route config
+   */
+  set(path, routeConfig) {
+    set.apply(this, [path, routeConfig]);
   }
 }

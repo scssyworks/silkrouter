@@ -8,7 +8,7 @@ import {
   TYPEOF_BOOL,
 } from '../utils/constants';
 import { extractParams } from '../utils/params';
-import Router from '../api/router';
+import { Router } from '../api/router';
 import { assign } from '../utils/assign';
 
 /**
