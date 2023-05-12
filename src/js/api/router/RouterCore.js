@@ -16,7 +16,7 @@ import callOnce from '../callOnce';
  * Core router class to handle basic routing functionality
  */
 export class RouterCore {
-  get global() {
+  static get global() {
     return typeof globalThis !== TYPEOF_UNDEF ? globalThis : global || self;
   }
   /**
@@ -29,14 +29,15 @@ export class RouterCore {
       throw new Error(HISTORY_UNSUPPORTED);
     }
     this.__paths__ = [];
-    this.popStateSubscription = fromEvent(this.global, POP_STATE).subscribe(
-      (e) => {
-        const path = getPath(hash, location);
-        if (path) {
-          trigger(context, VIRTUAL_PUSHSTATE, [{ path, hash }, e, this]);
-        }
+    this.popStateSubscription = fromEvent(
+      RouterCore.global,
+      POP_STATE
+    ).subscribe((e) => {
+      const path = getPath(hash, location);
+      if (path) {
+        trigger(context, VIRTUAL_PUSHSTATE, [{ path, hash }, e, this]);
       }
-    );
+    });
     this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(
       collate.apply(this)
     );

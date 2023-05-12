@@ -110,15 +110,6 @@
   }
 
   /**
-   * Function to extend an object with new and updated properties
-   * @private
-   * @returns {object}
-   */
-  function assign() {
-    return Object.assign(...arguments);
-  }
-
-  /**
    * Function to trigger custom event
    * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
    * @param {string} eventType Event type
@@ -1393,15 +1384,15 @@
         context,
         hash: config.hashRouting
       });
-      this.config = Object.freeze(assign({
+      this.config = Object.freeze({
         init: true,
         hashRouting: false,
-        preservePath: false
-      }, config, {
+        preservePath: false,
         context,
         history,
-        location
-      }));
+        location,
+        ...config
+      });
       if (config.hashRouting && !location.hash) {
         this.set('/', {
           replace: true,

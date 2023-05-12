@@ -111,15 +111,6 @@
   }
 
   /**
-   * Function to extend an object with new and updated properties
-   * @private
-   * @returns {object}
-   */
-  function assign() {
-    return Object.assign(...arguments);
-  }
-
-  /**
    * Function to trigger custom event
    * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
    * @param {string} eventType Event type
@@ -271,7 +262,7 @@
    * Core router class to handle basic routing functionality
    */
   class RouterCore {
-    get global() {
+    static get global() {
       return typeof globalThis !== TYPEOF_UNDEF ? globalThis : global || self;
     }
     /**
@@ -290,7 +281,7 @@
         throw new Error(HISTORY_UNSUPPORTED);
       }
       this.__paths__ = [];
-      this.popStateSubscription = rxjs.fromEvent(this.global, POP_STATE).subscribe(e => {
+      this.popStateSubscription = rxjs.fromEvent(RouterCore.global, POP_STATE).subscribe(e => {
         const path = getPath(hash, location);
         if (path) {
           trigger(context, VIRTUAL_PUSHSTATE, [{
@@ -338,7 +329,7 @@
         history,
         location,
         document
-      } = this.global;
+      } = RouterCore.global;
       const context = document.body;
       super({
         history,
@@ -346,15 +337,15 @@
         context,
         hash: config.hashRouting
       });
-      this.config = Object.freeze(assign({
+      this.config = Object.freeze({
         init: true,
         hashRouting: false,
-        preservePath: false
-      }, config, {
+        preservePath: false,
         context,
         history,
-        location
-      }));
+        location,
+        ...config
+      });
       if (config.hashRouting && !location.hash) {
         this.set('/', {
           replace: true,

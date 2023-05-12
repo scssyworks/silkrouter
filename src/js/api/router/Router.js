@@ -11,7 +11,7 @@ export class Router extends RouterCore {
    * @param {RouterConfig} config
    */
   constructor(config = {}) {
-    const { history, location, document } = this.global;
+    const { history, location, document } = RouterCore.global;
     const context = document.body;
     super({
       history,
@@ -19,17 +19,15 @@ export class Router extends RouterCore {
       context,
       hash: config.hashRouting,
     });
-    this.config = Object.freeze(
-      Object.assign(
-        { init: true, hashRouting: false, preservePath: false },
-        config,
-        {
-          context,
-          history,
-          location,
-        }
-      )
-    );
+    this.config = Object.freeze({
+      init: true,
+      hashRouting: false,
+      preservePath: false,
+      context,
+      history,
+      location,
+      ...config,
+    });
     if (config.hashRouting && !location.hash) {
       this.set('/', {
         replace: true,
