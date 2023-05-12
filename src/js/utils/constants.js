@@ -13,12 +13,12 @@ export const INVALID_ROUTE = 'Route string is not a pure route';
 export const VIRTUAL_PUSHSTATE = 'vpushstate';
 export const CACHED_FIELDS = [
   'route',
-  'hashRouting',
-  'path',
-  'hash',
-  'search',
-  'hashSearch',
   'data',
+  'query',
+  'params',
+  'index',
+  'ignoreCase',
+  'isHashRoute',
 ];
 export const AMP = '&';
 export const QRY = '?';

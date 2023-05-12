@@ -1,5 +1,4 @@
-import { Router } from '../src/js';
-import { route, deparam, noMatch, cache } from '../src/js/operators';
+import { Router, RouterCore, resolveParams } from '../src/js';
 import pkg from '../package.json';
 
 function q(selector) {
@@ -38,7 +37,6 @@ function initializeRouting() {
   const router = new Router();
   let childRouter = router;
   router.subscribe((e) => {
-    console.log(e);
     const eventRoute =
       location.hostname === 'scssyworks.github.io'
         ? e.route.replace(/\/silkrouter\//, '/')
@@ -71,30 +69,33 @@ function initializeRouting() {
     location.hostname === 'scssyworks.github.io'
       ? '/silkrouter/tab3/:firstname/:lastname'
       : '/tab3/:firstname/:lastname';
-  router.pipe(route(paramsRoute), deparam(true)).subscribe((e) => {
-    q('.params-data').forEach((el) => {
-      el.textContent = JSON.stringify(e.params, null, 2);
-    });
-    q('.params-data, .query-next-step').forEach((el) => {
-      el.classList.remove('d-none');
-    });
-    if (Object.keys(e.search).length) {
-      q('.query-data').forEach((el) => {
-        el.textContent = JSON.stringify(e.search, null, 2);
+  router.subscribe((e) => {
+    const params = resolveParams(paramsRoute, e.route);
+    if (Object.keys(params).length) {
+      q('.params-data').forEach((el) => {
+        el.textContent = JSON.stringify(params, null, 2);
+      });
+      q('.params-data, .query-next-step').forEach((el) => {
         el.classList.remove('d-none');
       });
-      q('.data-next-step').forEach((el) => {
-        el.classList.remove('d-none');
-      });
-    }
-    if (e.data) {
-      q('.state-data').forEach((el) => {
-        el.textContent = e.data;
-        el.classList.remove('d-none');
-      });
-      q('.pass-data-tutorial').forEach((el) => {
-        el.classList.remove('d-none');
-      });
+      if (e.query.path) {
+        q('.query-data').forEach((el) => {
+          el.textContent = e.query.path;
+          el.classList.remove('d-none');
+        });
+        q('.data-next-step').forEach((el) => {
+          el.classList.remove('d-none');
+        });
+      }
+      if (e.data) {
+        q('.state-data').forEach((el) => {
+          el.textContent = e.data;
+          el.classList.remove('d-none');
+        });
+        q('.pass-data-tutorial').forEach((el) => {
+          el.classList.remove('d-none');
+        });
+      }
     }
   });
   document.addEventListener('click', (e) => {
@@ -196,10 +197,7 @@ function initializeRouting() {
 
 function setGlobals() {
   window.Router = Router;
-  window.route = route;
-  window.deparam = deparam;
-  window.noMatch = noMatch;
-  window.cache = cache;
+  window.RouterCore = RouterCore;
 }
 
 initializeRouting();

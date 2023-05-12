@@ -1,5 +1,9 @@
 import { QRY } from '../../utils/constants';
 import { trim } from '../../utils/utils';
+
+/**
+ * Creates an instance of router event
+ */
 export default class RouterEvent {
   constructor(routeInfo, currentEvent) {
     // Set relevant parameters

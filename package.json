@@ -60,7 +60,9 @@
   "homepage": "https://scssyworks.github.io/silkrouter",
   "dependencies": {
     "core-js": "^3.30.1",
-    "deparam.js": "^3.0.6"
+    "deparam.js": "^3.0.6",
+    "is-number": "^7.0.0",
+    "is-object": "^1.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.21.3",

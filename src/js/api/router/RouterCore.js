@@ -4,6 +4,7 @@ import {
   POP_STATE,
   PUSH,
   TYPEOF_FUNC,
+  TYPEOF_UNDEF,
   VIRTUAL_PUSHSTATE,
 } from '../../utils/constants';
 import { getPath } from '../../utils/getPath';
@@ -15,22 +16,27 @@ import callOnce from '../callOnce';
  * Core router class to handle basic routing functionality
  */
 export class RouterCore {
+  get global() {
+    return typeof globalThis !== TYPEOF_UNDEF ? globalThis : global || self;
+  }
   /**
    * Router core constructor
    * @typedef {import('./types').RouterCoreConfig} RouterCoreConfig
    * @param {RouterCoreConfig} routerCoreConfig Route core configuration
    */
-  constructor({ global, history, context, location, hash }) {
+  constructor({ history, context, location, hash }) {
     if (!history[PUSH]) {
       throw new Error(HISTORY_UNSUPPORTED);
     }
     this.__paths__ = [];
-    this.popStateSubscription = fromEvent(global, POP_STATE).subscribe((e) => {
-      const path = getPath(hash, location);
-      if (path) {
-        trigger(context, VIRTUAL_PUSHSTATE, [{ path, hash }, e, this]);
+    this.popStateSubscription = fromEvent(this.global, POP_STATE).subscribe(
+      (e) => {
+        const path = getPath(hash, location);
+        if (path) {
+          trigger(context, VIRTUAL_PUSHSTATE, [{ path, hash }, e, this]);
+        }
       }
-    });
+    );
     this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(
       collate.apply(this)
     );

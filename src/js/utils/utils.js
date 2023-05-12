@@ -1,4 +1,5 @@
-import { isNumber, isObject } from 'deparam.js';
+import isNumber from 'is-number';
+import isObject from 'is-object';
 import { EMPTY, REG_PATHNAME, TYPEOF_BOOL, TYPEOF_STR } from './constants';
 
 /**
@@ -55,4 +56,13 @@ export function each(arrayObj, callback) {
       }
     }
   }
+}
+
+/**
+ * Transform a string to lower case
+ * @param {string} str String input
+ * @returns {string}
+ */
+export function lowerCase(str) {
+  return typeof str === 'string' ? str.toLowerCase() : str;
 }

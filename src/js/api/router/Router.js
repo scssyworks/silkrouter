@@ -1,6 +1,4 @@
-import { assign } from '../../utils/assign';
 import set from '../set';
-import { getGlobal } from '../../utils/getGlobal';
 import { RouterCore } from './RouterCore';
 
 /**
@@ -13,22 +11,24 @@ export class Router extends RouterCore {
    * @param {RouterConfig} config
    */
   constructor(config = {}) {
-    const global = getGlobal();
-    const { history, location, document } = global;
+    const { history, location, document } = this.global;
     const context = document.body;
     super({
-      global,
       history,
       location,
       context,
       hash: config.hashRouting,
     });
     this.config = Object.freeze(
-      assign({ init: true, hashRouting: false, preservePath: false }, config, {
-        context,
-        history,
-        location,
-      })
+      Object.assign(
+        { init: true, hashRouting: false, preservePath: false },
+        config,
+        {
+          context,
+          history,
+          location,
+        }
+      )
     );
     if (config.hashRouting && !location.hash) {
       this.set('/', {

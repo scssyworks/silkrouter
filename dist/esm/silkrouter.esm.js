@@ -1,54 +1,24 @@
 import { Observable, fromEvent } from 'rxjs';
 
 /**
- * Function to extend an object with new and updated properties
- * @private
- * @returns {object}
- */
-function assign() {
-  return Object.assign(...arguments);
-}
-
-/**
  * Router constants
  */
 const POP_STATE = 'popstate';
+const REG_ROUTE_PARAMS = /:[^/]+/g;
 const REG_PATHNAME = /^\/(?=[^?]*)/;
 const HISTORY_UNSUPPORTED = 'History unsupported!';
 const INVALID_ROUTE = 'Route string is not a pure route';
 const VIRTUAL_PUSHSTATE = 'vpushstate';
 const QRY = '?';
 const EMPTY = '';
-const UNDEF$1 = void 0;
+const UNDEF = void 0;
 const TYPEOF_STR = typeof EMPTY;
 const TYPEOF_BOOL = typeof true;
-const TYPEOF_UNDEF$1 = typeof UNDEF$1;
+const TYPEOF_UNDEF = typeof UNDEF;
 const TYPEOF_FUNC = typeof (() => {});
 const STATE = 'State';
 const PUSH = `push${STATE}`;
 const REPLACE = `replace${STATE}`;
-
-function getGlobal() {
-  return typeof globalThis !== TYPEOF_UNDEF$1 ? globalThis : global || self;
-}
-
-/*!
- * Deparam plugin converts query string to a valid JavaScript object
- * Released under MIT license
- * @name Deparam.js
- * @author Sachin Singh <https://github.com/scssyworks/deparam.js>
- * @version 3.0.6
- * @license MIT
- */
-function _typeof(obj) {
-  "@babel/helpers - typeof";
-
-  return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-    return typeof obj;
-  } : function (obj) {
-    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-  }, _typeof(obj);
-}
 
 /*!
  * is-number <https://github.com/jonschlinkert/is-number>
@@ -70,17 +40,6 @@ var isNumber = function(num) {
 var isObject = function isObject(x) {
 	return typeof x === 'object' && x !== null;
 };
-
-var UNDEF = void 0; // Results to undefined
-// Typeof undefined
-
-var TYPEOF_UNDEF = _typeof(UNDEF); // Typeof string
-
-
-_typeof(""); // location var
-
-
-(typeof window === "undefined" ? "undefined" : _typeof(window)) !== TYPEOF_UNDEF ? window.location : null; // Shorthand for built-ins
 
 /**
  * Shorthand for Object.keys
@@ -125,6 +84,38 @@ function each(arrayObj, callback) {
 }
 
 /**
+ * Parses current path and returns params object
+ * @param {string} expr Route expression
+ * @param {string} path URL path
+ * @returns {{[key: string]: any}}
+ */
+function resolveParams(expr, path) {
+  const params = {};
+  if (REG_ROUTE_PARAMS.test(expr)) {
+    const pathRegex = new RegExp(expr.replace(/\//g, '\\/').replace(/:[^/\\]+/g, '([^\\/]+)'));
+    REG_ROUTE_PARAMS.lastIndex = 0;
+    if (pathRegex.test(path)) {
+      const keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(':', EMPTY));
+      const values = Array.from(path.match(pathRegex));
+      values.shift();
+      each(keys, (key, index) => {
+        params[key] = values[index];
+      });
+    }
+  }
+  return params;
+}
+
+/**
+ * Function to extend an object with new and updated properties
+ * @private
+ * @returns {object}
+ */
+function assign() {
+  return Object.assign(...arguments);
+}
+
+/**
  * Function to trigger custom event
  * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
  * @param {string} eventType Event type
@@ -134,8 +125,7 @@ function trigger(target, eventType, data) {
   target = Array.from(target instanceof Node ? [target] : target);
   if (target.length && typeof eventType === TYPEOF_STR) {
     each(target, el => {
-      const win = getGlobal();
-      const customEvent = new win.CustomEvent(eventType, {
+      const customEvent = new CustomEvent(eventType, {
         bubbles: true,
         cancelable: true,
         detail: data || []
@@ -189,7 +179,7 @@ function set(routeStr) {
       trigger(context, VIRTUAL_PUSHSTATE, [{
         path,
         hash
-      }, UNDEF$1, this]);
+      }, UNDEF, this]);
     }
   } else {
     throw new TypeError(INVALID_ROUTE);
@@ -200,6 +190,9 @@ const getPath = (isHash, location) => {
   return trim(isHash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
 };
 
+/**
+ * Creates an instance of router event
+ */
 class RouterEvent {
   constructor(routeInfo, currentEvent) {
     // Set relevant parameters
@@ -261,7 +254,7 @@ function callOnce(isDone) {
         subscriber.next(new RouterEvent([{
           path,
           hash
-        }, UNDEF$1, this]));
+        }, UNDEF, this]));
       }
     }
     return () => {
@@ -274,6 +267,9 @@ function callOnce(isDone) {
  * Core router class to handle basic routing functionality
  */
 class RouterCore {
+  get global() {
+    return typeof globalThis !== TYPEOF_UNDEF ? globalThis : global || self;
+  }
   /**
    * Router core constructor
    * @typedef {import('./types').RouterCoreConfig} RouterCoreConfig
@@ -281,7 +277,6 @@ class RouterCore {
    */
   constructor(_ref) {
     let {
-      global,
       history,
       context,
       location,
@@ -291,7 +286,7 @@ class RouterCore {
       throw new Error(HISTORY_UNSUPPORTED);
     }
     this.__paths__ = [];
-    this.popStateSubscription = fromEvent(global, POP_STATE).subscribe(e => {
+    this.popStateSubscription = fromEvent(this.global, POP_STATE).subscribe(e => {
       const path = getPath(hash, location);
       if (path) {
         trigger(context, VIRTUAL_PUSHSTATE, [{
@@ -335,15 +330,13 @@ class Router extends RouterCore {
    */
   constructor() {
     let config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    const global = getGlobal();
     const {
       history,
       location,
       document
-    } = global;
+    } = this.global;
     const context = document.body;
     super({
-      global,
       history,
       location,
       context,
@@ -376,5 +369,5 @@ class Router extends RouterCore {
   }
 }
 
-export { Router, RouterCore };
+export { Router, RouterCore, resolveParams };
 //# sourceMappingURL=silkrouter.esm.js.map

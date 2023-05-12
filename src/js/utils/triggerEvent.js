@@ -1,5 +1,4 @@
 import { TYPEOF_STR } from './constants';
-import { getGlobal } from './getGlobal';
 import { each } from './utils';
 
 /**
@@ -12,8 +11,7 @@ export function trigger(target, eventType, data) {
   target = Array.from(target instanceof Node ? [target] : target);
   if (target.length && typeof eventType === TYPEOF_STR) {
     each(target, (el) => {
-      const win = getGlobal();
-      const customEvent = new win.CustomEvent(eventType, {
+      const customEvent = new CustomEvent(eventType, {
         bubbles: true,
         cancelable: true,
         detail: data || [],

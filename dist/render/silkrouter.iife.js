@@ -4,15 +4,6 @@
   'use strict';
 
   /**
-   * Function to extend an object with new and updated properties
-   * @private
-   * @returns {object}
-   */
-  function assign() {
-    return Object.assign(...arguments);
-  }
-
-  /**
    * Router constants
    */
   const POP_STATE = 'popstate';
@@ -21,39 +12,16 @@
   const HISTORY_UNSUPPORTED = 'History unsupported!';
   const INVALID_ROUTE = 'Route string is not a pure route';
   const VIRTUAL_PUSHSTATE = 'vpushstate';
-  const CACHED_FIELDS = ['route', 'hashRouting', 'path', 'hash', 'search', 'hashSearch', 'data'];
   const QRY = '?';
   const EMPTY = '';
-  const UNDEF$1 = void 0;
-  const TYPEOF_STR$1 = typeof EMPTY;
+  const UNDEF = void 0;
+  const TYPEOF_STR = typeof EMPTY;
   const TYPEOF_BOOL = typeof true;
-  const TYPEOF_UNDEF$1 = typeof UNDEF$1;
+  const TYPEOF_UNDEF = typeof UNDEF;
   const TYPEOF_FUNC = typeof (() => {});
   const STATE = 'State';
   const PUSH = `push${STATE}`;
   const REPLACE = `replace${STATE}`;
-
-  function getGlobal() {
-    return typeof globalThis !== TYPEOF_UNDEF$1 ? globalThis : global || self;
-  }
-
-  /*!
-   * Deparam plugin converts query string to a valid JavaScript object
-   * Released under MIT license
-   * @name Deparam.js
-   * @author Sachin Singh <https://github.com/scssyworks/deparam.js>
-   * @version 3.0.6
-   * @license MIT
-   */
-  function _typeof(obj) {
-    "@babel/helpers - typeof";
-
-    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-      return typeof obj;
-    } : function (obj) {
-      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    }, _typeof(obj);
-  }
 
   /*!
    * is-number <https://github.com/jonschlinkert/is-number>
@@ -76,250 +44,6 @@
   	return typeof x === 'object' && x !== null;
   };
 
-  var UNDEF = void 0; // Results to undefined
-  // Typeof undefined
-
-  var TYPEOF_UNDEF = _typeof(UNDEF); // Typeof string
-
-
-  var TYPEOF_STR = _typeof(""); // location var
-
-
-  var loc = (typeof window === "undefined" ? "undefined" : _typeof(window)) !== TYPEOF_UNDEF ? window.location : null; // Shorthand for built-ins
-
-  var isArr = Array.isArray;
-  /**
-   * Checks if current key is safe
-   * @param {string} key Current key
-   * @returns {boolean}
-   */
-
-  function isSafe(key) {
-    return ["__proto__", "prototype"].indexOf(key) === -1;
-  }
-  /**
-   * Shorthand for Object.prototype.hasOwnProperty
-   * @param {any} obj Any object
-   * @param {string} key key
-   * @returns {boolean} true or false if object has the property
-   */
-
-
-  function hasOwn(obj, key) {
-    return Object.prototype.hasOwnProperty.call(obj, key);
-  }
-  /**
-   * Returns true of input query string is complex
-   * @param {string} q Query string
-   * @returns {boolean} true or false
-   */
-
-
-  function ifComplex(q) {
-    return /\[/.test(q);
-  }
-  /**
-   * Returns an object without a prototype
-   * @returns {{[key in string|number]: any}} Object without __proto__
-   */
-
-
-  function obNull() {
-    return Object.create(null);
-  }
-  /**
-   * Returns a parsed query object
-   * @param {string} qs Query string
-   * @param {boolean} coerce Coerce values
-   * @returns {{[key in string|number]: any}} Query object
-   */
-
-
-  function lib(qs, coerce) {
-    var _this = this;
-
-    if (_typeof(qs) !== TYPEOF_STR) {
-      qs = loc ? loc.search : "";
-    }
-
-    qs = qs.substring(qs.charAt(0) === "?");
-    var queryObject = obNull();
-
-    if (qs) {
-      qs.split("&").forEach(function (qq) {
-        var qArr = qq.split("=").map(function (part) {
-          return decodeURIComponent(part);
-        });
-
-        if (ifComplex(qArr[0])) {
-          complex.apply(_this, [].concat(qArr).concat([queryObject, coerce]));
-        } else {
-          simple.apply(_this, [qArr, queryObject, false, coerce]);
-        }
-      });
-    }
-
-    return queryObject;
-  }
-  /**
-   * Converts an array to equivalent object
-   * @param {any[]} arr Any array
-   * @returns {any} Any object
-   */
-
-
-  function toObject(arr) {
-    var convertedObj = obNull();
-
-    if (isArr(arr)) {
-      arr.forEach(function (value, index) {
-        convertedObj[index] = value;
-      });
-    }
-
-    return convertedObj;
-  }
-  /**
-   * Converts array to an object if required
-   * @param {any} ob Any object
-   * @param {booleab} isNextNumber Test for next key
-   * @returns {any} Any object
-   */
-
-
-  function resolve(ob, isNextNumber) {
-    if (_typeof(ob) === TYPEOF_UNDEF) return isNextNumber ? [] : obNull();
-    return isNextNumber ? ob : toObject(ob);
-  }
-  /**
-   * Resolves the target object for next iteration
-   * @param {any} ob current reference object
-   * @param {string} nextProp reference property in current object
-   * @returns {any} Resolved object for next iteration
-   */
-
-
-  function resolveObj(ob, nextProp) {
-    if (isObject(ob) && !isArr(ob)) return {
-      ob: ob
-    };
-    if (isArr(ob) || _typeof(ob) === TYPEOF_UNDEF) return {
-      ob: resolve(ob, isNumber(nextProp))
-    };
-    return {
-      ob: [ob],
-      push: ob !== null
-    };
-  }
-  /**
-   * Handles complex query parameters
-   * @param {string} key Query key
-   * @param {string} value Query value
-   * @param {Object} obj Query object
-   * @returns {void}
-   */
-
-
-  function complex(key, value, obj, doCoerce) {
-    var match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
-
-    if (match.length === 3) {
-      var prop = match[1];
-      var nextProp = match[2];
-      key = key.replace(/\[([^\[]*)\]/, "");
-
-      if (ifComplex(key)) {
-        if (nextProp === "") nextProp = "0";
-        key = key.replace(/[^\[]+/, nextProp);
-        complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, doCoerce);
-      } else if (nextProp) {
-        if (isSafe(prop) && isSafe(nextProp)) {
-          var _resolveObj = resolveObj(obj[prop], nextProp),
-              ob = _resolveObj.ob,
-              push = _resolveObj.push;
-
-          obj[prop] = ob;
-          var nextOb = push ? obNull() : obj[prop];
-          nextOb[nextProp] = coerce(value, !doCoerce);
-
-          if (push) {
-            obj[prop].push(nextOb);
-          }
-        }
-      } else {
-        simple([match[1], value], obj, true, doCoerce);
-      }
-    }
-  }
-  /**
-   * Handles simple query
-   * @param {array} qArr Query list
-   * @param {Object} queryObject Query object
-   * @param {boolean} toArray Test for conversion to array
-   * @returns {void}
-   */
-
-
-  function simple(qArr, queryObject, toArray, doCoerce) {
-    var key = qArr[0];
-    var value = qArr[1];
-
-    if (isSafe(key)) {
-      value = coerce(value, !doCoerce);
-
-      if (hasOwn(queryObject, key)) {
-        queryObject[key] = isArr(queryObject[key]) ? queryObject[key] : [queryObject[key]];
-        queryObject[key].push(value);
-      } else {
-        queryObject[key] = toArray ? [value] : value;
-      }
-    }
-  }
-  /**
-   * Converts input value to their appropriate types
-   * @param {any} value Input value
-   * @param {boolean} skip Test for skipping coercion
-   * @returns {any} Coerced value
-   */
-
-
-  function coerce(value, skip) {
-    // eslint-disable-next-line
-    if (value == null) {
-      return "";
-    }
-
-    if (skip || _typeof(value) !== TYPEOF_STR) {
-      return value;
-    }
-
-    value = value.trim();
-
-    if (isNumber(value)) {
-      return +value;
-    }
-
-    switch (value) {
-      case "null":
-        return null;
-
-      case TYPEOF_UNDEF:
-        return UNDEF;
-
-      case "true":
-        return true;
-
-      case "false":
-        return false;
-
-      case "NaN":
-        return NaN;
-
-      default:
-        return value;
-    }
-  }
-
   /**
    * Shorthand for Object.keys
    */
@@ -330,7 +54,7 @@
    * @param {string} str String
    */
   function trim(str) {
-    return typeof str === TYPEOF_STR$1 ? str.trim() : EMPTY;
+    return typeof str === TYPEOF_STR ? str.trim() : EMPTY;
   }
 
   /**
@@ -363,6 +87,38 @@
   }
 
   /**
+   * Parses current path and returns params object
+   * @param {string} expr Route expression
+   * @param {string} path URL path
+   * @returns {{[key: string]: any}}
+   */
+  function resolveParams(expr, path) {
+    const params = {};
+    if (REG_ROUTE_PARAMS.test(expr)) {
+      const pathRegex = new RegExp(expr.replace(/\//g, '\\/').replace(/:[^/\\]+/g, '([^\\/]+)'));
+      REG_ROUTE_PARAMS.lastIndex = 0;
+      if (pathRegex.test(path)) {
+        const keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(':', EMPTY));
+        const values = Array.from(path.match(pathRegex));
+        values.shift();
+        each(keys, (key, index) => {
+          params[key] = values[index];
+        });
+      }
+    }
+    return params;
+  }
+
+  /**
+   * Function to extend an object with new and updated properties
+   * @private
+   * @returns {object}
+   */
+  function assign() {
+    return Object.assign(...arguments);
+  }
+
+  /**
    * Function to trigger custom event
    * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
    * @param {string} eventType Event type
@@ -370,10 +126,9 @@
    */
   function trigger(target, eventType, data) {
     target = Array.from(target instanceof Node ? [target] : target);
-    if (target.length && typeof eventType === TYPEOF_STR$1) {
+    if (target.length && typeof eventType === TYPEOF_STR) {
       each(target, el => {
-        const win = getGlobal();
-        const customEvent = new win.CustomEvent(eventType, {
+        const customEvent = new CustomEvent(eventType, {
           bubbles: true,
           cancelable: true,
           detail: data || []
@@ -427,7 +182,7 @@
         trigger(context, VIRTUAL_PUSHSTATE, [{
           path,
           hash
-        }, UNDEF$1, this]);
+        }, UNDEF, this]);
       }
     } else {
       throw new TypeError(INVALID_ROUTE);
@@ -1486,6 +1241,9 @@
     return trim(isHash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
   };
 
+  /**
+   * Creates an instance of router event
+   */
   class RouterEvent {
     constructor(routeInfo, currentEvent) {
       // Set relevant parameters
@@ -1547,7 +1305,7 @@
           subscriber.next(new RouterEvent([{
             path,
             hash
-          }, UNDEF$1, this]));
+          }, UNDEF, this]));
         }
       }
       return () => {
@@ -1560,6 +1318,9 @@
    * Core router class to handle basic routing functionality
    */
   class RouterCore {
+    static get global() {
+      return typeof globalThis !== TYPEOF_UNDEF ? globalThis : global || self;
+    }
     /**
      * Router core constructor
      * @typedef {import('./types').RouterCoreConfig} RouterCoreConfig
@@ -1567,7 +1328,6 @@
      */
     constructor(_ref) {
       let {
-        global,
         history,
         context,
         location,
@@ -1577,7 +1337,7 @@
         throw new Error(HISTORY_UNSUPPORTED);
       }
       this.__paths__ = [];
-      this.popStateSubscription = fromEvent(global, POP_STATE).subscribe(e => {
+      this.popStateSubscription = fromEvent(RouterCore.global, POP_STATE).subscribe(e => {
         const path = getPath(hash, location);
         if (path) {
           trigger(context, VIRTUAL_PUSHSTATE, [{
@@ -1621,15 +1381,13 @@
      */
     constructor() {
       let config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      const global = getGlobal();
       const {
         history,
         location,
         document
-      } = global;
+      } = RouterCore.global;
       const context = document.body;
       super({
-        global,
         history,
         location,
         context,
@@ -1662,197 +1420,7 @@
     }
   }
 
-  /**
-   * Parses current path and returns params object
-   * @private
-   * @param {string} expr Route expression
-   * @param {string} path URL path
-   * @returns {object}
-   */
-  function extractParams(expr, path) {
-    const params = {};
-    if (REG_ROUTE_PARAMS.test(expr)) {
-      const pathRegex = new RegExp(expr.replace(/\//g, '\\/').replace(/:[^/\\]+/g, '([^\\/]+)'));
-      REG_ROUTE_PARAMS.lastIndex = 0;
-      if (pathRegex.test(path)) {
-        const keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(':', EMPTY));
-        const values = Array.from(path.match(pathRegex));
-        values.shift();
-        each(keys, (key, index) => {
-          params[key] = values[index];
-        });
-      }
-    }
-    return params;
-  }
-
-  /**
-   * Operator to compare a specific route
-   * @param {string} routeStr Route string
-   * @param {Router} routerInstance Current router object [optional]
-   * @param {boolean} ignoreCase Ignore case in route string
-   */
-  function route(routeStr, routerInstance, ignoreCase) {
-    if (typeof routerInstance === TYPEOF_BOOL) {
-      ignoreCase = routerInstance;
-      routerInstance = UNDEF$1;
-    }
-    routeStr = trim(routeStr);
-    if (routerInstance instanceof Router) {
-      const paths = routerInstance.__paths__;
-      if (paths.indexOf(routeStr) === -1) {
-        paths.push(routeStr);
-      }
-    }
-    return observable => new Observable(subscriber => {
-      const subn = observable.subscribe({
-        next(event) {
-          let incomingRoute = event.route;
-          if (isValidRoute(routeStr)) {
-            if (ignoreCase) {
-              routeStr = routeStr.toLowerCase();
-              incomingRoute = incomingRoute.toLowerCase();
-            }
-            const params = extractParams(routeStr, incomingRoute);
-            const paramsLength = oKeys(params).length;
-            if (incomingRoute === routeStr || paramsLength > 0) {
-              if (paramsLength > 0) {
-                event.params = params;
-              }
-              subscriber.next(event);
-            }
-          } else {
-            subscriber.error(new Error(INVALID_ROUTE));
-          }
-        },
-        error: subscriber.error,
-        complete: subscriber.complete
-      });
-      return () => {
-        if (routerInstance instanceof Router) {
-          const paths = routerInstance.__paths__;
-          const existingRouteIndex = paths.indexOf(routeStr);
-          if (existingRouteIndex > -1) {
-            paths.splice(existingRouteIndex, 1);
-          }
-        }
-        subn.unsubscribe();
-      };
-    });
-  }
-
-  /**
-   * Converts search and hashSearch strings to object
-   * @param {boolean} coerce Flag to enable value typecast
-   */
-  function deparam(coerce) {
-    return observable => new Observable(subscriber => {
-      const subn = observable.subscribe({
-        next(event) {
-          try {
-            event.search = lib(event.search, coerce);
-            event.hashSearch = lib(event.hashSearch, coerce);
-            subscriber.next(event);
-          } catch (e) {
-            subscriber.error(e);
-          }
-        },
-        error: subscriber.error,
-        complete: subscriber.complete
-      });
-      return () => {
-        subn.unsubscribe();
-      };
-    });
-  }
-
-  /**
-   * Modifies current subscriber to detect errors
-   * @param {Router} routerInstance Current router object
-   */
-  function noMatch(routerInstance) {
-    return observable => new Observable(subscriber => {
-      const subn = observable.subscribe({
-        next(event) {
-          if (routerInstance instanceof Router) {
-            const paths = routerInstance.__paths__;
-            if (paths.length > 0) {
-              const currentRoute = event.route;
-              let match = false;
-              each(paths, path => {
-                if (path === currentRoute || oKeys(extractParams(path, currentRoute)).length) {
-                  return !(match = true);
-                }
-              });
-              if (!match) {
-                event.noMatch = true;
-                subscriber.next(event);
-              }
-            }
-          }
-        },
-        error: subscriber.error,
-        complete: subscriber.complete
-      });
-      return () => {
-        subn.unsubscribe();
-      };
-    });
-  }
-  function deepComparison(first, second, result) {
-    each(oKeys(first), key => {
-      if (isObject(first[key]) && isObject(second[key])) {
-        deepComparison(first[key], second[key], result);
-      } else {
-        result.break = first[key] !== second[key];
-      }
-    });
-  }
-
-  /**
-   * Caches incoming routes to avoid calling handler if there is no change
-   * @param {string[]} keys
-   * @param {boolean} deep
-   */
-  function cache() {
-    let keys = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : CACHED_FIELDS;
-    let deep = arguments.length > 1 ? arguments[1] : undefined;
-    let cache = {};
-    if (typeof keys === TYPEOF_BOOL) {
-      deep = keys;
-      keys = CACHED_FIELDS;
-    }
-    return observable => new Observable(subscriber => {
-      const subn = observable.subscribe({
-        next(event) {
-          each(keys, key => {
-            if (deep && isObject(event[key]) && isObject(cache[key])) {
-              const result = {};
-              deepComparison(event[key], cache[key], result);
-              if (result.break) {
-                assign(cache, event);
-                subscriber.next(event);
-                return false;
-              }
-            } else if (event[key] !== cache[key]) {
-              assign(cache, event);
-              subscriber.next(event);
-              return false; // break loop
-            }
-          });
-        },
-
-        error: subscriber.error,
-        complete: subscriber.complete
-      });
-      return () => {
-        subn.unsubscribe();
-        cache = {};
-      };
-    });
-  }
-
-  const name="silkrouter";const version="4.2.17";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist",test:"jest tests/*",deploy:"gh-pages -d dist",format:"rome format ./src --write",lint:"rome check ./src","check:sanity":"npm run lint && npm run format"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"core-js":"^3.30.1","deparam.js":"^3.0.6"};const devDependencies={"@babel/core":"^7.21.3","@babel/eslint-parser":"^7.21.3","@babel/preset-env":"^7.20.2","@rollup/plugin-babel":"^6.0.3","@rollup/plugin-commonjs":"^24.0.1","@rollup/plugin-eslint":"^9.0.3","@rollup/plugin-json":"^6.0.0","@rollup/plugin-node-resolve":"^15.0.1","@rollup/plugin-terser":"^0.4.0","@types/jest":"^29.4.4","env-cmd":"^10.1.0",eslint:"^8.36.0","gh-pages":"^5.0.0",jest:"^29.5.0",rollup:"^2.79.1","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.2",rome:"^11.0.0",rxjs:"^7.8.0"};const peerDependencies={rxjs:"^7.8.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
+  const name="silkrouter";const version="4.2.17";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist",test:"jest tests/*",deploy:"gh-pages -d dist",format:"rome format ./src --write",lint:"rome check ./src","check:sanity":"npm run lint && npm run format"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"core-js":"^3.30.1","deparam.js":"^3.0.6","is-number":"^7.0.0","is-object":"^1.0.2"};const devDependencies={"@babel/core":"^7.21.3","@babel/eslint-parser":"^7.21.3","@babel/preset-env":"^7.20.2","@rollup/plugin-babel":"^6.0.3","@rollup/plugin-commonjs":"^24.0.1","@rollup/plugin-eslint":"^9.0.3","@rollup/plugin-json":"^6.0.0","@rollup/plugin-node-resolve":"^15.0.1","@rollup/plugin-terser":"^0.4.0","@types/jest":"^29.4.4","env-cmd":"^10.1.0",eslint:"^8.36.0","gh-pages":"^5.0.0",jest:"^29.5.0",rollup:"^2.79.1","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.2",rome:"^11.0.0",rxjs:"^7.8.0"};const peerDependencies={rxjs:"^7.8.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
 
   function q(selector) {
     if (typeof selector === 'string') {
@@ -1885,7 +1453,6 @@
     const router = new Router();
     let childRouter = router;
     router.subscribe(e => {
-      console.log(e);
       const eventRoute = location.hostname === 'scssyworks.github.io' ? e.route.replace(/\/silkrouter\//, '/') : e.route;
       q('[data-route]').forEach(el => {
         el.classList.remove('active');
@@ -1910,30 +1477,33 @@
       });
     });
     const paramsRoute = location.hostname === 'scssyworks.github.io' ? '/silkrouter/tab3/:firstname/:lastname' : '/tab3/:firstname/:lastname';
-    router.pipe(route(paramsRoute), deparam(true)).subscribe(e => {
-      q('.params-data').forEach(el => {
-        el.textContent = JSON.stringify(e.params, null, 2);
-      });
-      q('.params-data, .query-next-step').forEach(el => {
-        el.classList.remove('d-none');
-      });
-      if (Object.keys(e.search).length) {
-        q('.query-data').forEach(el => {
-          el.textContent = JSON.stringify(e.search, null, 2);
+    router.subscribe(e => {
+      const params = resolveParams(paramsRoute, e.route);
+      if (Object.keys(params).length) {
+        q('.params-data').forEach(el => {
+          el.textContent = JSON.stringify(params, null, 2);
+        });
+        q('.params-data, .query-next-step').forEach(el => {
           el.classList.remove('d-none');
         });
-        q('.data-next-step').forEach(el => {
-          el.classList.remove('d-none');
-        });
-      }
-      if (e.data) {
-        q('.state-data').forEach(el => {
-          el.textContent = e.data;
-          el.classList.remove('d-none');
-        });
-        q('.pass-data-tutorial').forEach(el => {
-          el.classList.remove('d-none');
-        });
+        if (e.query.path) {
+          q('.query-data').forEach(el => {
+            el.textContent = e.query.path;
+            el.classList.remove('d-none');
+          });
+          q('.data-next-step').forEach(el => {
+            el.classList.remove('d-none');
+          });
+        }
+        if (e.data) {
+          q('.state-data').forEach(el => {
+            el.textContent = e.data;
+            el.classList.remove('d-none');
+          });
+          q('.pass-data-tutorial').forEach(el => {
+            el.classList.remove('d-none');
+          });
+        }
       }
     });
     document.addEventListener('click', e => {
@@ -2005,10 +1575,7 @@
   }
   function setGlobals() {
     window.Router = Router;
-    window.route = route;
-    window.deparam = deparam;
-    window.noMatch = noMatch;
-    window.cache = cache;
+    window.RouterCore = RouterCore;
   }
   initializeRouting();
   renderVersion();
