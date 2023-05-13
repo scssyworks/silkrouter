@@ -108,7 +108,14 @@ myOperator.js
 export function myOperator() {
   return (observable) =>
     new Observable((subscriber) => {
-      const currSubscription = observable.subscribe(subscriber);
+      const currSubscription = observable.subscribe({
+        next(value) {
+          // ...
+          subscriber.next(/* updated value */);
+        },
+        error: subscriber.error,
+        complete: subscriber.complete,
+      });
       // ...
       return () => {
         return currSubscription.unsubscribe();
