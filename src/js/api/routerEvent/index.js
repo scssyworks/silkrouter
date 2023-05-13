@@ -5,6 +5,12 @@ import { trim } from '../../utils/utils';
  * Creates an instance of router event
  */
 export default class RouterEvent {
+  /**
+   * Creates a instance of router event
+   * @typedef {import('./types').RouteInfo} RouteInfo
+   * @param {RouteInfo} routeInfo Route information
+   * @param {CustomEvent} currentEvent Current event object
+   */
   constructor(routeInfo, currentEvent) {
     // Set relevant parameters
     const [routeObject, originalEvent, routerInstance] = routeInfo;
@@ -20,6 +26,6 @@ export default class RouterEvent {
     const { state } = originalEvent || {};
     const { data, idx = 0 } = state || history.state || {};
     this.data = data;
-    this.index = idx;
+    this.index = +idx;
   }
 }

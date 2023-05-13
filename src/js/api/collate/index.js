@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import RouterEvent from '../routerEvent';
 
 /**
- * Attaches a rount handler
+ * Attaches a route handler
  * @returns {(observable: Observable<any>) => Observable<any>}
  */
 export default function collate() {

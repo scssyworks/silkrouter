@@ -2,15 +2,21 @@
  * Creates an instance of router event
  */
 export default class RouterEvent {
-    constructor(routeInfo: any, currentEvent: any);
-    route: any;
-    isHashRoute: any;
-    router: any;
-    currentEvent: any;
+    /**
+     * Creates a instance of router event
+     * @typedef {import('./types').RouteInfo} RouteInfo
+     * @param {RouteInfo} routeInfo Route information
+     * @param {CustomEvent} currentEvent Current event object
+     */
+    constructor(routeInfo: import("./types").RouteInfo, currentEvent: CustomEvent);
+    route: string;
+    isHashRoute: boolean;
+    router: import("../router").Router;
+    currentEvent: CustomEvent<any> | PopStateEvent;
     query: {
         path: string;
         hash: string;
     };
     data: any;
-    index: any;
+    index: number;
 }

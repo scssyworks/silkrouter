@@ -3,6 +3,11 @@ import { UNDEF } from '../../constants';
 import { getPath } from '../../utils/getPath';
 import RouterEvent from '../routerEvent';
 
+/**
+ * Calls the handler once on initialization
+ * @param {boolean} [isDone] Optional flag used as a switch
+ * @returns {(observable: Observable<any>) => Observable<any>}
+ */
 export default function callOnce(isDone) {
   const { hashRouting: hash, location, init } = this.config;
   const path = getPath(hash, location);

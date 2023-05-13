@@ -136,6 +136,12 @@ const getPath = (isHash, location) => {
  * Creates an instance of router event
  */
 class RouterEvent {
+  /**
+   * Creates a instance of router event
+   * @typedef {import('./types').RouteInfo} RouteInfo
+   * @param {RouteInfo} routeInfo Route information
+   * @param {CustomEvent} currentEvent Current event object
+   */
   constructor(routeInfo, currentEvent) {
     // Set relevant parameters
     const [routeObject, originalEvent, routerInstance] = routeInfo;
@@ -159,12 +165,12 @@ class RouterEvent {
       idx = 0
     } = state || history.state || {};
     this.data = data;
-    this.index = idx;
+    this.index = +idx;
   }
 }
 
 /**
- * Attaches a rount handler
+ * Attaches a route handler
  * @returns {(observable: Observable<any>) => Observable<any>}
  */
 function collate() {
@@ -185,6 +191,11 @@ function collate() {
   });
 }
 
+/**
+ * Calls the handler once on initialization
+ * @param {boolean} [isDone] Optional flag used as a switch
+ * @returns {(observable: Observable<any>) => Observable<any>}
+ */
 function callOnce(isDone) {
   const {
     hashRouting: hash,
