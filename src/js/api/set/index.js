@@ -7,8 +7,9 @@ import {
   QRY,
   REPLACE,
   PUSH,
-} from '../../utils/constants';
+} from '../../constants';
 import { isValidRoute, trim } from '../../utils/utils';
+import isObject from 'is-object';
 
 /**
  * Sets the current route
@@ -18,7 +19,8 @@ import { isValidRoute, trim } from '../../utils/utils';
  * @param {RouteConfig} [routeConfig] Route config
  * @returns {void}
  */
-export default function set(routeStr, routeConfig = {}) {
+export default function set(routeStr, routeConfig) {
+  routeConfig = isObject(routeConfig) ? routeConfig : {};
   const [route, qs] = routeStr.split(QRY);
   const {
     replace = false,

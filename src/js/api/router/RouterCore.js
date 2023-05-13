@@ -1,4 +1,4 @@
-import { fromEvent } from 'rxjs';
+import { Observable, fromEvent } from 'rxjs';
 import {
   HISTORY_UNSUPPORTED,
   POP_STATE,
@@ -6,11 +6,12 @@ import {
   TYPEOF_FUNC,
   TYPEOF_UNDEF,
   VIRTUAL_PUSHSTATE,
-} from '../../utils/constants';
+} from '../../constants';
 import { getPath } from '../../utils/getPath';
 import { trigger } from '../../utils/triggerEvent';
 import collate from '../collate';
 import callOnce from '../callOnce';
+import RouterEvent from '../routerEvent';
 
 /**
  * Core router class to handle basic routing functionality
@@ -28,7 +29,6 @@ export class RouterCore {
     if (!history[PUSH]) {
       throw new Error(HISTORY_UNSUPPORTED);
     }
-    this.__paths__ = [];
     this.popStateSubscription = fromEvent(
       RouterCore.global,
       POP_STATE
@@ -42,11 +42,21 @@ export class RouterCore {
       collate.apply(this)
     );
   }
+  /**
+   * Allows you to add operators for any pre-processing before a handler is called
+   * @typedef {import('./types').Operator} Operator
+   * @param  {...Operator} ops Operators
+   * @returns {Observable<any>}
+   */
   pipe(...ops) {
     return this.listeners.pipe(callOnce.apply(this), ...ops);
   }
-  subscribe(...fns) {
-    return this.pipe().subscribe(...fns);
+  /**
+   * Attaches a route handler
+   * @param {(event: RouterEvent) => void} fn Route handler
+   */
+  subscribe(fn) {
+    return this.pipe().subscribe(fn);
   }
   /**
    * Destroys current router instance
@@ -57,6 +67,5 @@ export class RouterCore {
       callback();
     }
     this.popStateSubscription.unsubscribe(); // Unsubscribe popstate event
-    this.__paths__.length = 0;
   }
 }

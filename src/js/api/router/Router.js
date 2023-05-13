@@ -1,3 +1,4 @@
+import isObject from 'is-object';
 import set from '../set';
 import { RouterCore } from './RouterCore';
 
@@ -10,7 +11,8 @@ export class Router extends RouterCore {
    * @typedef {import('./types').RouterConfig} RouterConfig
    * @param {RouterConfig} config
    */
-  constructor(config = {}) {
+  constructor(config) {
+    config = isObject(config) ? config : {};
     const { history, location, document } = RouterCore.global;
     const context = document.body;
     super({

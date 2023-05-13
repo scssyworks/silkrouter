@@ -1,4 +1,4 @@
-import { QRY } from './constants';
+import { QRY } from '../constants';
 import { trim } from './utils';
 
 export const getPath = (isHash, location) => {

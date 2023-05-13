@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { UNDEF } from '../../utils/constants';
+import { UNDEF } from '../../constants';
 import { getPath } from '../../utils/getPath';
 import RouterEvent from '../routerEvent';
 

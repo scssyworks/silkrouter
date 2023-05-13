@@ -1,12 +1,16 @@
 import { Observable } from 'rxjs';
 import RouterEvent from '../routerEvent';
 
+/**
+ * Attaches a rount handler
+ * @returns {(observable: Observable<any>) => Observable<any>}
+ */
 export default function collate() {
   return (observable) =>
     new Observable((subscriber) => {
       const subn = observable.subscribe({
         next: (event) => {
-          const routerInstance = event.detail[2];
+          const [, , routerInstance] = event.detail;
           if (routerInstance === this) {
             subscriber.next(new RouterEvent(event.detail, event));
           }

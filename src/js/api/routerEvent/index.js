@@ -1,4 +1,4 @@
-import { QRY } from '../../utils/constants';
+import { QRY } from '../../constants';
 import { trim } from '../../utils/utils';
 
 /**

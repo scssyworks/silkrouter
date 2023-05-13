@@ -1,16 +1,4 @@
-import isNumber from 'is-number';
-import isObject from 'is-object';
-import { EMPTY, REG_PATHNAME, TYPEOF_BOOL, TYPEOF_STR } from './constants';
-
-/**
- * Shorthand for Array.isArray
- */
-export const isArr = Array.isArray;
-
-/**
- * Shorthand for Object.keys
- */
-export const oKeys = Object.keys;
+import { EMPTY, REG_PATHNAME, TYPEOF_STR } from '../constants';
 
 /**
  * Safely trims string
@@ -27,42 +15,4 @@ export function trim(str) {
  */
 export function isValidRoute(route) {
   return REG_PATHNAME.test(route);
-}
-
-/**
- * Checks if key is present in provided object
- * @param {object} ob Object
- * @param {*} key Key
- */
-export function hasOwn(ob, key) {
-  return Object.prototype.hasOwnProperty.call(ob, key);
-}
-
-/**
- * Loops over an array like object
- * @param {object} arrayObj Array or array like object
- * @param {function} callback Callback function
- */
-export function each(arrayObj, callback) {
-  if (isObject(arrayObj)) {
-    const keys = oKeys(arrayObj);
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      const cont = callback(arrayObj[key], isNumber(key) ? +key : key);
-      if (typeof cont === TYPEOF_BOOL) {
-        if (!cont) {
-          break;
-        }
-      }
-    }
-  }
-}
-
-/**
- * Transform a string to lower case
- * @param {string} str String input
- * @returns {string}
- */
-export function lowerCase(str) {
-  return typeof str === 'string' ? str.toLowerCase() : str;
 }
