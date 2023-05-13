@@ -9,45 +9,59 @@
   const POP_STATE = 'popstate';
   const REG_ROUTE_PARAMS = /:[^/]+/g;
   const REG_PATHNAME = /^\/(?=[^?]*)/;
-  const HISTORY_UNSUPPORTED = 'History unsupported!';
-  const INVALID_ROUTE = 'Route string is not a pure route';
+  const HISTORY_UNSUPPORTED = 'History is not supported in this environment!';
+  const INVALID_ROUTE = 'Route format is incorrect!';
   const VIRTUAL_PUSHSTATE = 'vpushstate';
   const QRY = '?';
   const EMPTY = '';
   const UNDEF = void 0;
   const TYPEOF_STR = typeof EMPTY;
-  const TYPEOF_BOOL = typeof true;
   const TYPEOF_UNDEF = typeof UNDEF;
   const TYPEOF_FUNC = typeof (() => {});
   const STATE = 'State';
   const PUSH = `push${STATE}`;
   const REPLACE = `replace${STATE}`;
 
-  /*!
-   * is-number <https://github.com/jonschlinkert/is-number>
-   *
-   * Copyright (c) 2014-present, Jon Schlinkert.
-   * Released under the MIT License.
+  /**
+   * Parses current path and returns params object
+   * @param {string} expr Route expression
+   * @param {string} path URL path
+   * @returns {{[key: string]: any}}
    */
-
-  var isNumber = function(num) {
-    if (typeof num === 'number') {
-      return num - num === 0;
+  function resolveParams(expr, path) {
+    const params = {};
+    if (REG_ROUTE_PARAMS.test(expr)) {
+      const pathRegex = new RegExp(expr.replace(/\//g, '\\/').replace(/:[^/\\]+/g, '([^\\/]+)'));
+      REG_ROUTE_PARAMS.lastIndex = 0;
+      if (pathRegex.test(path)) {
+        const keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(':', EMPTY));
+        const values = Array.from(path.match(pathRegex));
+        values.shift();
+        keys.forEach((key, index) => {
+          params[key] = values[index];
+        });
+      }
     }
-    if (typeof num === 'string' && num.trim() !== '') {
-      return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
-    }
-    return false;
-  };
+    return params;
+  }
 
   var isObject = function isObject(x) {
   	return typeof x === 'object' && x !== null;
   };
 
   /**
-   * Shorthand for Object.keys
+   * Function to trigger custom event
+   * @param {HTMLElement} context Context element
+   * @param {string} eventType Event type
+   * @param {any[]} data Data to be passed to handler
    */
-  const oKeys = Object.keys;
+  function trigger(context, eventType, data) {
+    context.dispatchEvent(new CustomEvent(eventType, {
+      bubbles: true,
+      cancelable: true,
+      detail: data || []
+    }));
+  }
 
   /**
    * Safely trims string
@@ -67,69 +81,6 @@
   }
 
   /**
-   * Loops over an array like object
-   * @param {object} arrayObj Array or array like object
-   * @param {function} callback Callback function
-   */
-  function each(arrayObj, callback) {
-    if (isObject(arrayObj)) {
-      const keys = oKeys(arrayObj);
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        const cont = callback(arrayObj[key], isNumber(key) ? +key : key);
-        if (typeof cont === TYPEOF_BOOL) {
-          if (!cont) {
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Parses current path and returns params object
-   * @param {string} expr Route expression
-   * @param {string} path URL path
-   * @returns {{[key: string]: any}}
-   */
-  function resolveParams(expr, path) {
-    const params = {};
-    if (REG_ROUTE_PARAMS.test(expr)) {
-      const pathRegex = new RegExp(expr.replace(/\//g, '\\/').replace(/:[^/\\]+/g, '([^\\/]+)'));
-      REG_ROUTE_PARAMS.lastIndex = 0;
-      if (pathRegex.test(path)) {
-        const keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(':', EMPTY));
-        const values = Array.from(path.match(pathRegex));
-        values.shift();
-        each(keys, (key, index) => {
-          params[key] = values[index];
-        });
-      }
-    }
-    return params;
-  }
-
-  /**
-   * Function to trigger custom event
-   * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
-   * @param {string} eventType Event type
-   * @param {any[]} data Data to be passed to handler
-   */
-  function trigger(target, eventType, data) {
-    target = Array.from(target instanceof Node ? [target] : target);
-    if (target.length && typeof eventType === TYPEOF_STR) {
-      each(target, el => {
-        const customEvent = new CustomEvent(eventType, {
-          bubbles: true,
-          cancelable: true,
-          detail: data || []
-        });
-        el.dispatchEvent(customEvent);
-      });
-    }
-  }
-
-  /**
    * Sets the current route
    * @private
    * @typedef {import('./types').RouteConfig} RouteConfig
@@ -137,8 +88,8 @@
    * @param {RouteConfig} [routeConfig] Route config
    * @returns {void}
    */
-  function set(routeStr) {
-    let routeConfig = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  function set(routeStr, routeConfig) {
+    routeConfig = isObject(routeConfig) ? routeConfig : {};
     const [route, qs] = routeStr.split(QRY);
     const {
       replace = false,
@@ -1236,6 +1187,12 @@
    * Creates an instance of router event
    */
   class RouterEvent {
+    /**
+     * Creates a instance of router event
+     * @typedef {import('./types').RouteInfo} RouteInfo
+     * @param {RouteInfo} routeInfo Route information
+     * @param {CustomEvent} currentEvent Current event object
+     */
     constructor(routeInfo, currentEvent) {
       // Set relevant parameters
       const [routeObject, originalEvent, routerInstance] = routeInfo;
@@ -1259,15 +1216,19 @@
         idx = 0
       } = state || history.state || {};
       this.data = data;
-      this.index = idx;
+      this.index = +idx;
     }
   }
 
+  /**
+   * Attaches a route handler
+   * @returns {(observable: Observable<any>) => Observable<any>}
+   */
   function collate() {
     return observable => new Observable(subscriber => {
       const subn = observable.subscribe({
         next: event => {
-          const routerInstance = event.detail[2];
+          const [,, routerInstance] = event.detail;
           if (routerInstance === this) {
             subscriber.next(new RouterEvent(event.detail, event));
           }
@@ -1281,6 +1242,11 @@
     });
   }
 
+  /**
+   * Calls the handler once on initialization
+   * @param {boolean} [isDone] Optional flag used as a switch
+   * @returns {(observable: Observable<any>) => Observable<any>}
+   */
   function callOnce(isDone) {
     const {
       hashRouting: hash,
@@ -1327,7 +1293,6 @@
       if (!history[PUSH]) {
         throw new Error(HISTORY_UNSUPPORTED);
       }
-      this.__paths__ = [];
       this.popStateSubscription = fromEvent(RouterCore.global, POP_STATE).subscribe(e => {
         const path = getPath(hash, location);
         if (path) {
@@ -1339,14 +1304,26 @@
       });
       this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(this));
     }
+    /**
+     * Allows you to add operators for any pre-processing before a handler is called
+     * @typedef {import('./types').Operator} Operator
+     * @typedef {import('rxjs').Observable} Observable
+     * @param  {...Operator} ops Operators
+     * @returns {Observable<any>}
+     */
     pipe() {
       for (var _len = arguments.length, ops = new Array(_len), _key = 0; _key < _len; _key++) {
         ops[_key] = arguments[_key];
       }
       return this.listeners.pipe(callOnce.apply(this), ...ops);
     }
-    subscribe() {
-      return this.pipe().subscribe(...arguments);
+    /**
+     * Attaches a route handler
+     * @typedef {import('../routerEvent/index').RouterEvent} RouterEvent
+     * @param {(event: RouterEvent) => void} fn Route handler
+     */
+    subscribe(fn) {
+      return this.pipe().subscribe(fn);
     }
     /**
      * Destroys current router instance
@@ -1357,7 +1334,6 @@
         callback();
       }
       this.popStateSubscription.unsubscribe(); // Unsubscribe popstate event
-      this.__paths__.length = 0;
     }
   }
 
@@ -1370,8 +1346,8 @@
      * @typedef {import('./types').RouterConfig} RouterConfig
      * @param {RouterConfig} config
      */
-    constructor() {
-      let config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    constructor(config) {
+      config = isObject(config) ? config : {};
       const {
         history,
         location,
@@ -1411,7 +1387,7 @@
     }
   }
 
-  const name="silkrouter";const version="4.2.17";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist",test:"jest tests/*",deploy:"gh-pages -d dist",format:"rome format ./src --write",lint:"rome check ./src","check:sanity":"npm run lint && npm run format"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"core-js":"^3.30.1","deparam.js":"^3.0.6","is-number":"^7.0.0","is-object":"^1.0.2"};const devDependencies={"@babel/core":"^7.21.3","@babel/eslint-parser":"^7.21.3","@babel/preset-env":"^7.20.2","@rollup/plugin-babel":"^6.0.3","@rollup/plugin-commonjs":"^24.0.1","@rollup/plugin-eslint":"^9.0.3","@rollup/plugin-json":"^6.0.0","@rollup/plugin-node-resolve":"^15.0.1","@rollup/plugin-terser":"^0.4.0","@types/jest":"^29.4.4","env-cmd":"^10.1.0",eslint:"^8.36.0","gh-pages":"^5.0.0",jest:"^29.5.0",rollup:"^2.79.1","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.2",rome:"^11.0.0",rxjs:"^7.8.0"};const peerDependencies={rxjs:"^7.8.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
+  const name="silkrouter";const version="4.2.17";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="dist/typings/index.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist && npm run typings && npm run check:size",test:"jest tests/* --coverage",deploy:"gh-pages -d dist",format:"rome format ./src --write",lint:"rome check ./src","check:sanity":"npm run lint && npm run format","check:size":"node ./reporting/sizeCalculator.mjs",typings:"tsc src/js/index.js --declaration --allowJs --emitDeclarationOnly --outDir dist/typings"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"core-js":"^3.30.1","deparam.js":"^3.0.6","is-number":"^7.0.0","is-object":"^1.0.2"};const devDependencies={"@babel/core":"^7.21.3","@babel/eslint-parser":"^7.21.3","@babel/preset-env":"^7.20.2","@rollup/plugin-babel":"^6.0.3","@rollup/plugin-commonjs":"^24.0.1","@rollup/plugin-eslint":"^9.0.3","@rollup/plugin-json":"^6.0.0","@rollup/plugin-node-resolve":"^15.0.1","@rollup/plugin-terser":"^0.4.0","@types/jest":"^29.4.4","env-cmd":"^10.1.0",eslint:"^8.36.0","gh-pages":"^5.0.0","gzip-size":"^7.0.0",jest:"^29.5.0",rollup:"^2.79.1","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.2",rome:"^11.0.0",rxjs:"^7.8.0",typescript:"^5.0.4"};const peerDependencies={rxjs:"^7.8.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
 
   function q(selector) {
     if (typeof selector === 'string') {

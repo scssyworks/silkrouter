@@ -4,7 +4,7 @@ import { trim } from '../../utils/utils';
 /**
  * Creates an instance of router event
  */
-export default class RouterEvent {
+export class RouterEvent {
   /**
    * Creates a instance of router event
    * @typedef {import('./types').RouteInfo} RouteInfo

@@ -1,4 +1,4 @@
-import { Observable, fromEvent } from 'rxjs';
+import { fromEvent } from 'rxjs';
 import {
   HISTORY_UNSUPPORTED,
   POP_STATE,
@@ -11,7 +11,6 @@ import { getPath } from '../../utils/getPath';
 import { trigger } from '../../utils/triggerEvent';
 import collate from '../collate';
 import callOnce from '../callOnce';
-import RouterEvent from '../routerEvent';
 
 /**
  * Core router class to handle basic routing functionality
@@ -45,6 +44,7 @@ export class RouterCore {
   /**
    * Allows you to add operators for any pre-processing before a handler is called
    * @typedef {import('./types').Operator} Operator
+   * @typedef {import('rxjs').Observable} Observable
    * @param  {...Operator} ops Operators
    * @returns {Observable<any>}
    */
@@ -53,6 +53,7 @@ export class RouterCore {
   }
   /**
    * Attaches a route handler
+   * @typedef {import('../routerEvent/index').RouterEvent} RouterEvent
    * @param {(event: RouterEvent) => void} fn Route handler
    */
   subscribe(fn) {

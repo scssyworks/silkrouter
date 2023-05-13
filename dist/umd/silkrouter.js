@@ -260,6 +260,7 @@
     /**
      * Allows you to add operators for any pre-processing before a handler is called
      * @typedef {import('./types').Operator} Operator
+     * @typedef {import('rxjs').Observable} Observable
      * @param  {...Operator} ops Operators
      * @returns {Observable<any>}
      */
@@ -271,6 +272,7 @@
     }
     /**
      * Attaches a route handler
+     * @typedef {import('../routerEvent/index').RouterEvent} RouterEvent
      * @param {(event: RouterEvent) => void} fn Route handler
      */
     subscribe(fn) {

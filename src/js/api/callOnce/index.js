@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { UNDEF } from '../../constants';
 import { getPath } from '../../utils/getPath';
-import RouterEvent from '../routerEvent';
+import { RouterEvent } from '../routerEvent';
 
 /**
  * Calls the handler once on initialization

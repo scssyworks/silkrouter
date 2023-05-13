@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import RouterEvent from '../routerEvent';
+import { RouterEvent } from '../routerEvent';
 
 /**
  * Attaches a route handler
