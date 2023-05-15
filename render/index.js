@@ -41,12 +41,13 @@ function initializeRouting() {
       location.hostname === 'scssyworks.github.io'
         ? e.route.replace(/\/silkrouter\//, '/')
         : e.route;
-    q('[data-route]').forEach((el) => {
+    q('a.nav-link').forEach((el) => {
       el.classList.remove('active');
-      const elRoute = el.getAttribute('data-route');
-      if (elRoute === '/' && eventRoute === elRoute) {
-        el.classList.add('active');
-      } else if (elRoute !== '/' && eventRoute.includes(elRoute)) {
+      const elRoute = el.getAttribute('href');
+      if (
+        (elRoute === '/' && eventRoute === elRoute) ||
+        (elRoute !== '/' && eventRoute.includes(elRoute))
+      ) {
         el.classList.add('active');
       }
     });
@@ -99,14 +100,15 @@ function initializeRouting() {
     }
   });
   document.addEventListener('click', (e) => {
-    q('[data-route]').forEach((el) => {
+    q('a.nav-link').forEach((el) => {
       if (el.contains(e.target)) {
+        e.preventDefault();
         const isRelative = el.hasAttribute('data-relative');
         let route =
           isRelative && q('#checkHash:checked').length === 0
             ? el.closest('section').getAttribute('data-section') +
-              el.getAttribute('data-route')
-            : el.getAttribute('data-route');
+              el.getAttribute('href')
+            : el.getAttribute('href');
         if (location.hostname === 'scssyworks.github.io') {
           route = `/silkrouter${route}`;
         }
@@ -184,9 +186,9 @@ function initializeRouting() {
       preservePath: true,
     });
     hashRouter.subscribe((e) => {
-      q('[data-route][data-relative]').forEach((el) => {
+      q('a.nav-link[data-relative]').forEach((el) => {
         el.classList.remove('active');
-        if (e.route.includes(el.getAttribute('data-route'))) {
+        if (e.route.includes(el.getAttribute('href'))) {
           el.classList.add('active');
         }
       });

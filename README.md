@@ -5,7 +5,7 @@
 
 # Silk router
 
-Silk router is a reactive and light-weight (2.8kb gzipped) routing library.
+Silk router is a reactive and light-weight (1.4kb gzipped) routing library.
 
 # [[NOTE]]
 

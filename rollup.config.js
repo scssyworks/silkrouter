@@ -7,6 +7,7 @@ import serve from 'rollup-plugin-serve';
 import livereload from 'rollup-plugin-livereload';
 import pkg from './package.json';
 import json from '@rollup/plugin-json';
+import filesize from 'rollup-plugin-filesize';
 
 const isDevelopment = process.env.MODE.trim() === 'development';
 const startServer = process.env.SERVE.trim() === 'true';
@@ -55,7 +56,7 @@ const config = {
             throwOnError: true,
           }),
         ]
-      : []),
+      : [filesize()]),
     resolve({
       customResolveOptions: {
         moduleDirectories: ['node_modules'],

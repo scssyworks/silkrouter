@@ -1387,7 +1387,7 @@
     }
   }
 
-  const name="silkrouter";const version="4.2.17";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="dist/typings/index.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist && npm run typings && npm run check:size",test:"jest tests/* --coverage",deploy:"gh-pages -d dist",format:"rome format ./src --write",lint:"rome check ./src","check:sanity":"npm run lint && npm run format","check:size":"node ./reporting/sizeCalculator.mjs",typings:"tsc src/js/index.js --declaration --allowJs --emitDeclarationOnly --outDir dist/typings"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"core-js":"^3.30.1","deparam.js":"^3.0.6","is-number":"^7.0.0","is-object":"^1.0.2"};const devDependencies={"@babel/core":"^7.21.3","@babel/eslint-parser":"^7.21.3","@babel/preset-env":"^7.20.2","@rollup/plugin-babel":"^6.0.3","@rollup/plugin-commonjs":"^24.0.1","@rollup/plugin-eslint":"^9.0.3","@rollup/plugin-json":"^6.0.0","@rollup/plugin-node-resolve":"^15.0.1","@rollup/plugin-terser":"^0.4.0","@types/jest":"^29.4.4","env-cmd":"^10.1.0",eslint:"^8.36.0","gh-pages":"^5.0.0","gzip-size":"^7.0.0",jest:"^29.5.0",rollup:"^2.79.1","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.2",rome:"^11.0.0",rxjs:"^7.8.0",typescript:"^5.0.4"};const peerDependencies={rxjs:"^7.8.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
+  const name="silkrouter";const version="4.2.17";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="dist/typings/index.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist && npm run typings",test:"jest tests/* --coverage",deploy:"gh-pages -d dist",format:"rome format ./src --write",lint:"rome check ./src","check:sanity":"npm run lint && npm run format",typings:"tsc src/js/index.js --declaration --allowJs --emitDeclarationOnly --outDir dist/typings"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"core-js":"^3.30.1","deparam.js":"^3.0.6","is-number":"^7.0.0","is-object":"^1.0.2"};const devDependencies={"@babel/core":"^7.21.3","@babel/eslint-parser":"^7.21.3","@babel/preset-env":"^7.20.2","@rollup/plugin-babel":"^6.0.3","@rollup/plugin-commonjs":"^24.0.1","@rollup/plugin-eslint":"^9.0.3","@rollup/plugin-json":"^6.0.0","@rollup/plugin-node-resolve":"^15.0.1","@rollup/plugin-terser":"^0.4.0","@types/jest":"^29.4.4","env-cmd":"^10.1.0",eslint:"^8.36.0","gh-pages":"^5.0.0","gzip-size":"^7.0.0",jest:"^29.5.0",rollup:"^2.79.1","rollup-plugin-filesize":"^10.0.0","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.2",rome:"^11.0.0",rxjs:"^7.8.0",typescript:"^5.0.4"};const peerDependencies={rxjs:"^7.8.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
 
   function q(selector) {
     if (typeof selector === 'string') {
@@ -1421,12 +1421,10 @@
     let childRouter = router;
     router.subscribe(e => {
       const eventRoute = location.hostname === 'scssyworks.github.io' ? e.route.replace(/\/silkrouter\//, '/') : e.route;
-      q('[data-route]').forEach(el => {
+      q('a.nav-link').forEach(el => {
         el.classList.remove('active');
-        const elRoute = el.getAttribute('data-route');
-        if (elRoute === '/' && eventRoute === elRoute) {
-          el.classList.add('active');
-        } else if (elRoute !== '/' && eventRoute.includes(elRoute)) {
+        const elRoute = el.getAttribute('href');
+        if (elRoute === '/' && eventRoute === elRoute || elRoute !== '/' && eventRoute.includes(elRoute)) {
           el.classList.add('active');
         }
       });
@@ -1474,10 +1472,11 @@
       }
     });
     document.addEventListener('click', e => {
-      q('[data-route]').forEach(el => {
+      q('a.nav-link').forEach(el => {
         if (el.contains(e.target)) {
+          e.preventDefault();
           const isRelative = el.hasAttribute('data-relative');
-          let route = isRelative && q('#checkHash:checked').length === 0 ? el.closest('section').getAttribute('data-section') + el.getAttribute('data-route') : el.getAttribute('data-route');
+          let route = isRelative && q('#checkHash:checked').length === 0 ? el.closest('section').getAttribute('data-section') + el.getAttribute('href') : el.getAttribute('href');
           if (location.hostname === 'scssyworks.github.io') {
             route = `/silkrouter${route}`;
           }
@@ -1530,9 +1529,9 @@
         preservePath: true
       });
       hashRouter.subscribe(e => {
-        q('[data-route][data-relative]').forEach(el => {
+        q('a.nav-link[data-relative]').forEach(el => {
           el.classList.remove('active');
-          if (e.route.includes(el.getAttribute('data-route'))) {
+          if (e.route.includes(el.getAttribute('href'))) {
             el.classList.add('active');
           }
         });
