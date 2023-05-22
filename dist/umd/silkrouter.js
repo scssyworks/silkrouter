@@ -46,9 +46,15 @@
     return params;
   }
 
+  function getDefaultExportFromCjs (x) {
+  	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+  }
+
   var isObject = function isObject(x) {
   	return typeof x === 'object' && x !== null;
   };
+
+  var isObject$1 = /*@__PURE__*/getDefaultExportFromCjs(isObject);
 
   /**
    * Function to trigger custom event
@@ -90,7 +96,7 @@
    * @returns {void}
    */
   function set(routeStr, routeConfig) {
-    routeConfig = isObject(routeConfig) ? routeConfig : {};
+    routeConfig = isObject$1(routeConfig) ? routeConfig : {};
     const [route, qs] = routeStr.split(QRY);
     const {
       replace = false,
@@ -300,7 +306,7 @@
      * @param {RouterConfig} config
      */
     constructor(config) {
-      config = isObject(config) ? config : {};
+      config = isObject$1(config) ? config : {};
       const {
         history,
         location,

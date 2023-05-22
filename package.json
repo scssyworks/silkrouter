@@ -23,32 +23,18 @@
   "license": "MIT",
   "keywords": [
     "router",
-    "routing",
-    "single page apps",
-    "single page application",
-    "SPA",
-    "silk",
-    "silk router",
-    "history",
-    "browser",
-    "url",
-    "hash",
-    "hash routing",
-    "pushState",
+    "browserrouter",
+    "silkrouter",
+    "pushstate",
     "popstate",
-    "hashchange",
-    "observables",
-    "observer",
-    "subscriber",
-    "subscribe",
-    "subscription",
+    "history",
     "rxjs",
-    "reactivex"
+    "observables"
   ],
   "files": [
     "dist/umd/",
     "dist/esm/",
-    "src/typings/",
+    "dist/typings/",
     "LICENSE"
   ],
   "repository": {
@@ -61,7 +47,6 @@
   "homepage": "https://scssyworks.github.io/silkrouter",
   "dependencies": {
     "core-js": "^3.30.1",
-    "deparam.js": "^3.0.6",
     "is-number": "^7.0.0",
     "is-object": "^1.0.2"
   },
