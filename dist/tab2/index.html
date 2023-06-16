@@ -11,11 +11,6 @@
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
   <title>Rollup Plugin</title>
   <style>
-    [tabindex] {
-      cursor: pointer !important;
-      outline: none;
-    }
-
     h1.unset {
       margin: 0;
       padding: 10px 0;
@@ -38,6 +33,11 @@
       background-color: #e9e9e9;
       margin-right: 4px;
     }
+
+    .navbar-brand {
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -53,16 +53,13 @@
     </div>
     <nav class="nav nav-pills">
       <li class="nav-item">
-        <a tabindex="0" data-route="/" class="nav-link">Introduction</a>
+        <a href="/" class="nav-link">Introduction</a>
       </li>
       <li class="nav-item">
-        <a tabindex="0" data-route="/tab2/" class="nav-link">Hash router</a>
+        <a href="/tab2/" class="nav-link">Hash router</a>
       </li>
       <li class="nav-item">
-        <a tabindex="0" data-route="/tab3/" class="nav-link">Pass data</a>
-      </li>
-      <li class="nav-item">
-        <a tabindex="0" data-route="/tab4/" class="nav-link">Caching</a>
+        <a href="/tab3/" class="nav-link">Pass data</a>
       </li>
     </nav>
   </section>
@@ -72,13 +69,13 @@
       Welcome to the demo page for Silk router. This is an interactive demo where you can learn about how
       <b>silkrouter</b> works.
       <p>
-        <b>Warning: </b>Do not refresh the as parts of demo might not work!
+        <b>Warning: </b>Do not refresh this page as some parts of demo might not work!
       </p>
     </article>
     <article class="pt-4">
       <strong>Install</strong>
       <pre><code class="highlight-javascript">
-      npm install --save silkrouter rxjs
+      npm i silkrouter rxjs
       </code></pre>
     </article>
     <article class="pt-4">
@@ -102,9 +99,9 @@
       <strong>Configure</strong>
       <pre><code class="highlight-javascript">
       const router = new Router({
+          init: false, // Initialize on page load. Default: true
           hashRouting: true, // Switch to hash routing. Default: false
           preservePath: false, // If 'true' it will preserve current URL path. Works only for hash routing. Default: false
-          context: document.body // Silkrouter triggers 'vpushstate' event for history changes and navigation. You can listen to it on this element. Default: document.body
       });
       </code></pre>
     </article>
@@ -117,16 +114,16 @@
     </p>
     <nav class="nav inner-nav nav-pills">
       <li class="nav-item">
-        <a tabindex="0" data-route="/child-tab1" data-relative class="nav-link">/child-tab1</a>
+        <a href="/child-tab1" data-relative class="nav-link">/child-tab1</a>
       </li>
       <li class="nav-item">
-        <a tabindex="0" data-route="/child-tab2" data-relative class="nav-link">/child-tab2</a>
+        <a href="/child-tab2" data-relative class="nav-link">/child-tab2</a>
       </li>
       <li class="nav-item">
-        <a tabindex="0" data-route="/child-tab3" data-relative class="nav-link">/child-tab3</a>
+        <a href="/child-tab3" data-relative class="nav-link">/child-tab3</a>
       </li>
       <li class="nav-item">
-        <a tabindex="0" data-route="/child-tab4" data-relative class="nav-link">/child-tab4</a>
+        <a href="/child-tab4" data-relative class="nav-link">/child-tab4</a>
       </li>
     </nav>
     <p class="mt-4">
@@ -192,11 +189,13 @@
       special operator called <code>route</code>.
     </p>
     <pre><code class="pass-data-tutorial highlight-javascript d-none">
-    router
-        .pipe(
-            route('/tab3/:firstname/:lastname')
-        )
-        .subscribe(e => { console.log(e.params); });
+    ...
+    import { resolveParams } from 'silkrouter';
+    ...
+    router.subscribe(e => {
+      const params = resolveParams('/tab3/:firstname/:lastname', e.route);
+      console.log(params);
+    });
     </code></pre>
     <p class="mt-4 pass-data-tutorial d-none">
       Query strings on the other hand are passed to all listeners by default
@@ -205,8 +204,7 @@
       strings as data, and router will take care of the rest.
     </p>
     <pre><code class="highlight-javascript pass-data-tutorial d-none">
-    router.set({
-        route: '/tab3/john/doe',
+    router.set('/tab3/john/doe', {
         queryString: 'q=helloworld'
     });
     </code></pre>
@@ -215,8 +213,7 @@
       <code>history.state</code> object.
     </p>
     <pre><code class="highlight-javascript pass-data-tutorial d-none">
-    router.set({
-        route: '/tab3/john/doe',
+    router.set('/tab3/john/doe', {
         queryString: 'q=helloworld',
         data: 'Hello World'
     });
@@ -224,27 +221,6 @@
     <p class="mt-4 pass-data-tutorial d-none">
       You can access this data using <code>event.data</code> property.
     </p>
-  </section>
-  <section class="container content pt-4 pb-4 d-none" data-section="/tab4">
-    <h2>Caching</h2>
-    <p>
-      Silkrouter allows you to cache <code>event</code> object and triggers a
-      handler only if that is changed.
-    </p>
-    <p>Caching is quite useful in terms of optimization.</p>
-    <p>Caching can be enabled via <code>cache</code> operator.</p>
-    <pre><code class="highlight-javascript">
-    const router = new Router();
-    router
-        .pipe(cache()) // Allows caching with shallow comparison
-        .subscribe(() => { ... });
-    </code></pre>
-    <pre><code class="highlight-javascript">
-    const router = new Router();
-    router
-        .pipe(cache(true)) // Allows caching with deep comparison
-        .subscribe(() => { ... });
-    </code></pre>
   </section>
   <script>
     const scr = document.createElement('script');

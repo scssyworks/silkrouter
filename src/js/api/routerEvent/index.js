@@ -1,22 +1,31 @@
-import { QRY } from '../../utils/constants';
+import { QRY } from '../../constants';
 import { trim } from '../../utils/utils';
-export default class RouterEvent {
+
+/**
+ * Creates an instance of router event
+ */
+export class RouterEvent {
+  /**
+   * Creates a instance of router event
+   * @typedef {import('./types').RouteInfo} RouteInfo
+   * @param {RouteInfo} routeInfo Route information
+   * @param {CustomEvent} currentEvent Current event object
+   */
   constructor(routeInfo, currentEvent) {
     // Set relevant parameters
-    const routeObject = routeInfo[0];
-    const originalEvent = routeInfo[1];
-    const routerInstance = routeInfo[2];
+    const [routeObject, originalEvent, routerInstance] = routeInfo;
     const { location, history } = routerInstance.config;
     this.route = routeObject.path;
-    this.hashRouting = routeObject.hash;
-    this.routerInstance = routerInstance;
-    this.virtualEvent = currentEvent || {};
-    this.originalEvent = originalEvent || {};
-    this.path = trim(location.pathname);
-    this.hash = location.hash;
-    this.search = trim(location.search.substring(1));
-    this.hashSearch = trim(location.hash && location.hash.split(QRY)[1]);
-    const { state } = this.originalEvent;
-    this.data = (state && state.data) || (history.state && history.state.data);
+    this.isHashRoute = routeObject.hash;
+    this.router = routerInstance;
+    this.currentEvent = originalEvent || currentEvent;
+    this.query = {
+      path: trim(location.search.substring(1)),
+      hash: trim(location.hash.split(QRY)[1]),
+    };
+    const { state } = originalEvent || {};
+    const { data, idx = 0 } = state || history.state || {};
+    this.data = data;
+    this.index = +idx;
   }
 }

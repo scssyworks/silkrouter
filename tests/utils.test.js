@@ -1,4 +1,4 @@
-import { isValidRoute, trim } from '../src/js/utils/utils';
+import { each, isValidRoute, trim } from '../src/js/utils/utils';
 
 describe('Utils', () => {
   describe('trim', () => {

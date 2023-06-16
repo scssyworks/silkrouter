@@ -4,50 +4,37 @@
   "description": "Silk router is an app routing library",
   "main": "dist/umd/silkrouter.min.js",
   "module": "dist/esm/silkrouter.esm.min.js",
-  "types": "src/typings/silkrouter.d.ts",
+  "types": "dist/typings/index.d.ts",
   "scripts": {
     "start": "env-cmd -f ./.env.start rollup -c --watch",
     "dev": "env-cmd -f ./.env.dev rollup -c",
     "dev:serve": "env-cmd -f ./.env.start.prod rollup -c",
     "dist": "npm run dev && npm run dev:serve && npm run prod",
     "prod": "env-cmd rollup -c",
-    "build": "npm run check:sanity && npm run test && npm run dist",
-    "test": "jest tests/*",
+    "build": "npm run check:sanity && npm run test && npm run dist && npm run typings",
+    "test": "jest tests/* --coverage",
     "deploy": "gh-pages -d dist",
     "format": "rome format ./src --write",
     "lint": "rome check ./src",
-    "check:sanity": "npm run lint && npm run format"
+    "check:sanity": "npm run lint && npm run format",
+    "typings": "tsc src/js/index.js --declaration --allowJs --emitDeclarationOnly --outDir dist/typings"
   },
   "author": "scssyworks",
   "license": "MIT",
   "keywords": [
     "router",
-    "routing",
-    "single page apps",
-    "single page application",
-    "SPA",
-    "silk",
-    "silk router",
-    "history",
-    "browser",
-    "url",
-    "hash",
-    "hash routing",
-    "pushState",
+    "browserrouter",
+    "silkrouter",
+    "pushstate",
     "popstate",
-    "hashchange",
-    "observables",
-    "observer",
-    "subscriber",
-    "subscribe",
-    "subscription",
+    "history",
     "rxjs",
-    "reactivex"
+    "observables"
   ],
   "files": [
     "dist/umd/",
     "dist/esm/",
-    "src/typings/",
+    "dist/typings/",
     "LICENSE"
   ],
   "repository": {
@@ -59,7 +46,9 @@
   },
   "homepage": "https://scssyworks.github.io/silkrouter",
   "dependencies": {
-    "deparam.js": "^3.0.6"
+    "core-js": "^3.30.1",
+    "is-number": "^7.0.0",
+    "is-object": "^1.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.21.3",
@@ -77,10 +66,12 @@
     "gh-pages": "^5.0.0",
     "jest": "^29.5.0",
     "rollup": "^2.79.1",
+    "rollup-plugin-filesize": "^10.0.0",
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-serve": "^2.0.2",
     "rome": "^11.0.0",
-    "rxjs": "^7.8.0"
+    "rxjs": "^7.8.0",
+    "typescript": "^5.0.4"
   },
   "peerDependencies": {
     "rxjs": "^7.8.0"

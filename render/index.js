@@ -1,5 +1,4 @@
-import { Router } from '../src/js';
-import { route, deparam, noMatch, cache } from '../src/js/operators';
+import { Router, RouterCore, resolveParams } from '../src/js';
 import pkg from '../package.json';
 
 function q(selector) {
@@ -42,12 +41,13 @@ function initializeRouting() {
       location.hostname === 'scssyworks.github.io'
         ? e.route.replace(/\/silkrouter\//, '/')
         : e.route;
-    q('[data-route]').forEach((el) => {
+    q('a.nav-link').forEach((el) => {
       el.classList.remove('active');
-      const elRoute = el.getAttribute('data-route');
-      if (elRoute === '/' && eventRoute === elRoute) {
-        el.classList.add('active');
-      } else if (elRoute !== '/' && eventRoute.includes(elRoute)) {
+      const elRoute = el.getAttribute('href');
+      if (
+        (elRoute === '/' && eventRoute === elRoute) ||
+        (elRoute !== '/' && eventRoute.includes(elRoute))
+      ) {
         el.classList.add('active');
       }
     });
@@ -70,41 +70,45 @@ function initializeRouting() {
     location.hostname === 'scssyworks.github.io'
       ? '/silkrouter/tab3/:firstname/:lastname'
       : '/tab3/:firstname/:lastname';
-  router.pipe(route(paramsRoute), deparam(true)).subscribe((e) => {
-    q('.params-data').forEach((el) => {
-      el.textContent = JSON.stringify(e.params, null, 2);
-    });
-    q('.params-data, .query-next-step').forEach((el) => {
-      el.classList.remove('d-none');
-    });
-    if (Object.keys(e.search).length) {
-      q('.query-data').forEach((el) => {
-        el.textContent = JSON.stringify(e.search, null, 2);
+  router.subscribe((e) => {
+    const params = resolveParams(paramsRoute, e.route);
+    if (Object.keys(params).length) {
+      q('.params-data').forEach((el) => {
+        el.textContent = JSON.stringify(params, null, 2);
+      });
+      q('.params-data, .query-next-step').forEach((el) => {
         el.classList.remove('d-none');
       });
-      q('.data-next-step').forEach((el) => {
-        el.classList.remove('d-none');
-      });
-    }
-    if (e.data) {
-      q('.state-data').forEach((el) => {
-        el.textContent = e.data;
-        el.classList.remove('d-none');
-      });
-      q('.pass-data-tutorial').forEach((el) => {
-        el.classList.remove('d-none');
-      });
+      if (e.query.path) {
+        q('.query-data').forEach((el) => {
+          el.textContent = e.query.path;
+          el.classList.remove('d-none');
+        });
+        q('.data-next-step').forEach((el) => {
+          el.classList.remove('d-none');
+        });
+      }
+      if (e.data) {
+        q('.state-data').forEach((el) => {
+          el.textContent = e.data;
+          el.classList.remove('d-none');
+        });
+        q('.pass-data-tutorial').forEach((el) => {
+          el.classList.remove('d-none');
+        });
+      }
     }
   });
   document.addEventListener('click', (e) => {
-    q('[data-route]').forEach((el) => {
+    q('a.nav-link').forEach((el) => {
       if (el.contains(e.target)) {
+        e.preventDefault();
         const isRelative = el.hasAttribute('data-relative');
         let route =
           isRelative && q('#checkHash:checked').length === 0
             ? el.closest('section').getAttribute('data-section') +
-              el.getAttribute('data-route')
-            : el.getAttribute('data-route');
+              el.getAttribute('href')
+            : el.getAttribute('href');
         if (location.hostname === 'scssyworks.github.io') {
           route = `/silkrouter${route}`;
         }
@@ -141,23 +145,27 @@ function initializeRouting() {
     });
     q('.append-query').forEach((el) => {
       if (el.contains(e.target)) {
-        router.set({
-          route: `${
+        router.set(
+          `${
             location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''
           }/tab3/john/doe`,
-          queryString: 'q=HelloWorld',
-        });
+          {
+            queryString: 'q=HelloWorld',
+          }
+        );
       }
     });
     q('.append-data').forEach((el) => {
       if (el.contains(e.target)) {
-        router.set({
-          route: `${
+        router.set(
+          `${
             location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''
           }/tab3/john/doe`,
-          queryString: 'q=HelloWorld',
-          data: 'Hi there!',
-        });
+          {
+            queryString: 'q=HelloWorld',
+            data: 'Hi there!',
+          }
+        );
       }
     });
   });
@@ -178,9 +186,9 @@ function initializeRouting() {
       preservePath: true,
     });
     hashRouter.subscribe((e) => {
-      q('[data-route][data-relative]').forEach((el) => {
+      q('a.nav-link[data-relative]').forEach((el) => {
         el.classList.remove('active');
-        if (e.route.includes(el.getAttribute('data-route'))) {
+        if (e.route.includes(el.getAttribute('href'))) {
           el.classList.add('active');
         }
       });
@@ -191,10 +199,7 @@ function initializeRouting() {
 
 function setGlobals() {
   window.Router = Router;
-  window.route = route;
-  window.deparam = deparam;
-  window.noMatch = noMatch;
-  window.cache = cache;
+  window.RouterCore = RouterCore;
 }
 
 initializeRouting();
