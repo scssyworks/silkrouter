@@ -3,84 +3,132 @@
 (function () {
   'use strict';
 
-  function _typeof$1(obj) {
-    "@babel/helpers - typeof";
+  /**
+   * Router constants
+   */
+  const POP_STATE = 'popstate';
+  const REG_ROUTE_PARAMS = /:[^/]+/g;
+  const REG_PATHNAME = /^\/(?=[^?]*)/;
+  const HISTORY_UNSUPPORTED = 'History is not supported in this environment!';
+  const INVALID_ROUTE = 'Route format is incorrect!';
+  const VIRTUAL_PUSHSTATE = 'vpushstate';
+  const QRY = '?';
+  const EMPTY = '';
+  const UNDEF = void 0;
+  const TYPEOF_STR = typeof EMPTY;
+  const TYPEOF_UNDEF = typeof UNDEF;
+  const TYPEOF_FUNC = typeof (() => {});
+  const STATE = 'State';
+  const PUSH = `push${STATE}`;
+  const REPLACE = `replace${STATE}`;
 
-    return _typeof$1 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-      return typeof obj;
-    } : function (obj) {
-      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    }, _typeof$1(obj);
-  }
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
+  /**
+   * Parses current path and returns params object
+   * @param {string} expr Route expression
+   * @param {string} path URL path
+   * @returns {{[key: string]: any}}
+   */
+  function resolveParams(expr, path) {
+    const params = {};
+    if (REG_ROUTE_PARAMS.test(expr)) {
+      const pathRegex = new RegExp(expr.replace(/\//g, '\\/').replace(/:[^/\\]+/g, '([^\\/]+)'));
+      REG_ROUTE_PARAMS.lastIndex = 0;
+      if (pathRegex.test(path)) {
+        const keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(':', EMPTY));
+        const values = Array.from(path.match(pathRegex));
+        values.shift();
+        keys.forEach((key, index) => {
+          params[key] = values[index];
+        });
+      }
     }
+    return params;
   }
-  function _defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor);
-    }
-  }
-  function _createClass(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", {
-      writable: false
-    });
-    return Constructor;
-  }
-  function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
-  }
-  function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
-  }
-  function _iterableToArray(iter) {
-    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
-  }
-  function _unsupportedIterableToArray(o, minLen) {
-    if (!o) return;
-    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
-    var n = Object.prototype.toString.call(o).slice(8, -1);
-    if (n === "Object" && o.constructor) n = o.constructor.name;
-    if (n === "Map" || n === "Set") return Array.from(o);
-    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-  }
-  function _arrayLikeToArray(arr, len) {
-    if (len == null || len > arr.length) len = arr.length;
-    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-    return arr2;
-  }
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _toPrimitive(input, hint) {
-    if (typeof input !== "object" || input === null) return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== undefined) {
-      var res = prim.call(input, hint || "default");
-      if (typeof res !== "object") return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
-  function _toPropertyKey(arg) {
-    var key = _toPrimitive(arg, "string");
-    return typeof key === "symbol" ? key : String(key);
+
+  var isObject = function isObject(x) {
+  	return typeof x === 'object' && x !== null;
+  };
+
+  /**
+   * Function to trigger custom event
+   * @param {HTMLElement} context Context element
+   * @param {string} eventType Event type
+   * @param {any[]} data Data to be passed to handler
+   */
+  function trigger(context, eventType, data) {
+    context.dispatchEvent(new CustomEvent(eventType, {
+      bubbles: true,
+      cancelable: true,
+      detail: data || []
+    }));
   }
 
   /**
-   * Function to extend an object with new and updated properties
-   * @private
-   * @returns {object}
+   * Safely trims string
+   * @param {string} str String
    */
-  function assign() {
-    return Object.assign.apply(Object, arguments);
+  function trim(str) {
+    return typeof str === TYPEOF_STR ? str.trim() : EMPTY;
+  }
+
+  /**
+   * Checks if given route is valid
+   * @private
+   * @param {string} route Route string
+   */
+  function isValidRoute(route) {
+    return REG_PATHNAME.test(route);
+  }
+
+  /**
+   * Sets the current route
+   * @private
+   * @typedef {import('./types').RouteConfig} RouteConfig
+   * @param {string} routeStr Route string
+   * @param {RouteConfig} [routeConfig] Route config
+   * @returns {void}
+   */
+  function set(routeStr, routeConfig) {
+    routeConfig = isObject(routeConfig) ? routeConfig : {};
+    const [route, qs] = routeStr.split(QRY);
+    const {
+      replace = false,
+      preventDefault = false,
+      queryString = qs,
+      data,
+      pageTitle = null
+    } = routeConfig;
+    const {
+      preservePath,
+      hashRouting: hash,
+      history,
+      context
+    } = this.config;
+    // Resolve to URL query string if it's not explicitly passed
+    routeStr = trim(route);
+    if (isValidRoute(routeStr)) {
+      const path = routeStr;
+      if (hash) {
+        routeStr = `${preservePath ? '' : '/'}#${routeStr}`;
+      }
+      // Append query string
+      routeStr = `${routeStr}${trim(queryString ? `${QRY + queryString}` : EMPTY)}`;
+      const savedState = history.state || {
+        idx: 0
+      };
+      history[replace ? REPLACE : PUSH]({
+        data,
+        idx: savedState.idx + 1
+      }, pageTitle, routeStr);
+      if (!preventDefault && path) {
+        trigger(context, VIRTUAL_PUSHSTATE, [{
+          path,
+          hash
+        }, UNDEF, this]);
+      }
+    } else {
+      throw new TypeError(INVALID_ROUTE);
+    }
   }
 
   /******************************************************************************
@@ -1131,864 +1179,222 @@
       return isFunction(target.addEventListener) && isFunction(target.removeEventListener);
   }
 
-  /**
-   * Router constants
-   */
-  var POP_STATE = 'popstate';
-  var REG_ROUTE_PARAMS = /:[^/]+/g;
-  var REG_PATHNAME = /^\/(?=[^?]*)/;
-  var HISTORY_UNSUPPORTED = 'History unsupported!';
-  var INVALID_ROUTE = 'Route string is not a pure route';
-  var VIRTUAL_PUSHSTATE = 'vpushstate';
-  var CACHED_FIELDS = ['route', 'hashRouting', 'path', 'hash', 'search', 'hashSearch', 'data'];
-  var AMP = '&';
-  var QRY = '?';
-  var EMPTY = '';
-  var UNDEF$1 = void 0;
-  var TYPEOF_STR$1 = _typeof$1(EMPTY);
-  var TYPEOF_BOOL = _typeof$1(true);
-  var TYPEOF_UNDEF$1 = _typeof$1(UNDEF$1);
-  _typeof$1({});
-  _typeof$1(0);
-  var TYPEOF_FUNC = _typeof$1(function () {});
-  var STATE = 'State';
-  var PUSH = "push".concat(STATE);
-  var REPLACE = "replace".concat(STATE);
-
-  function getGlobal() {
-    return (typeof globalThis === "undefined" ? "undefined" : _typeof$1(globalThis)) !== TYPEOF_UNDEF$1 ? globalThis : global || self;
-  }
-
-  /*!
-   * Deparam plugin converts query string to a valid JavaScript object
-   * Released under MIT license
-   * @name Deparam.js
-   * @author Sachin Singh <https://github.com/scssyworks/deparam.js>
-   * @version 3.0.6
-   * @license MIT
-   */
-  function _typeof(obj) {
-    "@babel/helpers - typeof";
-
-    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-      return typeof obj;
-    } : function (obj) {
-      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    }, _typeof(obj);
-  }
-
-  /*!
-   * is-number <https://github.com/jonschlinkert/is-number>
-   *
-   * Copyright (c) 2014-present, Jon Schlinkert.
-   * Released under the MIT License.
-   */
-
-  var isNumber = function(num) {
-    if (typeof num === 'number') {
-      return num - num === 0;
-    }
-    if (typeof num === 'string' && num.trim() !== '') {
-      return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
-    }
-    return false;
-  };
-
-  var isObject = function isObject(x) {
-  	return typeof x === 'object' && x !== null;
-  };
-
-  var UNDEF = void 0; // Results to undefined
-  // Typeof undefined
-
-  var TYPEOF_UNDEF = _typeof(UNDEF); // Typeof string
-
-
-  var TYPEOF_STR = _typeof(""); // location var
-
-
-  var loc = (typeof window === "undefined" ? "undefined" : _typeof(window)) !== TYPEOF_UNDEF ? window.location : null; // Shorthand for built-ins
-
-  var isArr$1 = Array.isArray;
-  /**
-   * Checks if current key is safe
-   * @param {string} key Current key
-   * @returns {boolean}
-   */
-
-  function isSafe(key) {
-    return ["__proto__", "prototype"].indexOf(key) === -1;
-  }
-  /**
-   * Shorthand for Object.prototype.hasOwnProperty
-   * @param {any} obj Any object
-   * @param {string} key key
-   * @returns {boolean} true or false if object has the property
-   */
-
-
-  function hasOwn(obj, key) {
-    return Object.prototype.hasOwnProperty.call(obj, key);
-  }
-  /**
-   * Returns true of input query string is complex
-   * @param {string} q Query string
-   * @returns {boolean} true or false
-   */
-
-
-  function ifComplex(q) {
-    return /\[/.test(q);
-  }
-  /**
-   * Returns an object without a prototype
-   * @returns {{[key in string|number]: any}} Object without __proto__
-   */
-
-
-  function obNull() {
-    return Object.create(null);
-  }
-  /**
-   * Returns a parsed query object
-   * @param {string} qs Query string
-   * @param {boolean} coerce Coerce values
-   * @returns {{[key in string|number]: any}} Query object
-   */
-
-
-  function lib(qs, coerce) {
-    var _this = this;
-
-    if (_typeof(qs) !== TYPEOF_STR) {
-      qs = loc ? loc.search : "";
-    }
-
-    qs = qs.substring(qs.charAt(0) === "?");
-    var queryObject = obNull();
-
-    if (qs) {
-      qs.split("&").forEach(function (qq) {
-        var qArr = qq.split("=").map(function (part) {
-          return decodeURIComponent(part);
-        });
-
-        if (ifComplex(qArr[0])) {
-          complex.apply(_this, [].concat(qArr).concat([queryObject, coerce]));
-        } else {
-          simple.apply(_this, [qArr, queryObject, false, coerce]);
-        }
-      });
-    }
-
-    return queryObject;
-  }
-  /**
-   * Converts an array to equivalent object
-   * @param {any[]} arr Any array
-   * @returns {any} Any object
-   */
-
-
-  function toObject(arr) {
-    var convertedObj = obNull();
-
-    if (isArr$1(arr)) {
-      arr.forEach(function (value, index) {
-        convertedObj[index] = value;
-      });
-    }
-
-    return convertedObj;
-  }
-  /**
-   * Converts array to an object if required
-   * @param {any} ob Any object
-   * @param {booleab} isNextNumber Test for next key
-   * @returns {any} Any object
-   */
-
-
-  function resolve(ob, isNextNumber) {
-    if (_typeof(ob) === TYPEOF_UNDEF) return isNextNumber ? [] : obNull();
-    return isNextNumber ? ob : toObject(ob);
-  }
-  /**
-   * Resolves the target object for next iteration
-   * @param {any} ob current reference object
-   * @param {string} nextProp reference property in current object
-   * @returns {any} Resolved object for next iteration
-   */
-
-
-  function resolveObj(ob, nextProp) {
-    if (isObject(ob) && !isArr$1(ob)) return {
-      ob: ob
-    };
-    if (isArr$1(ob) || _typeof(ob) === TYPEOF_UNDEF) return {
-      ob: resolve(ob, isNumber(nextProp))
-    };
-    return {
-      ob: [ob],
-      push: ob !== null
-    };
-  }
-  /**
-   * Handles complex query parameters
-   * @param {string} key Query key
-   * @param {string} value Query value
-   * @param {Object} obj Query object
-   * @returns {void}
-   */
-
-
-  function complex(key, value, obj, doCoerce) {
-    var match = key.match(/([^\[]+)\[([^\[]*)\]/) || [];
-
-    if (match.length === 3) {
-      var prop = match[1];
-      var nextProp = match[2];
-      key = key.replace(/\[([^\[]*)\]/, "");
-
-      if (ifComplex(key)) {
-        if (nextProp === "") nextProp = "0";
-        key = key.replace(/[^\[]+/, nextProp);
-        complex(key, value, obj[prop] = resolveObj(obj[prop], nextProp).ob, doCoerce);
-      } else if (nextProp) {
-        if (isSafe(prop) && isSafe(nextProp)) {
-          var _resolveObj = resolveObj(obj[prop], nextProp),
-              ob = _resolveObj.ob,
-              push = _resolveObj.push;
-
-          obj[prop] = ob;
-          var nextOb = push ? obNull() : obj[prop];
-          nextOb[nextProp] = coerce(value, !doCoerce);
-
-          if (push) {
-            obj[prop].push(nextOb);
-          }
-        }
-      } else {
-        simple([match[1], value], obj, true, doCoerce);
-      }
-    }
-  }
-  /**
-   * Handles simple query
-   * @param {array} qArr Query list
-   * @param {Object} queryObject Query object
-   * @param {boolean} toArray Test for conversion to array
-   * @returns {void}
-   */
-
-
-  function simple(qArr, queryObject, toArray, doCoerce) {
-    var key = qArr[0];
-    var value = qArr[1];
-
-    if (isSafe(key)) {
-      value = coerce(value, !doCoerce);
-
-      if (hasOwn(queryObject, key)) {
-        queryObject[key] = isArr$1(queryObject[key]) ? queryObject[key] : [queryObject[key]];
-        queryObject[key].push(value);
-      } else {
-        queryObject[key] = toArray ? [value] : value;
-      }
-    }
-  }
-  /**
-   * Converts input value to their appropriate types
-   * @param {any} value Input value
-   * @param {boolean} skip Test for skipping coercion
-   * @returns {any} Coerced value
-   */
-
-
-  function coerce(value, skip) {
-    // eslint-disable-next-line
-    if (value == null) {
-      return "";
-    }
-
-    if (skip || _typeof(value) !== TYPEOF_STR) {
-      return value;
-    }
-
-    value = value.trim();
-
-    if (isNumber(value)) {
-      return +value;
-    }
-
-    switch (value) {
-      case "null":
-        return null;
-
-      case TYPEOF_UNDEF:
-        return UNDEF;
-
-      case "true":
-        return true;
-
-      case "false":
-        return false;
-
-      case "NaN":
-        return NaN;
-
-      default:
-        return value;
-    }
-  }
-
-  /**
-   * Shorthand for Array.isArray
-   */
-  var isArr = Array.isArray;
-
-  /**
-   * Shorthand for Object.keys
-   */
-  var oKeys = Object.keys;
-
-  /**
-   * Safely trims string
-   * @param {string} str String
-   */
-  function trim(str) {
-    return _typeof$1(str) === TYPEOF_STR$1 ? str.trim() : EMPTY;
-  }
-
-  /**
-   * Checks if given route is valid
-   * @private
-   * @param {string} route Route string
-   */
-  function isValidRoute(route) {
-    return REG_PATHNAME.test(route);
-  }
-
-  /**
-   * Loops over an array like object
-   * @param {object} arrayObj Array or array like object
-   * @param {function} callback Callback function
-   */
-  function each(arrayObj, callback) {
-    if (isObject(arrayObj)) {
-      var keys = oKeys(arrayObj);
-      for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        var cont = callback(arrayObj[key], isNumber(key) ? +key : key);
-        if (_typeof$1(cont) === TYPEOF_BOOL) {
-          if (!cont) {
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Function to trigger custom event
-   * @param {Node|NodeList|HTMLCollection|Node[]} target Target element or list
-   * @param {string} eventType Event type
-   * @param {any[]} data Data to be passed to handler
-   */
-  function trigger(target, eventType, data) {
-    target = Array.from(target instanceof Node ? [target] : target);
-    if (target.length && _typeof$1(eventType) === TYPEOF_STR$1) {
-      each(target, function (el) {
-        var win = getGlobal();
-        var customEvent = new win.CustomEvent(eventType, {
-          bubbles: true,
-          cancelable: true,
-          detail: data || []
-        });
-        el.dispatchEvent(customEvent);
-      });
-    }
-  }
-
-  var RouterEvent = /*#__PURE__*/_createClass(function RouterEvent(routeInfo, currentEvent) {
-    _classCallCheck(this, RouterEvent);
-    // Set relevant parameters
-    var routeObject = routeInfo[0];
-    var originalEvent = routeInfo[1];
-    var routerInstance = routeInfo[2];
-    var _routerInstance$confi = routerInstance.config,
-      location = _routerInstance$confi.location,
-      history = _routerInstance$confi.history;
-    this.route = routeObject.path;
-    this.hashRouting = routeObject.hash;
-    this.routerInstance = routerInstance;
-    this.virtualEvent = currentEvent || {};
-    this.originalEvent = originalEvent || {};
-    this.path = trim(location.pathname);
-    this.hash = location.hash;
-    this.search = trim(location.search.substring(1));
-    this.hashSearch = trim(location.hash && location.hash.split(QRY)[1]);
-    var state = this.originalEvent.state;
-    this.data = state && state.data || history.state && history.state.data;
-  });
-
-  function collate() {
-    var _this = this;
-    return function (observable) {
-      return new Observable(function (subscriber) {
-        var subn = observable.subscribe({
-          next: function next(event) {
-            var routerInstance = event.detail[2];
-            if (routerInstance === _this) {
-              subscriber.next(new RouterEvent(event.detail, event));
-            }
-          },
-          error: subscriber.error,
-          complete: subscriber.complete
-        });
-        return function () {
-          subn.unsubscribe();
-        };
-      });
-    };
-  }
-
-  var getPath = function getPath(isHash, location) {
+  const getPath = (isHash, location) => {
     return trim(isHash ? location.hash.substring(1).split(QRY)[0] : location.pathname);
   };
 
-  function bindRouterEvents(inst) {
-    var _inst$config = inst.config,
-      context = _inst$config.context,
-      location = _inst$config.location,
-      hash = _inst$config.hashRouting;
-    inst.popStateSubscription = fromEvent(getGlobal(), POP_STATE).subscribe(function (e) {
-      var path = getPath(hash, location);
-      if (path) {
-        trigger(context, VIRTUAL_PUSHSTATE, [{
-          path: path,
-          hash: hash
-        }, e, inst]);
-      }
-    });
-    inst.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(inst));
-    if (hash && !location.hash) {
-      inst.set('/', true, false); // Replace current hash path without executing anythings
-    }
-  }
-
-  var encode = encodeURIComponent;
-
   /**
-   * Builds query string recursively
-   * @private
-   * @param {string[]} qsList List of query string key value pairs
-   * @param {*} key Key
-   * @param {*} obj Value
+   * Creates an instance of router event
    */
-  function buildQuery(qsList, key, obj) {
-    if (isObject(obj)) {
-      each(obj, function (prop, obKey) {
-        buildQuery(qsList, "".concat(key, "[").concat(isArr(obj) ? EMPTY : obKey, "]"), prop);
-      });
-    } else if (_typeof$1(obj) !== TYPEOF_FUNC) {
-      qsList.push("".concat(encode(key), "=").concat(encode(obj)));
+  class RouterEvent {
+    /**
+     * Creates a instance of router event
+     * @typedef {import('./types').RouteInfo} RouteInfo
+     * @param {RouteInfo} routeInfo Route information
+     * @param {CustomEvent} currentEvent Current event object
+     */
+    constructor(routeInfo, currentEvent) {
+      // Set relevant parameters
+      const [routeObject, originalEvent, routerInstance] = routeInfo;
+      const {
+        location,
+        history
+      } = routerInstance.config;
+      this.route = routeObject.path;
+      this.isHashRoute = routeObject.hash;
+      this.router = routerInstance;
+      this.currentEvent = originalEvent || currentEvent;
+      this.query = {
+        path: trim(location.search.substring(1)),
+        hash: trim(location.hash.split(QRY)[1])
+      };
+      const {
+        state
+      } = originalEvent || {};
+      const {
+        data,
+        idx = 0
+      } = state || history.state || {};
+      this.data = data;
+      this.index = +idx;
     }
   }
 
   /**
-   * Converts an object to a query string
-   * @private
-   * @param {object} obj Object which should be converted to a string
-   * @returns {string}
+   * Attaches a route handler
+   * @returns {(observable: Observable<any>) => Observable<any>}
    */
-  function toQueryString(obj) {
-    var qsList = [];
-    if (isObject(obj)) {
-      each(obj, function (prop, key) {
-        buildQuery(qsList, key, prop);
-      });
-      return qsList.join(AMP);
-    }
-    return _typeof$1(obj) === TYPEOF_STR$1 ? obj : EMPTY;
-  }
-
-  /**
-   * Resolves and analyzes existing query string
-   * @private
-   * @param {string} queryString Query string
-   * @param {string} hashRouting Flag to test if hash routing is enabled
-   */
-  function resolveQuery(queryString, hashRouting) {
-    var location = this.config.location;
-    var search = trim(location.search && location.search.substring(1));
-    var existingQuery = trim(hashRouting ? location.hash.split(QRY)[1] : search);
-    if (!existingQuery) {
-      return queryString;
-    }
-    return toQueryString(assign(lib(search), lib(existingQuery), lib(queryString)));
-  }
-
-  function set(route, replace, doExec) {
-    var exec = true;
-    if (_typeof$1(doExec) === TYPEOF_BOOL) {
-      exec = doExec;
-    }
-    var _this$config = this.config,
-      preservePath = _this$config.preservePath,
-      hashRouting = _this$config.hashRouting,
-      history = _this$config.history;
-    var routeObject = assign({
-      replace: replace,
-      exec: exec
-    }, _typeof$1(route) === TYPEOF_STR$1 ? {
-      route: route
-    } : route);
-    replace = routeObject.replace;
-    exec = routeObject.exec;
-    var routeStr = routeObject.route,
-      queryString = routeObject.queryString;
-    var preserveQuery = routeObject.preserveQuery,
-      data = routeObject.data,
-      _routeObject$pageTitl = routeObject.pageTitle,
-      pageTitle = _routeObject$pageTitl === void 0 ? null : _routeObject$pageTitl;
-    var routeParts = routeStr.split(QRY);
-    // Check if query string is an object
-    if (isObject(queryString)) {
-      queryString = toQueryString(queryString);
-    }
-    // Resolve to URL query string if it's not explicitly passed
-    queryString = trim(queryString ? queryString : routeParts[1]);
-    routeStr = trim(routeParts[0]);
-    // Check if query preservation is required. Resolve query accordingly
-    if (preserveQuery) {
-      queryString = resolveQuery.apply(this, [queryString, hashRouting]);
-    }
-    if (isValidRoute(routeStr)) {
-      var unmodifiedRoute = routeStr;
-      if (hashRouting) {
-        routeStr = "/#".concat(routeStr);
-        // Path preservation should only work for hash routing
-        if (preservePath) {
-          routeStr = "".concat(routeStr.substring(1));
-        }
-      }
-      // Append query string
-      routeStr = "".concat(routeStr).concat(queryString ? "".concat(QRY + queryString) : EMPTY);
-      history[replace ? REPLACE : PUSH]({
-        data: data
-      }, pageTitle, routeStr);
-      if (exec && unmodifiedRoute) {
-        trigger(this.config.context, VIRTUAL_PUSHSTATE, [{
-          path: unmodifiedRoute,
-          hash: hashRouting
-        }, UNDEF$1, this]);
-      }
-    } else {
-      throw new TypeError(INVALID_ROUTE);
-    }
-    return this;
-  }
-
-  function callOnce(isDone) {
-    var _this = this;
-    var _this$config = this.config,
-      hash = _this$config.hashRouting,
-      location = _this$config.location,
-      init = _this$config.init;
-    var path = getPath(hash, location);
-    return function (observable) {
-      return new Observable(function (subscriber) {
-        var subn = observable.subscribe(subscriber);
-        if (!isDone) {
-          isDone = true;
-          if (init && path) {
-            subscriber.next(new RouterEvent([{
-              path: path,
-              hash: hash
-            }, UNDEF$1, _this]));
+  function collate() {
+    return observable => new Observable(subscriber => {
+      const subn = observable.subscribe({
+        next: event => {
+          const [,, routerInstance] = event.detail;
+          if (routerInstance === this) {
+            subscriber.next(new RouterEvent(event.detail, event));
           }
-        }
-        return function () {
-          subn.unsubscribe();
-        };
+        },
+        error: subscriber.error,
+        complete: subscriber.complete
       });
-    };
+      return () => {
+        subn.unsubscribe();
+      };
+    });
   }
 
-  var Router = /*#__PURE__*/function () {
-    function Router(config) {
-      _classCallCheck(this, Router);
-      var _getGlobal = getGlobal(),
-        history = _getGlobal.history,
-        location = _getGlobal.location,
-        document = _getGlobal.document;
+  /**
+   * Calls the handler once on initialization
+   * @param {boolean} [isDone] Optional flag used as a switch
+   * @returns {(observable: Observable<any>) => Observable<any>}
+   */
+  function callOnce(isDone) {
+    const {
+      hashRouting: hash,
+      location,
+      init
+    } = this.config;
+    const path = getPath(hash, location);
+    return observable => new Observable(subscriber => {
+      const subn = observable.subscribe(subscriber);
+      if (!isDone) {
+        isDone = true;
+        if (init && path) {
+          subscriber.next(new RouterEvent([{
+            path,
+            hash
+          }, UNDEF, this]));
+        }
+      }
+      return () => {
+        subn.unsubscribe();
+      };
+    });
+  }
+
+  /**
+   * Core router class to handle basic routing functionality
+   */
+  class RouterCore {
+    static get global() {
+      return typeof globalThis !== TYPEOF_UNDEF ? globalThis : global || self;
+    }
+    /**
+     * Router core constructor
+     * @typedef {import('./types').RouterCoreConfig} RouterCoreConfig
+     * @param {RouterCoreConfig} routerCoreConfig Route core configuration
+     */
+    constructor(_ref) {
+      let {
+        history,
+        context,
+        location,
+        hash
+      } = _ref;
       if (!history[PUSH]) {
         throw new Error(HISTORY_UNSUPPORTED);
       }
-      this.config = Object.freeze(assign({
+      this.popStateSubscription = fromEvent(RouterCore.global, POP_STATE).subscribe(e => {
+        const path = getPath(hash, location);
+        if (path) {
+          trigger(context, VIRTUAL_PUSHSTATE, [{
+            path,
+            hash
+          }, e, this]);
+        }
+      });
+      this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(collate.apply(this));
+    }
+    /**
+     * Allows you to add operators for any pre-processing before a handler is called
+     * @typedef {import('./types').Operator} Operator
+     * @typedef {import('rxjs').Observable} Observable
+     * @param  {...Operator} ops Operators
+     * @returns {Observable<any>}
+     */
+    pipe() {
+      for (var _len = arguments.length, ops = new Array(_len), _key = 0; _key < _len; _key++) {
+        ops[_key] = arguments[_key];
+      }
+      return this.listeners.pipe(callOnce.apply(this), ...ops);
+    }
+    /**
+     * Attaches a route handler
+     * @typedef {import('../routerEvent/index').RouterEvent} RouterEvent
+     * @param {(event: RouterEvent) => void} fn Route handler
+     */
+    subscribe(fn) {
+      return this.pipe().subscribe(fn);
+    }
+    /**
+     * Destroys current router instance
+     * @param {() => void} callback Callback for destroy function
+     */
+    destroy(callback) {
+      if (typeof callback === TYPEOF_FUNC) {
+        callback();
+      }
+      this.popStateSubscription.unsubscribe(); // Unsubscribe popstate event
+    }
+  }
+
+  /**
+   * Browser router to handle routing logic
+   */
+  class Router extends RouterCore {
+    /**
+     * Router constructor
+     * @typedef {import('./types').RouterConfig} RouterConfig
+     * @param {RouterConfig} config
+     */
+    constructor(config) {
+      config = isObject(config) ? config : {};
+      const {
+        history,
+        location,
+        document
+      } = RouterCore.global;
+      const context = document.body;
+      super({
+        history,
+        location,
+        context,
+        hash: config.hashRouting
+      });
+      this.config = Object.freeze({
         init: true,
-        // Initialize as soon as route handler is attached
         hashRouting: false,
-        // Switch to hash routing
         preservePath: false,
-        // Works for hash routing
-        context: document.body,
-        // To change the context of "vpushstate" event
-        location: location,
-        // Should remain unchanged
-        history: history // History object
-      }, config || {}));
-      this.__paths__ = [];
-      bindRouterEvents(this);
-    }
-    _createClass(Router, [{
-      key: "pipe",
-      value: function pipe() {
-        var _this$listeners;
-        for (var _len = arguments.length, ops = new Array(_len), _key = 0; _key < _len; _key++) {
-          ops[_key] = arguments[_key];
-        }
-        return (_this$listeners = this.listeners).pipe.apply(_this$listeners, [callOnce.apply(this)].concat(ops));
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe() {
-        var _this$pipe;
-        return (_this$pipe = this.pipe()).subscribe.apply(_this$pipe, arguments);
-      }
-    }, {
-      key: "set",
-      value: function set$1() {
-        for (var _len2 = arguments.length, props = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          props[_key2] = arguments[_key2];
-        }
-        return set.apply(this, props);
-      }
-    }, {
-      key: "destroy",
-      value: function destroy(callback) {
-        if (_typeof$1(callback) === TYPEOF_FUNC) {
-          callback();
-        }
-        this.popStateSubscription.unsubscribe(); // Unsubscribe popstate event
-        this.__paths__.length = 0;
-      }
-    }]);
-    return Router;
-  }();
-
-  /**
-   * Parses current path and returns params object
-   * @private
-   * @param {string} expr Route expression
-   * @param {string} path URL path
-   * @returns {object}
-   */
-  function extractParams(expr, path) {
-    var params = {};
-    if (REG_ROUTE_PARAMS.test(expr)) {
-      var pathRegex = new RegExp(expr.replace(/\//g, '\\/').replace(/:[^/\\]+/g, '([^\\/]+)'));
-      REG_ROUTE_PARAMS.lastIndex = 0;
-      if (pathRegex.test(path)) {
-        var keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(function (key) {
-          return key.replace(':', EMPTY);
-        });
-        var values = Array.from(path.match(pathRegex));
-        values.shift();
-        each(keys, function (key, index) {
-          params[key] = values[index];
-        });
-      }
-    }
-    return params;
-  }
-
-  /**
-   * Operator to compare a specific route
-   * @param {string} routeStr Route string
-   * @param {Router} routerInstance Current router object [optional]
-   * @param {boolean} ignoreCase Ignore case in route string
-   */
-  function route(routeStr, routerInstance, ignoreCase) {
-    if (_typeof$1(routerInstance) === TYPEOF_BOOL) {
-      ignoreCase = routerInstance;
-      routerInstance = UNDEF$1;
-    }
-    routeStr = trim(routeStr);
-    if (routerInstance instanceof Router) {
-      var paths = routerInstance.__paths__;
-      if (paths.indexOf(routeStr) === -1) {
-        paths.push(routeStr);
-      }
-    }
-    return function (observable) {
-      return new Observable(function (subscriber) {
-        var subn = observable.subscribe({
-          next: function next(event) {
-            var incomingRoute = event.route;
-            if (isValidRoute(routeStr)) {
-              if (ignoreCase) {
-                routeStr = routeStr.toLowerCase();
-                incomingRoute = incomingRoute.toLowerCase();
-              }
-              var params = extractParams(routeStr, incomingRoute);
-              var paramsLength = oKeys(params).length;
-              if (incomingRoute === routeStr || paramsLength > 0) {
-                if (paramsLength > 0) {
-                  event.params = params;
-                }
-                subscriber.next(event);
-              }
-            } else {
-              subscriber.error(new Error(INVALID_ROUTE));
-            }
-          },
-          error: subscriber.error,
-          complete: subscriber.complete
-        });
-        return function () {
-          if (routerInstance instanceof Router) {
-            var _paths = routerInstance.__paths__;
-            var existingRouteIndex = _paths.indexOf(routeStr);
-            if (existingRouteIndex > -1) {
-              _paths.splice(existingRouteIndex, 1);
-            }
-          }
-          subn.unsubscribe();
-        };
+        context,
+        history,
+        location,
+        ...config
       });
-    };
-  }
-
-  /**
-   * Converts search and hashSearch strings to object
-   * @param {boolean} coerce Flag to enable value typecast
-   */
-  function deparam(coerce) {
-    return function (observable) {
-      return new Observable(function (subscriber) {
-        var subn = observable.subscribe({
-          next: function next(event) {
-            try {
-              event.search = lib(event.search, coerce);
-              event.hashSearch = lib(event.hashSearch, coerce);
-              subscriber.next(event);
-            } catch (e) {
-              subscriber.error(e);
-            }
-          },
-          error: subscriber.error,
-          complete: subscriber.complete
+      if (config.hashRouting && !location.hash) {
+        this.set('/', {
+          replace: true,
+          preventDefault: true // Don't execute route handlers
         });
-        return function () {
-          subn.unsubscribe();
-        };
-      });
-    };
-  }
-
-  /**
-   * Modifies current subscriber to detect errors
-   * @param {Router} routerInstance Current router object
-   */
-  function noMatch(routerInstance) {
-    return function (observable) {
-      return new Observable(function (subscriber) {
-        var subn = observable.subscribe({
-          next: function next(event) {
-            if (routerInstance instanceof Router) {
-              var paths = routerInstance.__paths__;
-              if (paths.length > 0) {
-                var currentRoute = event.route;
-                var match = false;
-                each(paths, function (path) {
-                  if (path === currentRoute || oKeys(extractParams(path, currentRoute)).length) {
-                    return !(match = true);
-                  }
-                });
-                if (!match) {
-                  event.noMatch = true;
-                  subscriber.next(event);
-                }
-              }
-            }
-          },
-          error: subscriber.error,
-          complete: subscriber.complete
-        });
-        return function () {
-          subn.unsubscribe();
-        };
-      });
-    };
-  }
-  function deepComparison(first, second, result) {
-    each(oKeys(first), function (key) {
-      if (isObject(first[key]) && isObject(second[key])) {
-        deepComparison(first[key], second[key], result);
-      } else {
-        result["break"] = first[key] !== second[key];
       }
-    });
-  }
-
-  /**
-   * Caches incoming routes to avoid calling handler if there is no change
-   * @param {string[]} keys
-   * @param {boolean} deep
-   */
-  function cache() {
-    var keys = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : CACHED_FIELDS;
-    var deep = arguments.length > 1 ? arguments[1] : undefined;
-    var cache = {};
-    if (_typeof$1(keys) === TYPEOF_BOOL) {
-      deep = keys;
-      keys = CACHED_FIELDS;
     }
-    return function (observable) {
-      return new Observable(function (subscriber) {
-        var subn = observable.subscribe({
-          next: function next(event) {
-            each(keys, function (key) {
-              if (deep && isObject(event[key]) && isObject(cache[key])) {
-                var result = {};
-                deepComparison(event[key], cache[key], result);
-                if (result["break"]) {
-                  assign(cache, event);
-                  subscriber.next(event);
-                  return false;
-                }
-              } else if (event[key] !== cache[key]) {
-                assign(cache, event);
-                subscriber.next(event);
-                return false; // break loop
-              }
-            });
-          },
-
-          error: subscriber.error,
-          complete: subscriber.complete
-        });
-        return function () {
-          subn.unsubscribe();
-          cache = {};
-        };
-      });
-    };
+    /**
+     * Sets the current route path
+     * @typedef {import('../set/types').RouteConfig} RouteConfig
+     * @param {string} path Route path
+     * @param {RouteConfig} routeConfig Route config
+     */
+    set(path, routeConfig) {
+      set.apply(this, [path, routeConfig]);
+    }
   }
 
-  const name="silkrouter";const version="4.2.16";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="src/typings/silkrouter.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist",test:"jest tests/*",deploy:"gh-pages -d dist",format:"rome format ./src --write",lint:"rome check ./src","check:sanity":"npm run lint && npm run format"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"deparam.js":"^3.0.6"};const devDependencies={"@babel/core":"^7.21.3","@babel/eslint-parser":"^7.21.3","@babel/preset-env":"^7.20.2","@rollup/plugin-babel":"^6.0.3","@rollup/plugin-commonjs":"^24.0.1","@rollup/plugin-eslint":"^9.0.3","@rollup/plugin-json":"^6.0.0","@rollup/plugin-node-resolve":"^15.0.1","@rollup/plugin-terser":"^0.4.0","@types/jest":"^29.4.4","env-cmd":"^10.1.0",eslint:"^8.36.0","gh-pages":"^5.0.0",jest:"^29.5.0",rollup:"^2.79.1","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.2",rome:"^11.0.0",rxjs:"^7.8.0"};const peerDependencies={rxjs:"^7.8.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
+  const name="silkrouter";const version="4.2.17";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="dist/typings/index.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist && npm run typings",test:"jest tests/* --coverage",deploy:"gh-pages -d dist",format:"rome format ./src --write",lint:"rome check ./src","check:sanity":"npm run lint && npm run format",typings:"tsc src/js/index.js --declaration --allowJs --emitDeclarationOnly --outDir dist/typings"};const author="scssyworks";const license="MIT";const keywords=["router","routing","single page apps","single page application","SPA","silk","silk router","history","browser","url","hash","hash routing","pushState","popstate","hashchange","observables","observer","subscriber","subscribe","subscription","rxjs","reactivex"];const files=["dist/umd/","dist/esm/","src/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const dependencies={"core-js":"^3.30.1","deparam.js":"^3.0.6","is-number":"^7.0.0","is-object":"^1.0.2"};const devDependencies={"@babel/core":"^7.21.3","@babel/eslint-parser":"^7.21.3","@babel/preset-env":"^7.20.2","@rollup/plugin-babel":"^6.0.3","@rollup/plugin-commonjs":"^24.0.1","@rollup/plugin-eslint":"^9.0.3","@rollup/plugin-json":"^6.0.0","@rollup/plugin-node-resolve":"^15.0.1","@rollup/plugin-terser":"^0.4.0","@types/jest":"^29.4.4","env-cmd":"^10.1.0",eslint:"^8.36.0","gh-pages":"^5.0.0","gzip-size":"^7.0.0",jest:"^29.5.0",rollup:"^2.79.1","rollup-plugin-filesize":"^10.0.0","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.2",rome:"^11.0.0",rxjs:"^7.8.0",typescript:"^5.0.4"};const peerDependencies={rxjs:"^7.8.0"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,dependencies:dependencies,devDependencies:devDependencies,peerDependencies:peerDependencies};
 
   function q(selector) {
-    var _document;
     if (typeof selector === 'string') {
-      var elArray = [];
-      selector.split(',').map(function (selectorPart) {
-        return selectorPart.trim();
-      }).forEach(function (selectorPart) {
-        var selected = _toConsumableArray(document.querySelectorAll(selectorPart));
-        selected.forEach(function (el) {
+      const elArray = [];
+      selector.split(',').map(selectorPart => selectorPart.trim()).forEach(selectorPart => {
+        const selected = [...document.querySelectorAll(selectorPart)];
+        selected.forEach(el => {
           if (!elArray.includes(el)) {
             elArray.push(el);
           }
@@ -1997,135 +1403,135 @@
       return elArray;
     }
     // rome-ignore lint/style/noArguments: Keeping default behaviour of querySelectorAll
-    return _toConsumableArray((_document = document).querySelectorAll.apply(_document, arguments));
+    return [...document.querySelectorAll(...arguments)];
   }
   function renderVersion() {
-    q('.version').forEach(function (el) {
-      var wrapper = el.querySelector('span');
+    q('.version').forEach(el => {
+      const wrapper = el.querySelector('span');
       if (wrapper) {
         wrapper.textContent = pkg.version;
       }
     });
   }
   function initializeRouting() {
-    q('#checkHash').forEach(function (el) {
+    q('#checkHash').forEach(el => {
       el.checked = window.sessionStorage.getItem('checkedStatus') === '1';
     });
-    var router = new Router();
-    var childRouter = router;
-    router.subscribe(function (e) {
-      var eventRoute = location.hostname === 'scssyworks.github.io' ? e.route.replace(/\/silkrouter\//, '/') : e.route;
-      q('[data-route]').forEach(function (el) {
+    const router = new Router();
+    let childRouter = router;
+    router.subscribe(e => {
+      const eventRoute = location.hostname === 'scssyworks.github.io' ? e.route.replace(/\/silkrouter\//, '/') : e.route;
+      q('a.nav-link').forEach(el => {
         el.classList.remove('active');
-        var elRoute = el.getAttribute('data-route');
-        if (elRoute === '/' && eventRoute === elRoute) {
-          el.classList.add('active');
-        } else if (elRoute !== '/' && eventRoute.includes(elRoute)) {
+        const elRoute = el.getAttribute('href');
+        if (elRoute === '/' && eventRoute === elRoute || elRoute !== '/' && eventRoute.includes(elRoute)) {
           el.classList.add('active');
         }
       });
-      q('[data-section]').forEach(function (el) {
+      q('[data-section]').forEach(el => {
         el.classList.add('d-none');
-        var elSection = el.getAttribute('data-section');
+        const elSection = el.getAttribute('data-section');
         if (elSection === '/' && eventRoute === elSection) {
           el.classList.remove('d-none');
         } else if (elSection !== '/' && eventRoute.includes(elSection)) {
           el.classList.remove('d-none');
         }
       });
-      q('.params-data, .query-next-step, .query-data, .data-next-step, .state-data, .pass-data-tutorial').forEach(function (el) {
+      q('.params-data, .query-next-step, .query-data, .data-next-step, .state-data, .pass-data-tutorial').forEach(el => {
         el.classList.add('d-none');
       });
     });
-    var paramsRoute = location.hostname === 'scssyworks.github.io' ? '/silkrouter/tab3/:firstname/:lastname' : '/tab3/:firstname/:lastname';
-    router.pipe(route(paramsRoute), deparam(true)).subscribe(function (e) {
-      q('.params-data').forEach(function (el) {
-        el.textContent = JSON.stringify(e.params, null, 2);
-      });
-      q('.params-data, .query-next-step').forEach(function (el) {
-        el.classList.remove('d-none');
-      });
-      if (Object.keys(e.search).length) {
-        q('.query-data').forEach(function (el) {
-          el.textContent = JSON.stringify(e.search, null, 2);
+    const paramsRoute = location.hostname === 'scssyworks.github.io' ? '/silkrouter/tab3/:firstname/:lastname' : '/tab3/:firstname/:lastname';
+    router.subscribe(e => {
+      const params = resolveParams(paramsRoute, e.route);
+      if (Object.keys(params).length) {
+        q('.params-data').forEach(el => {
+          el.textContent = JSON.stringify(params, null, 2);
+        });
+        q('.params-data, .query-next-step').forEach(el => {
           el.classList.remove('d-none');
         });
-        q('.data-next-step').forEach(function (el) {
-          el.classList.remove('d-none');
-        });
-      }
-      if (e.data) {
-        q('.state-data').forEach(function (el) {
-          el.textContent = e.data;
-          el.classList.remove('d-none');
-        });
-        q('.pass-data-tutorial').forEach(function (el) {
-          el.classList.remove('d-none');
-        });
+        if (e.query.path) {
+          q('.query-data').forEach(el => {
+            el.textContent = e.query.path;
+            el.classList.remove('d-none');
+          });
+          q('.data-next-step').forEach(el => {
+            el.classList.remove('d-none');
+          });
+        }
+        if (e.data) {
+          q('.state-data').forEach(el => {
+            el.textContent = e.data;
+            el.classList.remove('d-none');
+          });
+          q('.pass-data-tutorial').forEach(el => {
+            el.classList.remove('d-none');
+          });
+        }
       }
     });
-    document.addEventListener('click', function (e) {
-      q('[data-route]').forEach(function (el) {
+    document.addEventListener('click', e => {
+      q('a.nav-link').forEach(el => {
         if (el.contains(e.target)) {
-          var isRelative = el.hasAttribute('data-relative');
-          var _route = isRelative && q('#checkHash:checked').length === 0 ? el.closest('section').getAttribute('data-section') + el.getAttribute('data-route') : el.getAttribute('data-route');
+          e.preventDefault();
+          const isRelative = el.hasAttribute('data-relative');
+          let route = isRelative && q('#checkHash:checked').length === 0 ? el.closest('section').getAttribute('data-section') + el.getAttribute('href') : el.getAttribute('href');
           if (location.hostname === 'scssyworks.github.io') {
-            _route = "/silkrouter".concat(_route);
+            route = `/silkrouter${route}`;
           }
           if (isRelative) {
             if (location.hostname === 'scssyworks.github.io' && childRouter.config.hashRouting) {
-              _route = _route.replace(/\/silkrouter\//, '/');
+              route = route.replace(/\/silkrouter\//, '/');
             }
-            childRouter.set(_route);
+            childRouter.set(route);
           } else {
-            router.set(_route);
+            router.set(route);
           }
         }
       });
-      q('.btn-primary.clear-session').forEach(function (el) {
+      q('.btn-primary.clear-session').forEach(el => {
         if (el.contains(e.target)) {
           window.sessionStorage.clear();
           window.location.href = location.hostname === 'scssyworks.github.io' ? '/silkrouter/tab2/' : '/tab2/';
         }
       });
-      q('.append-param').forEach(function (el) {
+      q('.append-param').forEach(el => {
         if (el.contains(e.target)) {
-          router.set("".concat(location.hostname === 'scssyworks.github.io' ? '/silkrouter' : '', "/tab3/john/doe"));
+          router.set(`${location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''}/tab3/john/doe`);
         }
       });
-      q('.append-query').forEach(function (el) {
+      q('.append-query').forEach(el => {
         if (el.contains(e.target)) {
-          router.set({
-            route: "".concat(location.hostname === 'scssyworks.github.io' ? '/silkrouter' : '', "/tab3/john/doe"),
+          router.set(`${location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''}/tab3/john/doe`, {
             queryString: 'q=HelloWorld'
           });
         }
       });
-      q('.append-data').forEach(function (el) {
+      q('.append-data').forEach(el => {
         if (el.contains(e.target)) {
-          router.set({
-            route: "".concat(location.hostname === 'scssyworks.github.io' ? '/silkrouter' : '', "/tab3/john/doe"),
+          router.set(`${location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''}/tab3/john/doe`, {
             queryString: 'q=HelloWorld',
             data: 'Hi there!'
           });
         }
       });
     });
-    q('#checkHash').forEach(function (el) {
-      el.addEventListener('change', function () {
-        window.sessionStorage.setItem('checkedStatus', "".concat(q('#checkHash:checked').length));
-        window.location.href = "".concat(location.hostname === 'scssyworks.github.io' ? '/silkrouter' : '', "/tab2/");
+    q('#checkHash').forEach(el => {
+      el.addEventListener('change', () => {
+        window.sessionStorage.setItem('checkedStatus', `${q('#checkHash:checked').length}`);
+        window.location.href = `${location.hostname === 'scssyworks.github.io' ? '/silkrouter' : ''}/tab2/`;
       });
     });
     if (q('#checkHash:checked').length) {
-      var hashRouter = new Router({
+      const hashRouter = new Router({
         hashRouting: true,
         preservePath: true
       });
-      hashRouter.subscribe(function (e) {
-        q('[data-route][data-relative]').forEach(function (el) {
+      hashRouter.subscribe(e => {
+        q('a.nav-link[data-relative]').forEach(el => {
           el.classList.remove('active');
-          if (e.route.includes(el.getAttribute('data-route'))) {
+          if (e.route.includes(el.getAttribute('href'))) {
             el.classList.add('active');
           }
         });
@@ -2135,10 +1541,7 @@
   }
   function setGlobals() {
     window.Router = Router;
-    window.route = route;
-    window.deparam = deparam;
-    window.noMatch = noMatch;
-    window.cache = cache;
+    window.RouterCore = RouterCore;
   }
   initializeRouting();
   renderVersion();
