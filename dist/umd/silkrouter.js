@@ -350,7 +350,5 @@
   exports.RouterCore = RouterCore;
   exports.resolveParams = resolveParams;
 
-  Object.defineProperty(exports, '__esModule', { value: true });
-
 }));
 //# sourceMappingURL=silkrouter.js.map
