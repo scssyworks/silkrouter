@@ -5,28 +5,20 @@
 
 # Silk router
 
-Silk router is a reactive and light-weight (1.4kb gzipped) routing library.
+Silk router is a reactive and light-weight (1.5kb gzipped) routing library.
 
-# [[NOTE]]
-
-Silk router version 5 has dropped support for all the older, reluctant to change
-browsers to focus on only the latest and greatest ones. It not only makes
-silkrouter faster and lighter, it also allow us tweak the core functionality.
-
-# Install
+# Installation
 
 ```sh
 npm install --save silkrouter rxjs
 ```
 
-# Dependencies
-
-Silk router is dependant on `rxjs` for certain classes such as `Observable` and
-`Subscription`. You need to install this package separately.
+Silk router is dependant on `rxjs` for classes such as `Observable` and
+`Subscription`. Please install this package as a separate (peer) dependency.
 
 # Usage
 
-1. Import
+1. Import `Router` class
 
 ```js
 import { Router } from 'silkrouter';
@@ -39,7 +31,7 @@ import { Router } from 'silkrouter';
 const router = new Router();
 ```
 
-3. Add a handler
+3. Add a `route` handler
 
 ```js
 router.subscribe((e) => {
@@ -47,15 +39,17 @@ router.subscribe((e) => {
 });
 ```
 
-4. Navigate to a route
+4. Navigate to a `route`
 
 ```js
-router.set("/path/to/route");
+router.set("/path/to/route"); // Route should always start with a '/'
 ```
 
-# Hash routing support
+# Hash router
 
-Silkrouter supports hash routing for projects that requires them.
+Silkrouter also adds `hash` routing capability. Hash routes are useful when
+back-end doesn't have a way to support page paths. Hash routing can be enabled
+via `hashRouting` flag.
 
 ```js
 const router = new Router({
@@ -63,8 +57,8 @@ const router = new Router({
 });
 ```
 
-Hash routing replaces the current path with a hash path by default. To disable
-this behaviour (and preserve the current path) you can enable path preservation.
+Please note that silkrouter replaces the current path with a hash path by
+default. To disable this behaviour you need to preserve the current path.
 
 ```js
 const router = new Router({
@@ -73,14 +67,13 @@ const router = new Router({
 });
 ```
 
-Path preservation doesn't work if hash routing is disabled.
+Path preservation only works for hash routing.
 
 # Disable initialization
 
-Silkrouter automatically calls the handler on initialization. This behaviour
-allow consumers to mount their respective components on page-load. However, in
-special scenarios you might just want to initialize the router without making
-any changes to the DOM. To do that we can disable initialization.
+Silkrouter automatically calls the handler as soon as it is attached. This
+behaviour allow consumers to mount components on page load. To attach the
+listeners silently, you can disable this behaviour.
 
 ```js
 const router = new Router({
@@ -88,11 +81,14 @@ const router = new Router({
 });
 ```
 
+Please note that disabling initialization doesn't effect the routing
+functionality. Route changes are still caught by the handlers.
+
 # Operators
 
-From version 5 onwards, silkrouter doesn't ship any built-in operators. However,
-it still has support for RxJS operators similar to version 4. You can create
-your operators and use them with silkrouter.
+From version 5 onwards `silkrouter` does not ship its own operators. You can
+create your own operators as needed, or use the ones built by the awesome
+JavaScript community.
 
 ```js
 const router = new Router();
@@ -126,5 +122,5 @@ export function myOperator() {
 
 # Contribution
 
-We invite all of you to contribute to silkrouter and make it better. Please feel
-free to fork this repository and raise PRs.
+We invite you all to contribute to `silkrouter` and make it better. Please feel
+free to open discussions, fork this repository and raise PRs.
