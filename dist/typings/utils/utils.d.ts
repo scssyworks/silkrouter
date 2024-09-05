@@ -1,4 +1,10 @@
 /**
+ * Checks if input value is a string
+ * @param {any} str String value
+ * @returns {boolean}
+ */
+export function isString(str: any): boolean;
+/**
  * Safely trims string
  * @param {string} str String
  */

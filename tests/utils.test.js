@@ -17,7 +17,7 @@ describe('Utils', () => {
     it('should return false of route is INVALID', () => {
       expect(isValidRoute('test/path')).toBeFalsy();
     });
-    it('should return false of route is UNDEFINED or NULL', () => {
+    it('should return false of route is undefined or NULL', () => {
       expect(isValidRoute()).toBeFalsy();
       expect(isValidRoute(null)).toBeFalsy();
     });

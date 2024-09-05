@@ -11,10 +11,6 @@ const INVALID_ROUTE = 'Route format is incorrect!';
 const VIRTUAL_PUSHSTATE = 'vpushstate';
 const QRY = '?';
 const EMPTY = '';
-const UNDEF = void 0;
-const TYPEOF_STR = typeof EMPTY;
-const TYPEOF_UNDEF = typeof UNDEF;
-const TYPEOF_FUNC = typeof (() => {});
 const STATE = 'State';
 const PUSH = `push${STATE}`;
 const REPLACE = `replace${STATE}`;
@@ -67,11 +63,20 @@ function trigger(context, eventType, data) {
 }
 
 /**
+ * Checks if input value is a string
+ * @param {any} str String value
+ * @returns {boolean}
+ */
+function isString(str) {
+  return typeof str === 'string';
+}
+
+/**
  * Safely trims string
  * @param {string} str String
  */
 function trim(str) {
-  return typeof str === TYPEOF_STR ? str.trim() : EMPTY;
+  return isString(str) ? str.trim() : EMPTY;
 }
 
 /**
@@ -88,11 +93,10 @@ function isValidRoute(route) {
  * @private
  * @typedef {import('./types').RouteConfig} RouteConfig
  * @param {string} routeStr Route string
- * @param {RouteConfig} [routeConfig] Route config
- * @returns {void}
+ * @param {RouteConfig} [rConfig] Route config
  */
-function set(routeStr, routeConfig) {
-  routeConfig = isObject$1(routeConfig) ? routeConfig : {};
+function set(routeStr, rConfig) {
+  const routeConfig = isObject$1(rConfig) ? rConfig : {};
   const [route, qs] = routeStr.split(QRY);
   const {
     replace = false,
@@ -108,26 +112,26 @@ function set(routeStr, routeConfig) {
     context
   } = this.config;
   // Resolve to URL query string if it's not explicitly passed
-  routeStr = trim(route);
-  if (isValidRoute(routeStr)) {
-    const path = routeStr;
+  let routeString = trim(route);
+  if (isValidRoute(routeString)) {
+    const path = routeString;
     if (hash) {
-      routeStr = `${preservePath ? '' : '/'}#${routeStr}`;
+      routeString = `${preservePath ? '' : '/'}#${routeString}`;
     }
     // Append query string
-    routeStr = `${routeStr}${trim(queryString ? `${QRY + queryString}` : EMPTY)}`;
+    routeString = `${routeString}${trim(queryString ? `${QRY + queryString}` : EMPTY)}`;
     const savedState = history.state || {
       idx: 0
     };
     history[replace ? REPLACE : PUSH]({
       data,
       idx: savedState.idx + 1
-    }, pageTitle, routeStr);
+    }, pageTitle, routeString);
     if (!preventDefault && path) {
       trigger(context, VIRTUAL_PUSHSTATE, [{
         path,
         hash
-      }, UNDEF, this]);
+      }, undefined, this]);
     }
   } else {
     throw new TypeError(INVALID_ROUTE);
@@ -176,6 +180,36 @@ class RouterEvent {
 }
 
 /**
+ * Calls the handler once on initialization
+ * @param {boolean} [isd] Optional flag used as a switch
+ * @returns {(observable: Observable<any>) => Observable<any>}
+ */
+function callOnce(isd) {
+  let isDone = isd;
+  const {
+    hashRouting: hash,
+    location,
+    init
+  } = this.config;
+  const path = getPath(hash, location);
+  return observable => new Observable(subscriber => {
+    const subn = observable.subscribe(subscriber);
+    if (!isDone) {
+      isDone = true;
+      if (init && path) {
+        subscriber.next(new RouterEvent([{
+          path,
+          hash
+        }, undefined, this]));
+      }
+    }
+    return () => {
+      subn.unsubscribe();
+    };
+  });
+}
+
+/**
  * Attaches a route handler
  * @returns {(observable: Observable<any>) => Observable<any>}
  */
@@ -198,40 +232,11 @@ function collate() {
 }
 
 /**
- * Calls the handler once on initialization
- * @param {boolean} [isDone] Optional flag used as a switch
- * @returns {(observable: Observable<any>) => Observable<any>}
- */
-function callOnce(isDone) {
-  const {
-    hashRouting: hash,
-    location,
-    init
-  } = this.config;
-  const path = getPath(hash, location);
-  return observable => new Observable(subscriber => {
-    const subn = observable.subscribe(subscriber);
-    if (!isDone) {
-      isDone = true;
-      if (init && path) {
-        subscriber.next(new RouterEvent([{
-          path,
-          hash
-        }, UNDEF, this]));
-      }
-    }
-    return () => {
-      subn.unsubscribe();
-    };
-  });
-}
-
-/**
  * Core router class to handle basic routing functionality
  */
 class RouterCore {
   static get global() {
-    return typeof globalThis !== TYPEOF_UNDEF ? globalThis : global || self;
+    return typeof globalThis !== 'undefined' ? globalThis : global || self;
   }
   /**
    * Router core constructor
@@ -285,7 +290,7 @@ class RouterCore {
    * @param {() => void} callback Callback for destroy function
    */
   destroy(callback) {
-    if (typeof callback === TYPEOF_FUNC) {
+    if (typeof callback === 'function') {
       callback();
     }
     this.popStateSubscription.unsubscribe(); // Unsubscribe popstate event
