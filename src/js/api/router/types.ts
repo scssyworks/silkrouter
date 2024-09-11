@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 export type RouterConfig = {
   init?: boolean;
@@ -14,7 +14,5 @@ export type RouterCoreConfig = {
 };
 
 export type Operator = (
-  // rome-ignore lint/suspicious/noExplicitAny: Type cannot be determined
   ...args: any[]
-  // rome-ignore lint/suspicious/noExplicitAny: Type cannot be determined
 ) => (observable: Observable<any>) => Observable<any>;

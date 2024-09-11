@@ -1,4 +1,4 @@
-import { Router } from '../router/Router';
+import type { Router } from '../router/Router';
 
 export type RouteInfo = [
   {
@@ -6,5 +6,5 @@ export type RouteInfo = [
     hash: boolean;
   },
   PopStateEvent,
-  Router
+  Router,
 ];

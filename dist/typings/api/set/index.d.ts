@@ -3,11 +3,10 @@
  * @private
  * @typedef {import('./types').RouteConfig} RouteConfig
  * @param {string} routeStr Route string
- * @param {RouteConfig} [routeConfig] Route config
- * @returns {void}
+ * @param {RouteConfig} [rConfig] Route config
  */
-export default function set(routeStr: string, routeConfig?: RouteConfig): void;
+export default function set(routeStr: string, rConfig?: RouteConfig): void;
 /**
  * Sets the current route
  */
-export type RouteConfig = import('./types').RouteConfig;
+export type RouteConfig = import("./types").RouteConfig;

@@ -14,10 +14,6 @@
   const VIRTUAL_PUSHSTATE = 'vpushstate';
   const QRY = '?';
   const EMPTY = '';
-  const UNDEF = void 0;
-  const TYPEOF_STR = typeof EMPTY;
-  const TYPEOF_UNDEF = typeof UNDEF;
-  const TYPEOF_FUNC = typeof (() => {});
   const STATE = 'State';
   const PUSH = `push${STATE}`;
   const REPLACE = `replace${STATE}`;
@@ -70,11 +66,20 @@
   }
 
   /**
+   * Checks if input value is a string
+   * @param {any} str String value
+   * @returns {boolean}
+   */
+  function isString(str) {
+    return typeof str === 'string';
+  }
+
+  /**
    * Safely trims string
    * @param {string} str String
    */
   function trim(str) {
-    return typeof str === TYPEOF_STR ? str.trim() : EMPTY;
+    return isString(str) ? str.trim() : EMPTY;
   }
 
   /**
@@ -91,11 +96,10 @@
    * @private
    * @typedef {import('./types').RouteConfig} RouteConfig
    * @param {string} routeStr Route string
-   * @param {RouteConfig} [routeConfig] Route config
-   * @returns {void}
+   * @param {RouteConfig} [rConfig] Route config
    */
-  function set(routeStr, routeConfig) {
-    routeConfig = isObject$1(routeConfig) ? routeConfig : {};
+  function set(routeStr, rConfig) {
+    const routeConfig = isObject$1(rConfig) ? rConfig : {};
     const [route, qs] = routeStr.split(QRY);
     const {
       replace = false,
@@ -111,26 +115,26 @@
       context
     } = this.config;
     // Resolve to URL query string if it's not explicitly passed
-    routeStr = trim(route);
-    if (isValidRoute(routeStr)) {
-      const path = routeStr;
+    let routeString = trim(route);
+    if (isValidRoute(routeString)) {
+      const path = routeString;
       if (hash) {
-        routeStr = `${preservePath ? '' : '/'}#${routeStr}`;
+        routeString = `${preservePath ? '' : '/'}#${routeString}`;
       }
       // Append query string
-      routeStr = `${routeStr}${trim(queryString ? `${QRY + queryString}` : EMPTY)}`;
+      routeString = `${routeString}${trim(queryString ? `${QRY + queryString}` : EMPTY)}`;
       const savedState = history.state || {
         idx: 0
       };
       history[replace ? REPLACE : PUSH]({
         data,
         idx: savedState.idx + 1
-      }, pageTitle, routeStr);
+      }, pageTitle, routeString);
       if (!preventDefault && path) {
         trigger(context, VIRTUAL_PUSHSTATE, [{
           path,
           hash
-        }, UNDEF, this]);
+        }, undefined, this]);
       }
     } else {
       throw new TypeError(INVALID_ROUTE);
@@ -151,7 +155,7 @@
   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
   PERFORMANCE OF THIS SOFTWARE.
   ***************************************************************************** */
-  /* global Reflect, Promise, SuppressedError, Symbol */
+  /* global Reflect, Promise, SuppressedError, Symbol, Iterator */
 
   var extendStatics = function(d, b) {
     extendStatics = Object.setPrototypeOf ||
@@ -179,8 +183,8 @@
   }
 
   function __generator(thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -252,8 +256,9 @@
   function __asyncGenerator(thisArg, _arguments, generator) {
     if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
     var g = generator.apply(thisArg, _arguments || []), i, q = [];
-    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
-    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+    return i = Object.create((typeof AsyncIterator === "function" ? AsyncIterator : Object).prototype), verb("next"), verb("throw"), verb("return", awaitReturn), i[Symbol.asyncIterator] = function () { return this; }, i;
+    function awaitReturn(f) { return function (v) { return Promise.resolve(v).then(f, reject); }; }
+    function verb(n, f) { if (g[n]) { i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; if (f) i[n] = f(i[n]); } }
     function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
     function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
     function fulfill(value) { resume("next", value); }
@@ -458,10 +463,6 @@
           var args = [];
           for (var _i = 2; _i < arguments.length; _i++) {
               args[_i - 2] = arguments[_i];
-          }
-          var delegate = timeoutProvider.delegate;
-          if (delegate === null || delegate === void 0 ? void 0 : delegate.setTimeout) {
-              return delegate.setTimeout.apply(delegate, __spreadArray([handler, timeout], __read(args)));
           }
           return setTimeout.apply(void 0, __spreadArray([handler, timeout], __read(args)));
       },
@@ -1081,15 +1082,10 @@
       };
       var outerNext = function (value) { return (active < concurrent ? doInnerSub(value) : buffer.push(value)); };
       var doInnerSub = function (value) {
-          expand && subscriber.next(value);
           active++;
           var innerComplete = false;
           innerFrom(project(value, index++)).subscribe(createOperatorSubscriber(subscriber, function (innerValue) {
-              onBeforeNext === null || onBeforeNext === void 0 ? void 0 : onBeforeNext(innerValue);
-              if (expand) {
-                  outerNext(innerValue);
-              }
-              else {
+              {
                   subscriber.next(innerValue);
               }
           }, function () {
@@ -1100,9 +1096,7 @@
                       active--;
                       var _loop_1 = function () {
                           var bufferedValue = buffer.shift();
-                          if (innerSubScheduler) {
-                              executeSchedule(subscriber, innerSubScheduler, function () { return doInnerSub(bufferedValue); });
-                          }
+                          if (innerSubScheduler) ;
                           else {
                               doInnerSub(bufferedValue);
                           }
@@ -1123,7 +1117,6 @@
           checkComplete();
       }));
       return function () {
-          additionalFinalizer === null || additionalFinalizer === void 0 ? void 0 : additionalFinalizer();
       };
   }
 
@@ -1232,6 +1225,36 @@
   }
 
   /**
+   * Calls the handler once on initialization
+   * @param {boolean} [isd] Optional flag used as a switch
+   * @returns {(observable: Observable<any>) => Observable<any>}
+   */
+  function callOnce(isd) {
+    let isDone = isd;
+    const {
+      hashRouting: hash,
+      location,
+      init
+    } = this.config;
+    const path = getPath(hash, location);
+    return observable => new Observable(subscriber => {
+      const subn = observable.subscribe(subscriber);
+      if (!isDone) {
+        isDone = true;
+        if (init && path) {
+          subscriber.next(new RouterEvent([{
+            path,
+            hash
+          }, undefined, this]));
+        }
+      }
+      return () => {
+        subn.unsubscribe();
+      };
+    });
+  }
+
+  /**
    * Attaches a route handler
    * @returns {(observable: Observable<any>) => Observable<any>}
    */
@@ -1254,40 +1277,11 @@
   }
 
   /**
-   * Calls the handler once on initialization
-   * @param {boolean} [isDone] Optional flag used as a switch
-   * @returns {(observable: Observable<any>) => Observable<any>}
-   */
-  function callOnce(isDone) {
-    const {
-      hashRouting: hash,
-      location,
-      init
-    } = this.config;
-    const path = getPath(hash, location);
-    return observable => new Observable(subscriber => {
-      const subn = observable.subscribe(subscriber);
-      if (!isDone) {
-        isDone = true;
-        if (init && path) {
-          subscriber.next(new RouterEvent([{
-            path,
-            hash
-          }, UNDEF, this]));
-        }
-      }
-      return () => {
-        subn.unsubscribe();
-      };
-    });
-  }
-
-  /**
    * Core router class to handle basic routing functionality
    */
   class RouterCore {
     static get global() {
-      return typeof globalThis !== TYPEOF_UNDEF ? globalThis : global || self;
+      return typeof globalThis !== 'undefined' ? globalThis : global || self;
     }
     /**
      * Router core constructor
@@ -1341,7 +1335,7 @@
      * @param {() => void} callback Callback for destroy function
      */
     destroy(callback) {
-      if (typeof callback === TYPEOF_FUNC) {
+      if (typeof callback === 'function') {
         callback();
       }
       this.popStateSubscription.unsubscribe(); // Unsubscribe popstate event
@@ -1398,7 +1392,7 @@
     }
   }
 
-  const name="silkrouter";const version="5.0.0";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="dist/typings/index.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist && npm run typings",test:"jest tests/* --coverage",deploy:"gh-pages -d dist",format:"rome format ./src --write",lint:"rome check ./src","check:sanity":"npm run lint && npm run format",typings:"tsc src/js/index.js --declaration --allowJs --emitDeclarationOnly --outDir dist/typings"};const author="scssyworks";const license="MIT";const keywords=["router","browserrouter","silkrouter","pushstate","popstate","history","rxjs","observables"];const files=["dist/umd/","dist/esm/","dist/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const devDependencies={"@babel/core":"^7.22.9","@babel/eslint-parser":"^7.22.9","@babel/preset-env":"^7.22.9","@rollup/plugin-babel":"^6.0.3","@rollup/plugin-commonjs":"^25.0.3","@rollup/plugin-eslint":"^9.0.4","@rollup/plugin-json":"^6.0.0","@rollup/plugin-node-resolve":"^15.1.0","@rollup/plugin-terser":"^0.4.3","@types/jest":"^29.5.3","env-cmd":"^10.1.0",eslint:"^8.46.0","gh-pages":"^5.0.0",jest:"^29.6.2",rollup:"^3.27.1","rollup-plugin-filesize":"^10.0.0","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^2.0.2",rome:"^12.1.3",rxjs:"^7.8.1",typescript:"^5.1.6"};const peerDependencies={rxjs:"^7.8.1"};const dependencies={"core-js":"^3.32.0","is-number":"^7.0.0","is-object":"^1.0.2"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,devDependencies:devDependencies,peerDependencies:peerDependencies,dependencies:dependencies};
+  const name="silkrouter";const version="5.0.1";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="dist/typings/index.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist && npm run typings",test:"jest tests/* --coverage",deploy:"gh-pages -d dist","check:sanity":"biome check --write src/",typings:"tsc src/js/index.js --declaration --allowJs --emitDeclarationOnly --outDir dist/typings"};const author="scssyworks";const license="MIT";const keywords=["router","browserrouter","silkrouter","pushstate","popstate","history","rxjs","observables"];const files=["dist/umd/","dist/esm/","dist/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^7.8.1"};const dependencies={"core-js":"^3.32.0","is-number":"^7.0.0","is-object":"^1.0.2"};const devDependencies={"@babel/core":"^7.25.2","@babel/eslint-parser":"^7.25.1","@babel/preset-env":"^7.25.4","@biomejs/biome":"^1.8.3","@rollup/plugin-babel":"^6.0.4","@rollup/plugin-commonjs":"^26.0.1","@rollup/plugin-eslint":"^9.0.5","@rollup/plugin-json":"^6.1.0","@rollup/plugin-node-resolve":"^15.2.3","@rollup/plugin-terser":"^0.4.4","@types/jest":"^29.5.12","env-cmd":"^10.1.0",eslint:"^9.9.1","gh-pages":"^6.1.1",jest:"^29.7.0",rollup:"^4.21.2","rollup-plugin-filesize":"^10.0.0","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^1.1.1",rxjs:"^7.8.1",typescript:"^5.5.4"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies,dependencies:dependencies,devDependencies:devDependencies};
 
   function q(selector) {
     if (typeof selector === 'string') {
@@ -1413,7 +1407,6 @@
       });
       return elArray;
     }
-    // rome-ignore lint/style/noArguments: Keeping default behaviour of querySelectorAll
     return [...document.querySelectorAll(...arguments)];
   }
   function renderVersion() {

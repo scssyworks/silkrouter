@@ -6,10 +6,10 @@ import { RouterEvent } from '../routerEvent';
  * @returns {(observable: Observable<any>) => Observable<any>}
  */
 export default function collate() {
-  return (observable) =>
-    new Observable((subscriber) => {
+  return observable =>
+    new Observable(subscriber => {
       const subn = observable.subscribe({
-        next: (event) => {
+        next: event => {
           const [, , routerInstance] = event.detail;
           if (routerInstance === this) {
             subscriber.next(new RouterEvent(event.detail, event));

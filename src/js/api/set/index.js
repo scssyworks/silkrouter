@@ -1,26 +1,24 @@
-import { trigger } from '../../utils/triggerEvent';
+import isObject from 'is-object';
 import {
-  VIRTUAL_PUSHSTATE,
-  INVALID_ROUTE,
-  UNDEF,
   EMPTY,
+  INVALID_ROUTE,
+  PUSH,
   QRY,
   REPLACE,
-  PUSH,
+  VIRTUAL_PUSHSTATE,
 } from '../../constants';
+import { trigger } from '../../utils/triggerEvent';
 import { isValidRoute, trim } from '../../utils/utils';
-import isObject from 'is-object';
 
 /**
  * Sets the current route
  * @private
  * @typedef {import('./types').RouteConfig} RouteConfig
  * @param {string} routeStr Route string
- * @param {RouteConfig} [routeConfig] Route config
- * @returns {void}
+ * @param {RouteConfig} [rConfig] Route config
  */
-export default function set(routeStr, routeConfig) {
-  routeConfig = isObject(routeConfig) ? routeConfig : {};
+export default function set(routeStr, rConfig) {
+  const routeConfig = isObject(rConfig) ? rConfig : {};
   const [route, qs] = routeStr.split(QRY);
   const {
     replace = false,
@@ -31,15 +29,15 @@ export default function set(routeStr, routeConfig) {
   } = routeConfig;
   const { preservePath, hashRouting: hash, history, context } = this.config;
   // Resolve to URL query string if it's not explicitly passed
-  routeStr = trim(route);
-  if (isValidRoute(routeStr)) {
-    const path = routeStr;
+  let routeString = trim(route);
+  if (isValidRoute(routeString)) {
+    const path = routeString;
     if (hash) {
-      routeStr = `${preservePath ? '' : '/'}#${routeStr}`;
+      routeString = `${preservePath ? '' : '/'}#${routeString}`;
     }
     // Append query string
-    routeStr = `${routeStr}${trim(
-      queryString ? `${QRY + queryString}` : EMPTY
+    routeString = `${routeString}${trim(
+      queryString ? `${QRY + queryString}` : EMPTY,
     )}`;
     const savedState = history.state || { idx: 0 };
     history[replace ? REPLACE : PUSH](
@@ -48,7 +46,7 @@ export default function set(routeStr, routeConfig) {
         idx: savedState.idx + 1,
       },
       pageTitle,
-      routeStr
+      routeString,
     );
     if (!preventDefault && path) {
       trigger(context, VIRTUAL_PUSHSTATE, [
@@ -56,7 +54,7 @@ export default function set(routeStr, routeConfig) {
           path,
           hash,
         },
-        UNDEF,
+        undefined,
         this,
       ]);
     }

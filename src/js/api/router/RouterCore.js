@@ -3,21 +3,19 @@ import {
   HISTORY_UNSUPPORTED,
   POP_STATE,
   PUSH,
-  TYPEOF_FUNC,
-  TYPEOF_UNDEF,
   VIRTUAL_PUSHSTATE,
 } from '../../constants';
 import { getPath } from '../../utils/getPath';
 import { trigger } from '../../utils/triggerEvent';
-import collate from '../collate';
 import callOnce from '../callOnce';
+import collate from '../collate';
 
 /**
  * Core router class to handle basic routing functionality
  */
 export class RouterCore {
   static get global() {
-    return typeof globalThis !== TYPEOF_UNDEF ? globalThis : global || self;
+    return typeof globalThis !== 'undefined' ? globalThis : global || self;
   }
   /**
    * Router core constructor
@@ -30,15 +28,15 @@ export class RouterCore {
     }
     this.popStateSubscription = fromEvent(
       RouterCore.global,
-      POP_STATE
-    ).subscribe((e) => {
+      POP_STATE,
+    ).subscribe(e => {
       const path = getPath(hash, location);
       if (path) {
         trigger(context, VIRTUAL_PUSHSTATE, [{ path, hash }, e, this]);
       }
     });
     this.listeners = fromEvent(context, VIRTUAL_PUSHSTATE).pipe(
-      collate.apply(this)
+      collate.apply(this),
     );
   }
   /**
@@ -64,7 +62,7 @@ export class RouterCore {
    * @param {() => void} callback Callback for destroy function
    */
   destroy(callback) {
-    if (typeof callback === TYPEOF_FUNC) {
+    if (typeof callback === 'function') {
       callback();
     }
     this.popStateSubscription.unsubscribe(); // Unsubscribe popstate event

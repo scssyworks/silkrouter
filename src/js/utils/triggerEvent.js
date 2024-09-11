@@ -10,6 +10,6 @@ export function trigger(context, eventType, data) {
       bubbles: true,
       cancelable: true,
       detail: data || [],
-    })
+    }),
   );
 }
