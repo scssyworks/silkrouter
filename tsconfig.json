@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["Decorators", "DOM", "DOM.Iterable", "ES2023", "DOM.AsyncIterable"],
+    "module": "ESNext", 
+    "moduleResolution": "Node",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist/typings",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true, 
+    "strict": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false, 
+    "noImplicitReturns": false,
+    "skipLibCheck": true
+  }
+}

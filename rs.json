@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/rollup-scripts/templates/schemas/rs.schema.json",
+  "srcRoot": "src",
+  "outputFormats": [
+    "es",
+    "cjs"
+  ],
+  "external": "all",
+  "input": "index.ts"
+}
