@@ -1,4 +1,4 @@
-import { Router } from '../router/Router';
+import type { Router } from '../router/Router';
 export type RouteInfo = [
     {
         path: string;
