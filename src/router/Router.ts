@@ -1,7 +1,8 @@
-import type { Handler, Route, RouterConfig } from './Router.types';
+import { RouterEvent } from '../router-event/RouterEvent';
+import type { Handler, IRouter, Route, RouterConfig } from './Router.types';
 
-export class Router {
-  #handlers = new Set<Handler>();
+export class Router implements IRouter {
+  #handlers = new Set<Handler<any>>();
   #history: History;
   constructor(props?: RouterConfig) {
     this.#history = props?.history || this.global.history;
@@ -16,25 +17,33 @@ export class Router {
   get global() {
     return typeof globalThis !== 'undefined' ? globalThis : global || self;
   }
-  subscribe(fn: Handler) {
-    this.#callOnce(fn);
+  subscribe<S>(fn: Handler<S>) {
+    this.#callOnce<S>(fn);
     this.#handlers.add(fn);
     return () => this.#handlers.delete(fn);
   }
-  #call(event?: PopStateEvent) {
+  #call<S>(event?: PopStateEvent) {
     for (const handler of this.#handlers) {
-      this.#callOnly(handler, event);
+      this.#callOnly<S>(handler, event);
     }
   }
-  #callOnly(handler: Handler, event?: PopStateEvent) {
-    handler(new URL(this.global.location.href), this.#history.state, event);
+  #callOnly<S>(handler: Handler<S>, event?: PopStateEvent) {
+    const evt = new RouterEvent<S>(
+      new URL(this.global.location.href),
+      this.#history.state,
+      event,
+      this,
+    );
+    if (this === evt.routerInstance) {
+      handler(evt);
+    }
   }
-  #callOnce(handler: Handler, event?: PopStateEvent) {
+  #callOnce<S>(handler: Handler<S>, event?: PopStateEvent) {
     if (!this.#handlers.has(handler)) {
-      this.#callOnly(handler, event);
+      this.#callOnly<S>(handler, event);
     }
   }
-  push<T>(route: string | Route<T>, replace?: boolean) {
+  push<S>(route: string | Route<S>, replace?: boolean) {
     try {
       const url = new URL(
         typeof route === 'string' ? route : route.href,
@@ -46,14 +55,14 @@ export class Router {
         '',
         url.href,
       );
-      this.#call();
+      this.#call<S>();
     } catch (e) {
       throw new Error('Invalid route URL');
     }
   }
 
-  replace<T>(route: string | Route<T>) {
-    this.push(route, true);
+  replace<S>(route: string | Route<S>) {
+    this.push<S>(route, true);
   }
 
   dispose() {
