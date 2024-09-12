@@ -22,7 +22,12 @@
     "history",
     "reactive"
   ],
-  "files": ["dist/umd/", "dist/esm/", "dist/typings/", "LICENSE"],
+  "files": [
+    "dist/umd/",
+    "dist/esm/",
+    "dist/typings/",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/scssyworks/silkrouter.git"
@@ -33,7 +38,9 @@
   "homepage": "https://scssyworks.github.io/silkrouter",
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
-    "rollup-scripts": "0.0.129",
+    "rollup-plugin-livereload": "2.0.5",
+    "rollup-plugin-serve": "1.1.1",
+    "rollup-scripts": "0.0.130",
     "typescript": "5.6.2"
   }
 }
