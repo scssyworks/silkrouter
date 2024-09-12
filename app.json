@@ -1,0 +1,11 @@
+{
+    "$schema": "./node_modules/rollup-scripts/templates/schemas/rs.schema.json",
+    "srcRoot": "apps/src",
+    "outputFormats": [
+      "iife"
+    ],
+    "external": "none",
+    "input": "index.ts",
+    "outDir": "dist/app",
+    "rollupConfig": "./rollup.app.config.js"
+  }

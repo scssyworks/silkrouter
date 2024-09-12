@@ -13,6 +13,7 @@
     "noImplicitAny": false,
     "noImplicitThis": false, 
     "noImplicitReturns": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "allowJs": true
   }
 }
