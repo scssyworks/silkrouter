@@ -1,3 +1,2 @@
-export function print(...args) {
-  console.log(...args);
-}
+export * from './router';
+export * from './router-event';

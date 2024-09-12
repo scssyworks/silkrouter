@@ -5,8 +5,8 @@ const router = getRouter();
 (window as any).router = router;
 
 if (appRoot) {
-  router.subscribe((url, state, event) => {
-    console.log(url, state, event);
-    appRoot.innerHTML = url.pathname;
+  router.subscribe(event => {
+    console.log(event);
+    appRoot.innerHTML = event.url.pathname;
   });
 }
