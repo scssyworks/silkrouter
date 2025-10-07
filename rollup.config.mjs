@@ -5,7 +5,7 @@ import terser from '@rollup/plugin-terser';
 import eslint from '@rollup/plugin-eslint';
 import serve from 'rollup-plugin-serve';
 import livereload from 'rollup-plugin-livereload';
-import pkg from './package.json' assert { type: 'json' };
+import pkg from './package.json' with { type: 'json' };
 import json from '@rollup/plugin-json';
 import filesize from 'rollup-plugin-filesize';
 

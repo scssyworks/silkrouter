@@ -45,11 +45,21 @@
   	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
   }
 
-  var isObject = function isObject(x) {
-  	return typeof x === 'object' && x !== null;
-  };
+  var isObject$1;
+  var hasRequiredIsObject;
 
-  var isObject$1 = /*@__PURE__*/getDefaultExportFromCjs(isObject);
+  function requireIsObject () {
+  	if (hasRequiredIsObject) return isObject$1;
+  	hasRequiredIsObject = 1;
+
+  	isObject$1 = function isObject(x) {
+  		return typeof x === 'object' && x !== null;
+  	};
+  	return isObject$1;
+  }
+
+  var isObjectExports = requireIsObject();
+  var isObject = /*@__PURE__*/getDefaultExportFromCjs(isObjectExports);
 
   /**
    * Function to trigger custom event
@@ -99,7 +109,7 @@
    * @param {RouteConfig} [rConfig] Route config
    */
   function set(routeStr, rConfig) {
-    const routeConfig = isObject$1(rConfig) ? rConfig : {};
+    const routeConfig = isObject(rConfig) ? rConfig : {};
     const [route, qs] = routeStr.split(QRY);
     const {
       replace = false,
@@ -451,12 +461,7 @@
   }
 
   var config = {
-      onUnhandledError: null,
-      onStoppedNotification: null,
-      Promise: undefined,
-      useDeprecatedSynchronousErrorHandling: false,
-      useDeprecatedNextContext: false,
-  };
+      Promise: undefined};
 
   var timeoutProvider = {
       setTimeout: function (handler, timeout) {
@@ -467,8 +472,7 @@
           return setTimeout.apply(void 0, __spreadArray([handler, timeout], __read(args)));
       },
       clearTimeout: function (handle) {
-          var delegate = timeoutProvider.delegate;
-          return ((delegate === null || delegate === void 0 ? void 0 : delegate.clearTimeout) || clearTimeout)(handle);
+          return (clearTimeout)(handle);
       },
       delegate: undefined,
   };
@@ -556,10 +560,6 @@
       };
       return Subscriber;
   }(Subscription));
-  var _bind = Function.prototype.bind;
-  function bind(fn, thisArg) {
-      return _bind.call(fn, thisArg);
-  }
   var ConsumerObserver = (function () {
       function ConsumerObserver(partialObserver) {
           this.partialObserver = partialObserver;
@@ -615,17 +615,7 @@
               };
           }
           else {
-              var context_1;
-              if (_this && config.useDeprecatedNextContext) {
-                  context_1 = Object.create(observerOrNext);
-                  context_1.unsubscribe = function () { return _this.unsubscribe(); };
-                  partialObserver = {
-                      next: observerOrNext.next && bind(observerOrNext.next, context_1),
-                      error: observerOrNext.error && bind(observerOrNext.error, context_1),
-                      complete: observerOrNext.complete && bind(observerOrNext.complete, context_1),
-                  };
-              }
-              else {
+              {
                   partialObserver = observerOrNext;
               }
           }
@@ -1288,13 +1278,12 @@
      * @typedef {import('./types').RouterCoreConfig} RouterCoreConfig
      * @param {RouterCoreConfig} routerCoreConfig Route core configuration
      */
-    constructor(_ref) {
-      let {
-        history,
-        context,
-        location,
-        hash
-      } = _ref;
+    constructor({
+      history,
+      context,
+      location,
+      hash
+    }) {
       if (!history[PUSH]) {
         throw new Error(HISTORY_UNSUPPORTED);
       }
@@ -1316,10 +1305,7 @@
      * @param  {...Operator} ops Operators
      * @returns {Observable<any>}
      */
-    pipe() {
-      for (var _len = arguments.length, ops = new Array(_len), _key = 0; _key < _len; _key++) {
-        ops[_key] = arguments[_key];
-      }
+    pipe(...ops) {
       return this.listeners.pipe(callOnce.apply(this), ...ops);
     }
     /**
@@ -1352,7 +1338,7 @@
      * @param {RouterConfig} config
      */
     constructor(config) {
-      config = isObject$1(config) ? config : {};
+      config = isObject(config) ? config : {};
       const {
         history,
         location,
@@ -1392,7 +1378,7 @@
     }
   }
 
-  const name="silkrouter";const version="5.0.1";const description="Silk router is an app routing library";const main="dist/umd/silkrouter.min.js";const module="dist/esm/silkrouter.esm.min.js";const types="dist/typings/index.d.ts";const scripts={start:"env-cmd -f ./.env.start rollup -c --watch",dev:"env-cmd -f ./.env.dev rollup -c","dev:serve":"env-cmd -f ./.env.start.prod rollup -c",dist:"npm run dev && npm run dev:serve && npm run prod",prod:"env-cmd rollup -c",build:"npm run check:sanity && npm run test && npm run dist && npm run typings",test:"jest tests/* --coverage",deploy:"gh-pages -d dist","check:sanity":"biome check --write src/",typings:"tsc src/js/index.js --declaration --allowJs --emitDeclarationOnly --outDir dist/typings"};const author="scssyworks";const license="MIT";const keywords=["router","browserrouter","silkrouter","pushstate","popstate","history","rxjs","observables"];const files=["dist/umd/","dist/esm/","dist/typings/","LICENSE"];const repository={type:"git",url:"git+https://github.com/scssyworks/silkrouter.git"};const bugs={url:"https://github.com/scssyworks/silkrouter/issues"};const homepage="https://scssyworks.github.io/silkrouter";const peerDependencies={rxjs:"^7.8.1"};const dependencies={"core-js":"^3.32.0","is-number":"^7.0.0","is-object":"^1.0.2"};const devDependencies={"@babel/core":"^7.25.2","@babel/eslint-parser":"^7.25.1","@babel/preset-env":"^7.25.4","@biomejs/biome":"^1.8.3","@rollup/plugin-babel":"^6.0.4","@rollup/plugin-commonjs":"^26.0.1","@rollup/plugin-eslint":"^9.0.5","@rollup/plugin-json":"^6.1.0","@rollup/plugin-node-resolve":"^15.2.3","@rollup/plugin-terser":"^0.4.4","@types/jest":"^29.5.12","env-cmd":"^10.1.0",eslint:"^9.9.1","gh-pages":"^6.1.1",jest:"^29.7.0",rollup:"^4.21.2","rollup-plugin-filesize":"^10.0.0","rollup-plugin-livereload":"^2.0.5","rollup-plugin-serve":"^1.1.1",rxjs:"^7.8.1",typescript:"^5.5.4"};var pkg = {name:name,version:version,description:description,main:main,module:module,types:types,scripts:scripts,author:author,license:license,keywords:keywords,files:files,repository:repository,bugs:bugs,homepage:homepage,peerDependencies:peerDependencies,dependencies:dependencies,devDependencies:devDependencies};
+  const version="5.0.2";var pkg = {version:version};
 
   function q(selector) {
     if (typeof selector === 'string') {
