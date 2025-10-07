@@ -1,5 +1,25 @@
 import { Observable, fromEvent } from 'rxjs';
 
+function getDefaultExportFromCjs (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
+var isObject$1;
+var hasRequiredIsObject;
+
+function requireIsObject () {
+	if (hasRequiredIsObject) return isObject$1;
+	hasRequiredIsObject = 1;
+
+	isObject$1 = function isObject(x) {
+		return typeof x === 'object' && x !== null;
+	};
+	return isObject$1;
+}
+
+var isObjectExports = requireIsObject();
+var isObject = /*@__PURE__*/getDefaultExportFromCjs(isObjectExports);
+
 /**
  * Router constants
  */
@@ -14,39 +34,6 @@ const EMPTY = '';
 const STATE = 'State';
 const PUSH = `push${STATE}`;
 const REPLACE = `replace${STATE}`;
-
-/**
- * Parses current path and returns params object
- * @param {string} expr Route expression
- * @param {string} path URL path
- * @returns {{[key: string]: any}}
- */
-function resolveParams(expr, path) {
-  const params = {};
-  if (REG_ROUTE_PARAMS.test(expr)) {
-    const pathRegex = new RegExp(expr.replace(/\//g, '\\/').replace(/:[^/\\]+/g, '([^\\/]+)'));
-    REG_ROUTE_PARAMS.lastIndex = 0;
-    if (pathRegex.test(path)) {
-      const keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(':', EMPTY));
-      const values = Array.from(path.match(pathRegex));
-      values.shift();
-      keys.forEach((key, index) => {
-        params[key] = values[index];
-      });
-    }
-  }
-  return params;
-}
-
-function getDefaultExportFromCjs (x) {
-	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-}
-
-var isObject = function isObject(x) {
-	return typeof x === 'object' && x !== null;
-};
-
-var isObject$1 = /*@__PURE__*/getDefaultExportFromCjs(isObject);
 
 /**
  * Function to trigger custom event
@@ -96,7 +83,7 @@ function isValidRoute(route) {
  * @param {RouteConfig} [rConfig] Route config
  */
 function set(routeStr, rConfig) {
-  const routeConfig = isObject$1(rConfig) ? rConfig : {};
+  const routeConfig = isObject(rConfig) ? rConfig : {};
   const [route, qs] = routeStr.split(QRY);
   const {
     replace = false,
@@ -243,13 +230,12 @@ class RouterCore {
    * @typedef {import('./types').RouterCoreConfig} RouterCoreConfig
    * @param {RouterCoreConfig} routerCoreConfig Route core configuration
    */
-  constructor(_ref) {
-    let {
-      history,
-      context,
-      location,
-      hash
-    } = _ref;
+  constructor({
+    history,
+    context,
+    location,
+    hash
+  }) {
     if (!history[PUSH]) {
       throw new Error(HISTORY_UNSUPPORTED);
     }
@@ -271,10 +257,7 @@ class RouterCore {
    * @param  {...Operator} ops Operators
    * @returns {Observable<any>}
    */
-  pipe() {
-    for (var _len = arguments.length, ops = new Array(_len), _key = 0; _key < _len; _key++) {
-      ops[_key] = arguments[_key];
-    }
+  pipe(...ops) {
     return this.listeners.pipe(callOnce.apply(this), ...ops);
   }
   /**
@@ -307,7 +290,7 @@ class Router extends RouterCore {
    * @param {RouterConfig} config
    */
   constructor(config) {
-    config = isObject$1(config) ? config : {};
+    config = isObject(config) ? config : {};
     const {
       history,
       location,
@@ -345,6 +328,29 @@ class Router extends RouterCore {
   set(path, routeConfig) {
     set.apply(this, [path, routeConfig]);
   }
+}
+
+/**
+ * Parses current path and returns params object
+ * @param {string} expr Route expression
+ * @param {string} path URL path
+ * @returns {{[key: string]: any}}
+ */
+function resolveParams(expr, path) {
+  const params = {};
+  if (REG_ROUTE_PARAMS.test(expr)) {
+    const pathRegex = new RegExp(expr.replace(/\//g, '\\/').replace(/:[^/\\]+/g, '([^\\/]+)'));
+    REG_ROUTE_PARAMS.lastIndex = 0;
+    if (pathRegex.test(path)) {
+      const keys = Array.from(expr.match(REG_ROUTE_PARAMS)).map(key => key.replace(':', EMPTY));
+      const values = Array.from(path.match(pathRegex));
+      values.shift();
+      keys.forEach((key, index) => {
+        params[key] = values[index];
+      });
+    }
+  }
+  return params;
 }
 
 export { Router, RouterCore, resolveParams };
