@@ -22,7 +22,7 @@ jobs:
       - run: npm test
       - run: npm version ${{github.event.release.tag_name}} --no-git-tag-version --force
       - run: npm run build
-      - run: npm publish
+      - run: npm publish --tag ${{github.event.release.tag_name}} --access public
       - run: git commit -am "${{github.event.release.tag_name}} published!"
       - run: git push origin HEAD:master
         env:
