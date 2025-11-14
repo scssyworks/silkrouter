@@ -19,14 +19,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
       - run: git config --global user.name "scssyworks"
       - run: git config --global user.email "contactsachinsingh@gmail.com"
       - run: npm ci
       - run: npm test
       - run: npm version ${{github.event.release.tag_name}} --no-git-tag-version --force
       - run: npm run build
-      - run: npm publish --tag ${{github.event.release.tag_name}} --access public
+      - run: npm publish --provenance --access public
       - run: git commit -am "${{github.event.release.tag_name}} published!"
       - run: git push origin HEAD:master
         env:
