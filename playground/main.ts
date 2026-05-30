@@ -1,6 +1,4 @@
-import { sayHello } from 'silkrouter';
-
 (function render(el: HTMLElement | null) {
   if (!el) return;
-  el.textContent = sayHello();
+  el.textContent = 'Hello World';
 })(document.getElementById('app'));
