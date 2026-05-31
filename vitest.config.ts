@@ -16,9 +16,9 @@ export default defineConfig({
       },
       include: [
         'src/**/*.{ts,tsx}',
-        '!src/main.ts',
+        '!src/web/main.ts',
         '!src/**/*.test.{ts,tsx}',
-        '!src/types/**',
+        '!src/web/types/**',
         '!src/test-utils/**',
       ],
     },

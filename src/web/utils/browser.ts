@@ -1,4 +1,4 @@
-import type { SrHistory } from 'silkrouter';
+import type { SrHistory } from '../types';
 import { createEmitter } from './event';
 import { getWindow } from './win';
 

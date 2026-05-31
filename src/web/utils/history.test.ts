@@ -1,7 +1,7 @@
 import { Window } from 'happy-dom';
 import { getRouter } from './history';
-import type { IRouter } from 'silkrouter';
-import { flush, flushMacro } from '../test-utils';
+import type { IRouter } from '../types';
+import { flush, flushMacro } from '../../test-utils';
 
 const mockWindowFn = (path = '') => {
   const win = new Window({

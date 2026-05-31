@@ -17,10 +17,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "silkrouter": ["./src/main.ts"]
-    }
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["src", "playground"]
 }

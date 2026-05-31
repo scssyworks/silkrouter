@@ -2,14 +2,12 @@
   "name": "silkrouter",
   "version": "0.0.0",
   "type": "module",
-  "main": "./dist/cjs/index.cjs",
-  "module": "./dist/es/index.mjs",
   "exports": {
-    ".": {
-      "import": "./dist/es/index.mjs",
-      "require": "./dist/cjs/index.cjs",
-      "types": "./dist/main.d.ts",
-      "default": "./dist/es/index.mjs"
+    "./web": {
+      "import": "./dist/web/es/index.mjs",
+      "require": "./dist/web/cjs/index.cjs",
+      "types": "./dist/web/main.d.ts",
+      "default": "./dist/web/es/index.mjs"
     }
   },
   "files": [
@@ -27,6 +25,7 @@
     "@vitest/coverage-v8": "4.1.7",
     "happy-dom": "20.9.0",
     "prettier": "3.8.3",
+    "terser": "5.48.0",
     "typescript": "6.0.2",
     "unplugin-dts": "1.0.0",
     "vite": "8.0.12",
