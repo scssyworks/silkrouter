@@ -48,5 +48,8 @@
   "bugs": {
     "url": "https://github.com/scssyworks/silkrouter/issues"
   },
-  "homepage": "https://github.com/scssyworks/silkrouter#readme"
+  "homepage": "https://github.com/scssyworks/silkrouter#readme",
+  "dependencies": {
+    "xss": "1.0.15"
+  }
 }
