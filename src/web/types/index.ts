@@ -11,18 +11,6 @@ export type SrHandler<E extends Event = Event, S = unknown> = (
   evt: ISrEvent<E, S>,
 ) => void | Promise<void>;
 
-export interface Push<S extends Record<string, unknown>> {
-  url: string;
-  replace?: boolean;
-  state?: S;
-  history?: History;
-}
-
-export type Runtime = {
-  isBrowser: boolean;
-  isNode: boolean;
-};
-
 export interface IHandlerProps<S = unknown> {
   path: string; // The full path of the URL, e.g. '/users/123?active=true#section1'
   pathname: string; // The URL pathname, e.g. '/users/123'
@@ -39,13 +27,14 @@ export type Handler<S = unknown> = (
 ) => void | Promise<void>;
 
 export interface IMemoryHistory {
-  pushState<S>(state: S, title: string, url?: string): void;
-  replaceState<S>(state: S, title: string, url?: string): void;
+  pushState<S = unknown>(state: S, title: string | null, url: string): void;
+  replaceState<S = unknown>(state: S, title: string | null, url: string): void;
   go(delta: number): void;
   back(): void;
   forward(): void;
   length: number;
-  state: unknown;
+  target: EventTarget;
+  state?: unknown;
 }
 
 export type HistoryOptions = {
@@ -129,4 +118,9 @@ export type Match = {
 export type SrHistory = {
   history: History | IMemoryHistory;
   historyTarget: IEmitter;
+};
+
+export type HistoryStack = {
+  url: string;
+  state?: unknown;
 };

@@ -2,6 +2,7 @@ import { Window } from 'happy-dom';
 import { getRouter } from './history';
 import type { IRouter } from '../types';
 import { flush, flushMacro } from '../../test-utils';
+import { getWindow } from './win';
 
 const mockWindowFn = (path = '') => {
   const win = new Window({
@@ -32,6 +33,13 @@ describe('Router environment', () => {
     mockWindow.mockReturnValue(null);
     expect(() => getRouter()).toThrow(
       Error('History is not available in non-browser environments.'),
+    );
+  });
+
+  it('should throw error in non-browser environment for memory router', () => {
+    mockWindow.mockReturnValue(null);
+    expect(() => getRouter({ memoryRouter: true })).toThrow(
+      Error('Memory history is not available in non-browser environments.'),
     );
   });
 });
@@ -93,6 +101,7 @@ describe('Router', () => {
         pathname: '/test',
         route: '/test',
       });
+      expect(getWindow()!.location.pathname).toBe('/test');
     });
 
     it('should call the handler if path is navigated with replace true', async () => {
@@ -719,6 +728,327 @@ describe('Router', () => {
       router = getRouter({
         hashRouter: true,
       });
+      const path = router.every();
+      path.target.on('sr:error', evtHandler);
+      unsubscribe = path.subscribe(handler);
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/',
+        pathname: '/',
+        route: '/',
+      });
+      handler.mockClear();
+      router.navigate('/test');
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/test',
+        pathname: '/test',
+        route: '/',
+      });
+      await flush();
+      expect(evtHandler).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Memory Router', () => {
+    it('should call handler on subscribe', async () => {
+      const handler = vi.fn();
+      router = getRouter({ memoryRouter: true });
+      unsubscribe = router.subscribe(handler);
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/',
+        pathname: '/',
+        route: '/',
+      });
+    });
+
+    it('should NOT call handler if path is different', async () => {
+      const handler = vi.fn();
+      router = getRouter({ memoryRouter: true });
+      unsubscribe = router.route('/test').subscribe(handler);
+      await flush();
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('should call the handler if path is navigated', async () => {
+      const handler = vi.fn();
+      router = getRouter({ memoryRouter: true });
+      unsubscribe = router.route('/test').subscribe(handler);
+      router.navigate('/test');
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/test',
+        pathname: '/test',
+        route: '/test',
+      });
+      // Ensure memory router is not updating physical location after navigation
+      expect(getWindow()!.location.pathname).toBe('/');
+    });
+
+    it('should call the handler if path is navigated with replace true', async () => {
+      const handler = vi.fn();
+      router = getRouter({ memoryRouter: true });
+      unsubscribe = router.route('/test').subscribe(handler);
+      router.navigate('/test', {
+        replace: true,
+      });
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/test',
+        pathname: '/test',
+        route: '/test',
+      });
+    });
+
+    it('should always call global handler if path is navigated', async () => {
+      const handler = vi.fn();
+      router = getRouter({ memoryRouter: true });
+      unsubscribe = router.subscribe(handler);
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/',
+        pathname: '/',
+        route: '/',
+      });
+      await flush(); // Flushing previous async handler before next navigation
+      handler.mockClear();
+      router.navigate('/test');
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/test',
+        pathname: '/test',
+        route: '/',
+      });
+    });
+
+    it('should abandon original handler call if navigation is initiated before the handler settles', async () => {
+      const evtHandler = vi.fn();
+      const handler = vi.fn();
+      router = getRouter({ memoryRouter: true });
+      const path = router.every();
+      path.target.on('sr:done', evtHandler); // This should call synchronously for custom event
+      unsubscribe = path.subscribe(handler);
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/',
+        pathname: '/',
+        route: '/',
+      });
+      // Previous handler is still in progress and new navigation has initiated
+      // This will cause sr:done event to be triggered once
+      handler.mockClear();
+      router.navigate('/test');
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/test',
+        pathname: '/test',
+        route: '/',
+      });
+      await flush(); // Flush previous handler to trigger the event
+      expect(evtHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it('should parse params, query and fragment strings correctly', async () => {
+      const handler = vi.fn();
+      router = getRouter({ memoryRouter: true });
+      unsubscribe = router.route('/test/:id').subscribe(handler);
+      router.navigate('/test/123?foo=bar#frag');
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/test/123?foo=bar#frag',
+        pathname: '/test/123',
+        route: '/test/:id',
+        search: '?foo=bar',
+        query: { foo: 'bar' },
+        params: { id: '123' },
+        fragment: '#frag',
+      });
+    });
+
+    it('should pass state correctly', async () => {
+      const handler = vi.fn();
+      router = getRouter({ memoryRouter: true });
+      unsubscribe = router.route('/test/:id').subscribe(handler);
+      router.navigate('/test/123?foo=bar#frag', {
+        state: 'hello world',
+      });
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/test/123?foo=bar#frag',
+        pathname: '/test/123',
+        route: '/test/:id',
+        search: '?foo=bar',
+        state: 'hello world',
+        query: { foo: 'bar' },
+        params: { id: '123' },
+        fragment: '#frag',
+      });
+    });
+
+    it('should support base path', async () => {
+      const handler = vi.fn();
+      router = getRouter({
+        basePath: '/base',
+        memoryRouter: true,
+      });
+      unsubscribe = router.subscribe(handler);
+      await flush();
+      expect(handler).not.toHaveBeenCalled();
+      handler.mockClear();
+      router.navigate('/test');
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/base/test',
+        pathname: '/base/test',
+        route: '/base/',
+      });
+    });
+
+    it('should support path handler with base path', async () => {
+      const handler = vi.fn();
+      router = getRouter({
+        basePath: '/base',
+        memoryRouter: true,
+      });
+      unsubscribe = router.route('/test').subscribe(handler);
+      router.navigate('/test');
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/base/test',
+        pathname: '/base/test',
+        route: '/base/test',
+      });
+    });
+
+    it('should support relative path handler with base path', async () => {
+      const handler = vi.fn();
+      router = getRouter({
+        basePath: '/base/path',
+        memoryRouter: true,
+      });
+      unsubscribe = router.route('../test').subscribe(handler);
+      router.navigate('../test');
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/base/test',
+        pathname: '/base/test',
+        route: '/base/test',
+      });
+    });
+
+    it('should support back and forward navigation', async () => {
+      const handler = vi.fn();
+      router = getRouter({ memoryRouter: true });
+      unsubscribe = router.subscribe(handler);
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/',
+        pathname: '/',
+        route: '/',
+      });
+      await flush(); // Flushing previous async handler before next navigation
+      handler.mockClear();
+      router.navigate('/test');
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/test',
+        pathname: '/test',
+        route: '/',
+      });
+      await flush(); // Flushing previous async handler before next navigation
+      handler.mockClear();
+      router.back();
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/',
+        pathname: '/',
+        route: '/',
+      });
+      await flush(); // Flushing previous async handler before next navigation
+      handler.mockClear();
+      router.forward();
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/test',
+        pathname: '/test',
+        route: '/',
+      });
+    });
+
+    it('should handle double navigation', async () => {
+      const handler = vi.fn();
+      router = getRouter({ memoryRouter: true });
+      unsubscribe = router.subscribe(handler);
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/',
+        pathname: '/',
+        route: '/',
+      });
+      await flush(); // Flushing previous async handler before next navigation
+      handler.mockClear();
+      router.navigate('/test');
+      router.navigate('/test2');
+      await flush();
+      expect(handler).toHaveBeenNthCalledWith(1, {
+        ...defaultRoute,
+        path: '/test2',
+        pathname: '/test2',
+        route: '/',
+      });
+    });
+
+    it('should handle errors', async () => {
+      const handler = vi.fn(async () => {
+        throw new Error('something went wrong');
+      });
+      router = getRouter({ memoryRouter: true });
+      unsubscribe = router.subscribe(handler);
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/',
+        pathname: '/',
+        route: '/',
+      });
+      await flush(); // Flushing previous async handler before next navigation
+      handler.mockClear();
+      router.navigate('/test');
+      await flush();
+      expect(handler).toHaveBeenCalledWith({
+        ...defaultRoute,
+        path: '/test',
+        pathname: '/test',
+        route: '/',
+      });
+    });
+
+    it('should abandon original error handler if next navigation occurred before previous handler settled', async () => {
+      const evtHandler = vi.fn();
+      const handler = vi.fn(async () => {
+        throw new Error('something went wrong');
+      });
+      router = getRouter({ memoryRouter: true });
       const path = router.every();
       path.target.on('sr:error', evtHandler);
       unsubscribe = path.subscribe(handler);

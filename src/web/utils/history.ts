@@ -11,6 +11,7 @@ import type {
 } from '../types';
 import { getHistory } from './browser';
 import { createEmitter } from './event';
+import { getMemoryHistory } from './memory';
 import { PathUtils, SrPath } from './path';
 
 export class Router implements IRouter {
@@ -120,6 +121,6 @@ export function getRouter(
     memoryRouter?: boolean; // Use this option to enable memory router for nested routers and/or unit testing.
   },
 ) {
-  const history = getHistory(); // Short-circuit for non-browser environments. Should switch to memory router if options.memoryRouter is true when implemented.
+  const history = options?.memoryRouter ? getMemoryHistory() : getHistory();
   return new Router({ ...options, history });
 }
