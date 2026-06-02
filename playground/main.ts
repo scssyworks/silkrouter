@@ -12,6 +12,7 @@ const mainPaths: Record<string, string> = {
   data: '/data/10/20?q=123&r=456',
   roadmap: '/roadmap',
   cleanup: '/cleanup',
+  events: '/events',
 };
 
 const router = getRouter();
@@ -206,8 +207,47 @@ router.route('/cleanup').subscribe(() => {
   </code></pre>
   <section>
     <button id="back">&lt;&lt; Back</button>
-    <button id="roadmap">Next: Roadmap &gt;&gt;</button>
+    <button id="events">Next: Events &gt;&gt;</button>
   </section>
+  `);
+});
+
+router.route('/events').subscribe(() => {
+  render(`
+    <section>
+      Silkrouter emits custom events on router and path instances. These events are useful for tracking navigation events, debugging, and integrating with other libraries or frameworks. There are four main events:
+      <ul>
+        <li><b>sr:init</b>: Emitted on the router instance whenever a navigation event occurs. The event detail contains the URL, navigation ID, and any state associated with the navigation.</li>
+        <li><b>sr:transit</b>: Emitted on the path instance when route transition starts.</li>
+        <li><b>sr:done</b>: Emitted on the path instance when route transition ends.</li>
+        <li><b>sr:error</b>: Emitted on the path instance when an error occurs during route transition.</li>
+      </ul>
+    </section>
+    <code><pre>
+    <span id="cmt">// Subscribe to 'sr:init' events</span>
+    router.<span id="prop">target</span>.<span id="prop">on</span>(<span id="str">'sr:init'</span>, (evt) <span id="sym">=></span> {
+      console.<span id="prop">log</span>(<span id="str">'Navigation event:'</span>, evt);
+    });
+
+    <span id="cmt">// Subscribe to 'sr:transit' and 'sr:done' events</span>
+    <span id="kw">const</span> path = router.<span id="prop">route</span>(<span id="str">'/path'</span>); <span id="cmt">// Use "router.every()" to get all paths instance</span>
+    path.<span id="prop">target</span>.<span id="prop">on</span>(<span id="str">'sr:transit'</span>, () <span id="sym">=></span> {
+      console.<span id="prop">log</span>(<span id="str">'Route transition started'</span>);
+    });
+
+    path.<span id="prop">target</span>.<span id="prop">on</span>(<span id="str">'sr:done'</span>, () <span id="sym">=></span> {
+      console.<span id="prop">log</span>(<span id="str">'Route transition ended'</span>);
+    });
+
+    <span id="cmt">// Subscribe to 'sr:error' event</span>
+    path.<span id="prop">target</span>.<span id="prop">on</span>(<span id="str">'sr:error'</span>, () <span id="sym">=></span> {
+      console.<span id="prop">error</span>(<span id="str">'Route transition error'</span>);
+    });
+    </pre></code>
+    <section>
+      <button id="back">&lt;&lt; Back</button>
+      <button id="roadmap">Next: Roadmap &gt;&gt;</button>
+    </section>
   `);
 });
 

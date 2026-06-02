@@ -6,6 +6,7 @@
 
 body {
   padding: 0;
+  margin: 0;
   font-family:
     system-ui,
     -apple-system,
@@ -22,10 +23,17 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
+}
+
+footer {
+  margin-top: auto;
+  padding: 1rem 0;
 }
 
 #app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   width: 100%;
   max-width: 1440px;
   padding: 0 1rem;
@@ -125,4 +133,19 @@ code span#prop {
 
 code span#cmt {
   color: gray;
+}
+
+span#version {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2373ab;
+  border: 1px solid #2373ab;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+span#copy {
+  font-size: 0.8rem;
+  color: #393939;
 }
