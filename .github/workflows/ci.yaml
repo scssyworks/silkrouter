@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - 'v*'
       - 'release/*'
     tags:
       - 'v*.*.*'
@@ -73,9 +73,11 @@ jobs:
       - name: Determine version
         id: vars
         run: |
-          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-            VERSION="0.0.0-main-${GITHUB_SHA::6}"
-            TAG="main"
+          if [[ "${GITHUB_REF}" == refs/heads/v* ]]; then
+            BRANCH="${GITHUB_REF#refs/heads/}"
+            VERSION_LINE="${BRANCH#v}"
+            VERSION="0.0.0-${VERSION_LINE}-${GITHUB_SHA::6}"
+            TAG="canary-${VERSION_LINE}"
           elif [[ "${GITHUB_REF}" == refs/heads/release/* ]]; then
             BRANCH="${GITHUB_REF#refs/heads/}"
             BASE_VERSION="${BRANCH#release/}"
