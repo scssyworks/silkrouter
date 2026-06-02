@@ -3,6 +3,7 @@ node_modules
 coverage
 dist
 dist-ssr
+build
 *.local
 # Ignore archive files
 archive
