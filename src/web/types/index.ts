@@ -41,7 +41,6 @@ export type HistoryOptions = {
   basePath?: string;
   hashRouter?: boolean;
   preservePath?: boolean;
-  debug?: boolean;
   history: SrHistory;
 };
 

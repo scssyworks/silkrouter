@@ -50,6 +50,11 @@ h2 {
   font-size: 1.5rem;
 }
 
+h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
 main {
   padding: 2rem 0;
 }
@@ -69,6 +74,15 @@ button {
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 1px;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+button#back {
+  border: 1px solid #2373ab;
+  background-color: transparent;
+  color: #2373ab;
+  margin-right: 0.5rem;
 }
 
 pre {
@@ -76,6 +90,7 @@ pre {
   color: #fff;
   padding: 1rem;
   border-radius: 4px;
+  margin: 2rem 0;
 }
 
 pre,
@@ -83,4 +98,31 @@ code {
   font-family: 'Consolas', 'Courier New', monospace;
   font-size: 0.9rem;
   line-height: 1.2;
+}
+
+code span#kw {
+  color: rgb(68, 150, 251);
+  font-weight: 600;
+}
+
+code span#sym {
+  color: rgb(114, 203, 255);
+  font-weight: 600;
+}
+
+code span#str {
+  color: rgb(221, 158, 107);
+  font-weight: 600;
+}
+
+code span#fc {
+  color: rgb(231, 211, 110);
+}
+
+code span#prop {
+  color: rgb(236, 177, 184);
+}
+
+code span#cmt {
+  color: gray;
 }
