@@ -159,7 +159,7 @@ export class PathUtils {
     return path.split('/').filter(Boolean);
   }
 
-  static match(route: URL, url: URL, exact = false): Match {
+  static match(route: URL, url: URL, exact = true): Match {
     // Match host
     if (route.origin !== url.origin) return this.#noMatch;
     const routeSections = this.toArray(route.pathname);
