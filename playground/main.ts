@@ -84,7 +84,7 @@ router.route('/setup').subscribe(() => {
   });
   </code></pre>
   <section>
-  Silkrouter implements an observer-style API for subscribing to path changes. It is not an Observable implementation and does not follow Observable or RxJS specifications. Handlers subscribe to specific paths and are invoked immediately only when the current browser path matches the subscribed path.
+  Silkrouter implements an observer-style API for subscribing to path changes. It does not implement the TC39 Observable proposal or RxJS Observable interfaces. Handlers subscribe to specific paths and are invoked immediately only when the current browser path matches the subscribed path.
   </section>
   <section>
     <button id="back">&lt;&lt; Back</button>
