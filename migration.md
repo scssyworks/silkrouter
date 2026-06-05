@@ -61,7 +61,7 @@ router.navigate(
 );
 ```
 
-# Removed features like "no match" and "cache"
+# Dropped features like "no match" and "cache"
 
 Silkrouter v4 shipped with a `noMatch` operator that invoked a handler only when none of the other handlers matched. The purpose of this operator was to provide a flexible way to render a 404 page when no route matched. We soon realized that this approach did not scale well. As more routes were attached, the router had to keep track of all of them. Here's a simple implementation of `noMatch` in v6:
 
@@ -93,4 +93,15 @@ router.subscribe((props) => {
 // "PathUtils" is available as a named export from "silkrouter/web" and supports matching routes with parameters.
 ```
 
-Silkrouter v4 shipped with another operator called `cache`. The purpose of this operator was to perform a deep comparison of the previous and next props to avoid invoking the handler unnecessarily. We have since changed the internal architecture of Silkrouter, and this caching logic is no longer needed.
+Silkrouter v4 also shipped with an operator called `cache`. Its purpose was to perform a deep comparison of the previous and next props to avoid invoking handlers unnecessarily. However, this was an afterthought and was never a core concept or goal of the library. As a result, it was removed in v5. If you still find this feature important, you can achieve the same behavior with two lines of code using `lodash`.
+
+```ts
+router.subscribe((props) => {
+  if (!cache || !_.isEqual(cache, props)) {
+    cache = props;
+    // ...
+  }
+});
+```
+
+It is important to understand why we dropped this feature in the first place. This approach works only when the order of query string and path parameters remains the same. Otherwise, more complex logic is required to evaluate deep equality. The `cache` operator relied on third-party libraries to achieve this, which increased the bundle size. As a result, we decided to leave this responsibility to the frameworks that consume the Silkrouter API.
