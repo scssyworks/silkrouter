@@ -87,7 +87,7 @@ jobs:
 
             VERSION_LINE="${BRANCH#v}"
 
-            VERSION="${VERSION_LINE}-canary.${GITHUB_SHA::6}"
+            VERSION="${VERSION_LINE}.0-canary.${GITHUB_SHA::6}"
             TAG="canary-${VERSION_LINE}"
             MAJOR="${VERSION_LINE%%.*}"
 
