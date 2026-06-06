@@ -4,12 +4,16 @@ on:
   push:
     branches:
       - 'v*'
-      - 'release/*'
+      - 'release/v*'
     tags:
       - 'v*.*.*'
 
 permissions:
   contents: read
+
+env:
+  SUPPORTED_MAJORS: '6 5 4'
+  LATEST_MAJOR: '6'
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -20,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 24
@@ -33,6 +38,7 @@ jobs:
     needs: test
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 24
@@ -54,6 +60,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 24
@@ -67,31 +74,100 @@ jobs:
           name: dist
           path: dist
 
-      - name: Determine version
+      - name: Determine version and tag
         id: vars
         run: |
           if [[ "${GITHUB_REF}" == refs/heads/v* ]]; then
             BRANCH="${GITHUB_REF#refs/heads/}"
+
+            if [[ ! "$BRANCH" =~ ^v[0-9]+\.[0-9]+$ ]]; then
+              echo "Invalid version branch: $BRANCH"
+              exit 1
+            fi
+
             VERSION_LINE="${BRANCH#v}"
-            VERSION="0.0.0-${VERSION_LINE}-${GITHUB_SHA::6}"
+
+            VERSION="${VERSION_LINE}-canary.${GITHUB_SHA::6}"
             TAG="canary-${VERSION_LINE}"
-          elif [[ "${GITHUB_REF}" == refs/heads/release/* ]]; then
+            MAJOR="${VERSION_LINE%%.*}"
+
+          elif [[ "${GITHUB_REF}" == refs/heads/release/v* ]]; then
             BRANCH="${GITHUB_REF#refs/heads/}"
-            BASE_VERSION="${BRANCH#release/}"
-            VERSION="${BASE_VERSION}-rc.${GITHUB_RUN_NUMBER}"
+
+            if [[ ! "$BRANCH" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "Invalid version branch: $BRANCH"
+              exit 1
+            fi
+
+            BASE_VERSION="${BRANCH#release/v}"
+
+            RC_NUMBER=$(node scripts/release.js "${BASE_VERSION}")
+
+            if [[ -z "$RC_NUMBER" || ! "$RC_NUMBER" =~ ^[0-9]+$ ]]; then
+              echo "Invalid RC number: $RC_NUMBER"
+              exit 1
+            fi
+
+            VERSION="${BASE_VERSION}-rc.${RC_NUMBER}"
             TAG="rc-${BASE_VERSION}"
+            MAJOR="${BASE_VERSION%%.*}"
+            
           elif [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/v}"
-            TAG="latest"
+            GITHUB_TAG="${GITHUB_REF#refs/tags/}"
+
+            if [[ ! "$GITHUB_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "Invalid version tag: $GITHUB_TAG"
+              exit 1
+            fi
+
+            VERSION="${GITHUB_TAG#v}"
+            TAG="v${VERSION}"
+            MAJOR="${VERSION%%.*}"
+
+          else
+            echo "Unsupported ref: ${GITHUB_REF}"
+            exit 1
           fi
 
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "major=$MAJOR" >> "$GITHUB_OUTPUT"
+
+      - name: Validate release policy
+        run: |
+          MAJOR="${{ steps.vars.outputs.major }}"
+
+          ALLOWED=false
+          for SUPPORTED in $SUPPORTED_MAJORS; do
+            if [[ "$MAJOR" == "$SUPPORTED" ]]; then
+              ALLOWED=true
+              break
+            fi
+          done
+
+          if [[ "$ALLOWED" == "false" ]]; then
+            echo "Unsupported major version: $MAJOR"
+            exit 1
+          fi
 
       - name: Update package.json version
         run: |
-          npm version ${{ steps.vars.outputs.version }} --no-git-tag-version
+          npm version "${{ steps.vars.outputs.version }}" --no-git-tag-version
 
       - name: Publish to npm
         run: |
-          npm publish --tag ${{ steps.vars.outputs.tag }} --access public
+          npm publish --tag "${{ steps.vars.outputs.tag }}" --access public
+
+      - name: Promote stable release to latest
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          MAJOR="${{ steps.vars.outputs.major }}"
+          VERSION="${{ steps.vars.outputs.version }}"
+
+          if [[ "$MAJOR" == "$LATEST_MAJOR" ]]; then
+            PACKAGE_NAME=$(node -p "require('./package.json').name")
+            npm dist-tag add "${PACKAGE_NAME}@${VERSION}" latest
+            echo "Promoted ${PACKAGE_NAME}@${VERSION} to latest"
+          else
+            echo "Not promoting to latest since major version $MAJOR is not the latest supported major version ($LATEST_MAJOR)"
+          fi
