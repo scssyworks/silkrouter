@@ -33,6 +33,12 @@ jobs:
       - run: npm ci
       - run: npm test
 
+      - uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354
+        with:
+          files: './coverage/lcov.info'
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
   build:
     runs-on: ubuntu-latest
     needs: test

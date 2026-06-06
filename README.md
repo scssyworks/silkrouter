@@ -1,3 +1,5 @@
+[![CI](https://github.com/scssyworks/silkrouter/actions/workflows/ci.yaml/badge.svg?branch=v6.0)](https://github.com/scssyworks/silkrouter/actions/workflows/ci.yaml) ![Codecov](https://img.shields.io/codecov/c/github/scssyworks/silkrouter)
+
 # Silkrouter
 
 Silkrouter is a light-weight (&lt;2kb gzipped) and reactive routing library.
