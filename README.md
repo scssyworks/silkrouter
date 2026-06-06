@@ -1,4 +1,4 @@
-[![CI](https://github.com/scssyworks/silkrouter/actions/workflows/ci.yaml/badge.svg?branch=v6.0)](https://github.com/scssyworks/silkrouter/actions/workflows/ci.yaml) ![Codecov](https://img.shields.io/codecov/c/github/scssyworks/silkrouter)
+[![CI](https://github.com/scssyworks/silkrouter/actions/workflows/ci.yaml/badge.svg?branch=v6.0)](https://github.com/scssyworks/silkrouter/actions/workflows/ci.yaml) ![Codecov](https://codecov.io/gh/scssyworks/silkrouter/branch/v6.0/graph/badge.svg)
 
 # Silkrouter
 
