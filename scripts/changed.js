@@ -41,7 +41,11 @@ const srcChanged = files.some(
 );
 
 const playgroundChanged = files.some(
-  (file) => file.startsWith('playground/') || file.startsWith('src/'),
+  (file) =>
+    file.startsWith('playground/') ||
+    file.startsWith('src/') ||
+    file === 'index.html' ||
+    file.startsWith('public/'),
 );
 
 process.stdout.write(`src_changed=${srcChanged}\n`);
