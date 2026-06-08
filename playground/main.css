@@ -99,6 +99,7 @@ pre {
   padding: 1rem;
   border-radius: 4px;
   margin: 2rem 0;
+  overflow-x: auto;
 }
 
 pre,
