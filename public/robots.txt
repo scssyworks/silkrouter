@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+# Sitemap points to your site domain.
+Sitemap: https://silkrouter.dev/sitemap.xml
+

@@ -65,6 +65,10 @@ export class Router implements IRouter {
     return 0;
   }
 
+  get every() {
+    return this.route('');
+  }
+
   #onPopState = (evt: ISrEvent<PopStateEvent>) => {
     this.target.emit('sr:init', {
       url: new URL(this.location.href),
@@ -99,15 +103,11 @@ export class Router implements IRouter {
   }
 
   subscribe<S = unknown>(fn: Handler<S>) {
-    return this.every().subscribe(fn);
+    return this.every.subscribe(fn);
   }
 
   route(path: string): ISrPath {
     return new SrPath({ basePath: this.#basePath, path }, this);
-  }
-
-  every(): ISrPath {
-    return this.route('');
   }
 
   unsubscribe() {

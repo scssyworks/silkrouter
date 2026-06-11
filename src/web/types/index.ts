@@ -97,6 +97,7 @@ export interface IRouter {
   useHash: boolean;
   preservePath: boolean;
   location: Location;
+  every: ISrPath;
   navigate<S = unknown>(
     pathname: string,
     navOptions?: NavigateOptions<S>,
@@ -105,7 +106,6 @@ export interface IRouter {
   back(): void;
   subscribe<S = unknown>(fn: Handler<S>): () => void;
   route(path: string): ISrPath;
-  every(): ISrPath;
   unsubscribe(): void;
 }
 
