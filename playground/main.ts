@@ -1,10 +1,12 @@
 import { createEmitter, getRouter } from '../src/web/main';
 import './main.css';
 import { render } from './utils/render';
+import { setMeta } from './main.utils';
 
 const $body = createEmitter(document.body);
 
 const mainPaths: Record<string, string> = {
+  home: '/',
   install: '/install',
   setup: '/setup',
   navigation: '/navigation',
@@ -15,13 +17,31 @@ const mainPaths: Record<string, string> = {
   events: '/events',
 };
 
+const pathOrder = [
+  mainPaths.home,
+  mainPaths.install,
+  mainPaths.setup,
+  mainPaths.navigation,
+  mainPaths.configure,
+  mainPaths.data,
+  mainPaths.cleanup,
+  mainPaths.events,
+  mainPaths.roadmap,
+];
+
 const router = getRouter();
+
+// `setMeta` is provided by `./main.utils` — it updates title/meta/canonical tags on navigation.
 
 $body.on('click', (event) => {
   const evt = event.originalEvent as MouseEvent;
   const btn = (evt.target as HTMLElement).closest('button');
   if (btn && btn.id === 'back') {
-    router.back();
+    const prevPathIdx =
+      pathOrder.findIndex((p) => p.startsWith(router.location.pathname)) - 1;
+    if (prevPathIdx >= 0) {
+      router.navigate(pathOrder[prevPathIdx]);
+    }
     return;
   }
   if (btn && mainPaths[btn.id]) {
@@ -29,7 +49,15 @@ $body.on('click', (event) => {
   }
 });
 
-router.route('/').subscribe(() => {
+router.route('/').subscribe((props) => {
+  setMeta({
+    title: 'Silkrouter — Home',
+    description:
+      'Silkrouter is a light-weight (<2kb gzipped) and reactive routing library.',
+    pathname: props.pathname,
+    url: 'https://silkrouter.dev/',
+  });
+
   render(`
   <section>
     Silkrouter has been developed with one idea in mind: <b>simplicity</b>. It has an easy-to-use API that can be used with any CSR library or framework. SSR support will be added soon.
@@ -46,12 +74,19 @@ router.route('/').subscribe(() => {
   `);
 });
 
-router.route('/install').subscribe(() => {
+router.route('/install').subscribe((props) => {
+  setMeta({
+    title: 'Silkrouter — Installation',
+    description: 'Installation instructions for Silkrouter via NPM.',
+    pathname: props.pathname,
+    url: 'https://silkrouter.dev/install',
+  });
+
   render(`
   <section>
     Silkrouter is available for installation via NPM
   </section>
-  <pre>npm i --save-exact silkrouter</pre>
+  <pre>npm i --save-exact silkrouter@canary-6</pre>
   <section>
     <b>Note:</b> Starting with <b>v6</b>, Silkrouter does not rely on any third-party libraries, favoring native Web APIs instead.
   </section>
@@ -62,7 +97,14 @@ router.route('/install').subscribe(() => {
   `);
 });
 
-router.route('/setup').subscribe(() => {
+router.route('/setup').subscribe((props) => {
+  setMeta({
+    title: 'Silkrouter — Setup',
+    description: 'Quickstart and setup guide for Silkrouter.',
+    pathname: props.pathname,
+    url: 'https://silkrouter.dev/setup',
+  });
+
   render(`
   <section>
     Silkrouter is easy to setup and use.
@@ -93,7 +135,14 @@ router.route('/setup').subscribe(() => {
   `);
 });
 
-router.route('/navigation').subscribe(() => {
+router.route('/navigation').subscribe((props) => {
+  setMeta({
+    title: 'Silkrouter — Navigation',
+    description: 'Navigation API and examples for Silkrouter.',
+    pathname: props.pathname,
+    url: 'https://silkrouter.dev/navigation',
+  });
+
   render(`
   <section>
     Silkrouter provides a simple API for navigating to different paths.
@@ -128,7 +177,14 @@ router.route('/navigation').subscribe(() => {
   `);
 });
 
-router.route('/configure').subscribe(() => {
+router.route('/configure').subscribe((props) => {
+  setMeta({
+    title: 'Silkrouter — Configure',
+    description: 'Configuration options and examples for Silkrouter.',
+    pathname: props.pathname,
+    url: 'https://silkrouter.dev/configure',
+  });
+
   render(`
   <section>
     Silkrouter can be configured with different options to suit your needs.
@@ -150,6 +206,13 @@ router.route('/configure').subscribe(() => {
 });
 
 router.route('/data/:from/:to').subscribe((props) => {
+  setMeta({
+    title: `Silkrouter — Data ${props.path}`,
+    description: `Data view for ${props.path}`,
+    pathname: props.pathname,
+    url: `https://silkrouter.dev${props.path}`,
+  });
+
   render(`
   <section>
     Silkrouter has three types of data that can be accessed in handlers: <b>params</b>, <b>query</b>, and <b>state</b>.
@@ -181,7 +244,14 @@ router.route('/data/:from/:to').subscribe((props) => {
   `);
 });
 
-router.route('/cleanup').subscribe(() => {
+router.route('/cleanup').subscribe((props) => {
+  setMeta({
+    title: 'Silkrouter — Cleaning Up',
+    description: 'Unsubscribe handlers and cleanup patterns for Silkrouter.',
+    pathname: props.pathname,
+    url: 'https://silkrouter.dev/cleanup',
+  });
+
   render(`
   <section>
     Handlers subscribed to paths will remain active and will be called whenever the path changes to a matching path. If you want to unsubscribe a handler, you can call the function returned by the subscribe method.
@@ -212,7 +282,15 @@ router.route('/cleanup').subscribe(() => {
   `);
 });
 
-router.route('/events').subscribe(() => {
+router.route('/events').subscribe((props) => {
+  setMeta({
+    title: 'Silkrouter — Events',
+    description:
+      'Custom event lifecycle (sr:init, sr:transit, sr:done, sr:error) emitted by Silkrouter.',
+    pathname: props.pathname,
+    url: 'https://silkrouter.dev/events',
+  });
+
   render(`
     <section>
       Silkrouter emits custom events on router and path instances. These events are useful for tracking navigation events, debugging, and integrating with other libraries or frameworks. There are four main events:
@@ -230,7 +308,7 @@ router.route('/events').subscribe(() => {
     });
 
     <span id="cmt">// Subscribe to 'sr:transit' and 'sr:done' events</span>
-    <span id="kw">const</span> path = router.<span id="prop">route</span>(<span id="str">'/path'</span>); <span id="cmt">// Use "router.every()" to get all paths instance</span>
+    <span id="kw">const</span> path = router.<span id="prop">route</span>(<span id="str">'/path'</span>); <span id="cmt">// Use "router.every" to get all paths instance</span>
     path.<span id="prop">target</span>.<span id="prop">on</span>(<span id="str">'sr:transit'</span>, () <span id="sym">=></span> {
       console.<span id="prop">log</span>(<span id="str">'Route transition started'</span>);
     });
@@ -251,7 +329,15 @@ router.route('/events').subscribe(() => {
   `);
 });
 
-router.route('/roadmap').subscribe(() => {
+router.route('/roadmap').subscribe((props) => {
+  setMeta({
+    title: 'Silkrouter — Roadmap',
+    description:
+      'Planned features for Silkrouter including SSR support, React router, and interruption hooks.',
+    pathname: props.pathname,
+    url: 'https://silkrouter.dev/roadmap',
+  });
+
   render(`
   <section>
     As web development evolves, Silkrouter will continue to improve and expand its capabilities to meet the needs of modern web applications. We have completely re-written Silkrouter for v6 to provide a more robust and flexible routing solution, and we have an exciting roadmap ahead.

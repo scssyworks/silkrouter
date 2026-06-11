@@ -147,7 +147,7 @@ describe('Router', () => {
       const evtHandler = vi.fn();
       const handler = vi.fn();
       router = getRouter();
-      const path = router.every();
+      const path = router.every;
       path.target.on('sr:done', evtHandler); // This should call synchronously for custom event
       unsubscribe = path.subscribe(handler);
       await flush();
@@ -360,7 +360,7 @@ describe('Router', () => {
         throw new Error('something went wrong');
       });
       router = getRouter();
-      const path = router.every();
+      const path = router.every;
       path.target.on('sr:error', evtHandler);
       unsubscribe = path.subscribe(handler);
       await flush();
@@ -475,7 +475,7 @@ describe('Router', () => {
       router = getRouter({
         hashRouter: true,
       });
-      const path = router.every();
+      const path = router.every;
       path.target.on('sr:done', evtHandler); // This should call synchronously for custom event
       unsubscribe = path.subscribe(handler);
       await flush();
@@ -728,7 +728,7 @@ describe('Router', () => {
       router = getRouter({
         hashRouter: true,
       });
-      const path = router.every();
+      const path = router.every;
       path.target.on('sr:error', evtHandler);
       unsubscribe = path.subscribe(handler);
       await flush();
@@ -833,7 +833,7 @@ describe('Router', () => {
       const evtHandler = vi.fn();
       const handler = vi.fn();
       router = getRouter({ memoryRouter: true });
-      const path = router.every();
+      const path = router.every;
       path.target.on('sr:done', evtHandler); // This should call synchronously for custom event
       unsubscribe = path.subscribe(handler);
       await flush();
@@ -1049,7 +1049,7 @@ describe('Router', () => {
         throw new Error('something went wrong');
       });
       router = getRouter({ memoryRouter: true });
-      const path = router.every();
+      const path = router.every;
       path.target.on('sr:error', evtHandler);
       unsubscribe = path.subscribe(handler);
       await flush();
