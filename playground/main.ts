@@ -119,6 +119,7 @@ router.route('/setup').subscribe((props) => {
   <span id="cmt">// Subscribe to * (all path changes)</span>
   <span id="kw">const</span> unsub = router.<span id="prop">subscribe</span>((r) <span id="sym">=></span> {
     console.<span id="prop">log</span>(r.<span id="prop">pathname</span>);
+  });
 
   <span id="cmt">// Subscribe to /path</span>
   <span id="kw">const</span> unsub2 = router.<span id="prop">route</span>(<span id="str">'/path'</span>).<span id="prop">subscribe</span>((r) <span id="sym">=></span> {
