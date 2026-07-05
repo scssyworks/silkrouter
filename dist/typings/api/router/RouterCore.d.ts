@@ -2,7 +2,7 @@
  * Core router class to handle basic routing functionality
  */
 export class RouterCore {
-    static get global(): typeof globalThis;
+    static get global(): any;
     /**
      * Router core constructor
      * @typedef {import('./types').RouterCoreConfig} RouterCoreConfig

@@ -12,9 +12,9 @@ export class Router extends RouterCore {
         init: boolean;
         hashRouting: boolean;
         preservePath: boolean;
-        context: HTMLElement;
-        history: History;
-        location: Location;
+        context: any;
+        history: any;
+        location: any;
     }>;
     /**
      * Sets the current route path

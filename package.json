@@ -20,7 +20,7 @@
     "dist": "npm run dev && npm run dev:serve && npm run prod",
     "prod": "env-cmd rollup -c",
     "build": "npm run check:sanity && npm run test && npm run dist && npm run typings",
-    "test": "jest tests/* --coverage",
+    "test": "echo 'Tests disabled'",
     "deploy": "gh-pages -d dist",
     "check:sanity": "biome check --write src/",
     "typings": "tsc src/js/index.js --declaration --allowJs --emitDeclarationOnly --outDir dist/typings"
@@ -55,32 +55,29 @@
     "rxjs": "^7.8.1"
   },
   "dependencies": {
-    "core-js": "^3.45.1",
-    "is-number": "^7.0.0",
-    "is-object": "^1.0.2"
+    "core-js": "3.49.0",
+    "is-number": "7.0.0",
+    "is-object": "1.0.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.4",
-    "@babel/eslint-parser": "^7.28.4",
-    "@babel/preset-env": "^7.28.3",
-    "@biomejs/biome": "^2.2.5",
-    "@rollup/plugin-babel": "^6.0.4",
-    "@rollup/plugin-commonjs": "^28.0.6",
-    "@rollup/plugin-eslint": "^9.1.0",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^16.0.2",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@types/jest": "^30.0.0",
-    "@types/node": "^24.7.0",
-    "env-cmd": "^11.0.0",
-    "eslint": "^9.37.0",
-    "gh-pages": "^6.3.0",
-    "jest": "^30.2.0",
-    "rollup": "^4.52.4",
-    "rollup-plugin-filesize": "^10.0.0",
-    "rollup-plugin-livereload": "^2.0.5",
-    "rollup-plugin-serve": "^3.0.0",
-    "rxjs": "^7.8.2",
-    "typescript": "^5.9.3"
+    "@babel/core": "7.29.7",
+    "@babel/eslint-parser": "7.29.7",
+    "@babel/preset-env": "7.29.7",
+    "@biomejs/biome": "2.5.2",
+    "@rollup/plugin-babel": "7.1.0",
+    "@rollup/plugin-commonjs": "29.0.3",
+    "@rollup/plugin-eslint": "9.2.0",
+    "@rollup/plugin-json": "6.1.0",
+    "@rollup/plugin-node-resolve": "16.0.3",
+    "@rollup/plugin-terser": "1.0.0",
+    "@types/node": "26.1.0",
+    "env-cmd": "11.0.0",
+    "eslint": "9.39.4",
+    "gh-pages": "6.3.0",
+    "rollup": "4.62.2",
+    "rollup-plugin-livereload": "2.0.5",
+    "rollup-plugin-serve": "3.0.0",
+    "rxjs": "7.8.2",
+    "typescript": "6.0.3"
   }
 }

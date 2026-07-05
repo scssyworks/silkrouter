@@ -9,7 +9,7 @@ export const INVALID_ROUTE: "Route format is incorrect!";
 export const VIRTUAL_PUSHSTATE: "vpushstate";
 export const QRY: "?";
 export const EMPTY: "";
-export const UNDEF: any;
+export const UNDEF: undefined;
 export const STATE: "State";
 export const PUSH: "pushState";
 export const REPLACE: "replaceState";

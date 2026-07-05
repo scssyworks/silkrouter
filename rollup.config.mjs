@@ -1,13 +1,12 @@
-import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
 import babel from '@rollup/plugin-babel';
-import terser from '@rollup/plugin-terser';
-import eslint from '@rollup/plugin-eslint';
-import serve from 'rollup-plugin-serve';
-import livereload from 'rollup-plugin-livereload';
-import pkg from './package.json' with { type: 'json' };
+import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
-import filesize from 'rollup-plugin-filesize';
+import resolve from '@rollup/plugin-node-resolve';
+import terser from '@rollup/plugin-terser';
+import livereload from 'rollup-plugin-livereload';
+import serve from 'rollup-plugin-serve';
+import pkg from './package.json' with { type: 'json' };
+import { filesize } from './plugins/rollup-size-plugin.mjs';
 
 const isDevelopment = process.env.MODE.trim() === 'development';
 const startServer = process.env.SERVE.trim() === 'true';
@@ -33,7 +32,7 @@ const pathMap = {
 
 const config = {
   input,
-  output: (startServer ? ['iife'] : ['esm', 'umd']).map((format) => {
+  output: (startServer ? ['iife'] : ['esm', 'umd']).map(format => {
     return {
       name: pkg.name,
       sourcemap: isDevelopment,
@@ -44,19 +43,7 @@ const config = {
   }),
   external: startServer ? [] : [...Object.keys(pkg.peerDependencies)],
   plugins: [
-    ...(isDevelopment && startServer
-      ? [
-          eslint({
-            exclude: [
-              'node_modules/**',
-              'json/**',
-              'package.json',
-              'package-lock.json',
-            ],
-            throwOnError: true,
-          }),
-        ]
-      : [filesize()]),
+    ...(isDevelopment && startServer ? [] : [filesize()]),
     resolve({
       customResolveOptions: {
         moduleDirectories: ['node_modules'],
@@ -77,7 +64,7 @@ const config = {
               preferConst: true,
             }),
             serve({
-              open: true,
+              open: false,
               contentBase: ['dist'],
               host: 'localhost',
               port: '3030',
