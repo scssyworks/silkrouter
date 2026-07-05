@@ -1,7 +1,7 @@
-import { Router, RouterCore, resolveParams } from '../src/js';
 import pkg from '../package.json';
+import { Router, RouterCore, resolveParams } from '../src/js';
 
-function q(selector) {
+function q(selector, ...args) {
   if (typeof selector === 'string') {
     const elArray = [];
     selector
@@ -17,7 +17,7 @@ function q(selector) {
       });
     return elArray;
   }
-  return [...document.querySelectorAll(...arguments)];
+  return [...document.querySelectorAll(...args)];
 }
 
 function renderVersion() {
