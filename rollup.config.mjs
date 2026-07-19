@@ -1,16 +1,29 @@
+import { readFileSync } from 'node:fs';
 import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import resolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 import livereload from 'rollup-plugin-livereload';
-import serve from 'rollup-plugin-serve';
 import pkg from './package.json' with { type: 'json' };
+import { copyPublic } from './plugins/copy-public.mjs';
 import { filesize } from './plugins/rollup-size-plugin.mjs';
+import { memoryServe } from './plugins/dev-server.mjs';
 
 const isDevelopment = process.env.MODE.trim() === 'development';
 const startServer = process.env.SERVE.trim() === 'true';
 const input = process.env.INPUT.trim();
+
+// Keep the watcher's exclusions in sync with .gitignore instead of a
+// hardcoded list - anything untracked/build-output should never retrigger.
+const watchExclude = readFileSync(
+  new URL('./.gitignore', import.meta.url),
+  'utf8',
+)
+  .split('\n')
+  .map(line => line.trim())
+  .filter(line => line && !line.startsWith('#'))
+  .map(line => `**/${line.replace(/\/$/, '')}/**`);
 
 const rxjs = 'rxjs';
 
@@ -42,7 +55,11 @@ const config = {
     };
   }),
   external: startServer ? [] : [...Object.keys(pkg.peerDependencies)],
+  watch: {
+    exclude: watchExclude,
+  },
   plugins: [
+    copyPublic(),
     ...(isDevelopment && startServer ? [] : [filesize()]),
     resolve({
       customResolveOptions: {
@@ -63,15 +80,9 @@ const config = {
               compact: true,
               preferConst: true,
             }),
-            serve({
-              open: false,
-              contentBase: ['dist'],
-              host: 'localhost',
-              port: '3030',
-              historyApiFallback: true,
-            }),
+            memoryServe({ host: 'localhost', port: 3030 }),
             livereload({
-              watch: 'dist',
+              watch: 'public',
               verbose: false,
             }),
           ]

@@ -14,12 +14,13 @@
     }
   },
   "scripts": {
-    "start": "env-cmd -f ./.env.start rollup -c --watch",
-    "dev": "env-cmd -f ./.env.dev rollup -c",
-    "dev:serve": "env-cmd -f ./.env.start.prod rollup -c",
+    "clean": "rm -rf dist",
+    "start": "npm run clean && node plugins/watch-config.mjs -- env-cmd -f ./.env.start rollup -c --watch",
+    "dev": "npm run clean && env-cmd -f ./.env.dev rollup -c",
+    "dev:serve": "npm run clean && env-cmd -f ./.env.start.prod rollup -c",
     "dist": "npm run dev && npm run dev:serve && npm run prod",
     "prod": "env-cmd rollup -c",
-    "build": "npm run check:sanity && npm run test && npm run dist && npm run typings",
+    "build": "npm run clean && npm run check:sanity && npm run test && npm run dist && npm run typings",
     "test": "echo 'Tests disabled'",
     "deploy": "gh-pages -d dist",
     "check:sanity": "biome check --write src/",
