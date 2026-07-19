@@ -59,13 +59,13 @@ jobs:
           name: dist
           path: dist
 
-      - name: Configure git identity
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
       - name: Deploy to GitHub Pages
-        run: npm run deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx gh-pages -d dist \
+            -r "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" \
+            -u "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
   publish:
     runs-on: ubuntu-latest
@@ -136,8 +136,8 @@ jobs:
             fi
 
             VERSION="${GITHUB_TAG#v}"
-            TAG="v${VERSION}"
             MAJOR="${VERSION%%.*}"
+            TAG="stable-${MAJOR}"
 
           else
             echo "Unsupported ref: ${GITHUB_REF}"
