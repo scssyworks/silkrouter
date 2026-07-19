@@ -1,4 +1,3 @@
-import pkg from '../package.json';
 import { Router, RouterCore, resolveParams } from '../src/js';
 
 function q(selector, ...args) {
@@ -22,15 +21,6 @@ function q(selector, ...args) {
 
 function getLinkRoute(el) {
   return el.getAttribute('data-route') || el.getAttribute('href') || '';
-}
-
-function renderVersion() {
-  q('.version').forEach(el => {
-    const wrapper = el.querySelector('span');
-    if (wrapper) {
-      wrapper.textContent = pkg.version;
-    }
-  });
 }
 
 function initializeRouting() {
@@ -209,5 +199,4 @@ function setGlobals() {
 }
 
 initializeRouting();
-renderVersion();
 setGlobals();
