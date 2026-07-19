@@ -1,17 +1,29 @@
-import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
+import { readFileSync } from 'node:fs';
 import babel from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
+import resolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
-import eslint from '@rollup/plugin-eslint';
-import serve from 'rollup-plugin-serve';
 import livereload from 'rollup-plugin-livereload';
 import pkg from './package.json' with { type: 'json' };
-import json from '@rollup/plugin-json';
-import filesize from 'rollup-plugin-filesize';
+import { copyPublic } from './plugins/copy-public.mjs';
+import { filesize } from './plugins/rollup-size-plugin.mjs';
+import { memoryServe } from './plugins/dev-server.mjs';
 
 const isDevelopment = process.env.MODE.trim() === 'development';
 const startServer = process.env.SERVE.trim() === 'true';
 const input = process.env.INPUT.trim();
+
+// Keep the watcher's exclusions in sync with .gitignore instead of a
+// hardcoded list - anything untracked/build-output should never retrigger.
+const watchExclude = readFileSync(
+  new URL('./.gitignore', import.meta.url),
+  'utf8',
+)
+  .split('\n')
+  .map(line => line.trim())
+  .filter(line => line && !line.startsWith('#'))
+  .map(line => `**/${line.replace(/\/$/, '')}/**`);
 
 const rxjs = 'rxjs';
 
@@ -33,7 +45,7 @@ const pathMap = {
 
 const config = {
   input,
-  output: (startServer ? ['iife'] : ['esm', 'umd']).map((format) => {
+  output: (startServer ? ['iife'] : ['esm', 'umd']).map(format => {
     return {
       name: pkg.name,
       sourcemap: isDevelopment,
@@ -43,20 +55,12 @@ const config = {
     };
   }),
   external: startServer ? [] : [...Object.keys(pkg.peerDependencies)],
+  watch: {
+    exclude: watchExclude,
+  },
   plugins: [
-    ...(isDevelopment && startServer
-      ? [
-          eslint({
-            exclude: [
-              'node_modules/**',
-              'json/**',
-              'package.json',
-              'package-lock.json',
-            ],
-            throwOnError: true,
-          }),
-        ]
-      : [filesize()]),
+    copyPublic(),
+    ...(isDevelopment && startServer ? [] : [filesize()]),
     resolve({
       customResolveOptions: {
         moduleDirectories: ['node_modules'],
@@ -76,15 +80,9 @@ const config = {
               compact: true,
               preferConst: true,
             }),
-            serve({
-              open: true,
-              contentBase: ['dist'],
-              host: 'localhost',
-              port: '3030',
-              historyApiFallback: true,
-            }),
+            memoryServe({ host: 'localhost', port: 3030 }),
             livereload({
-              watch: 'dist',
+              watch: 'public',
               verbose: false,
             }),
           ]
