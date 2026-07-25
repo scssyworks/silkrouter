@@ -194,7 +194,11 @@ jobs:
 
             VERSION="${GITHUB_TAG#v}"
             MAJOR="${VERSION%%.*}"
-            TAG="stable-${MAJOR}"
+            if [[ "$MAJOR" == "$LATEST_MAJOR" ]]; then
+              TAG="latest"
+            else
+              TAG="stable-${MAJOR}"
+            fi
 
           else
             echo "Unsupported ref: ${GITHUB_REF}"
@@ -229,17 +233,3 @@ jobs:
       - name: Publish to npm
         run: |
           npm publish --tag "${{ steps.vars.outputs.tag }}" --access public
-
-      - name: Promote stable release to latest
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          MAJOR="${{ steps.vars.outputs.major }}"
-          VERSION="${{ steps.vars.outputs.version }}"
-
-          if [[ "$MAJOR" == "$LATEST_MAJOR" ]]; then
-            PACKAGE_NAME=$(node -p "require('./package.json').name")
-            npm dist-tag add "${PACKAGE_NAME}@${VERSION}" latest
-            echo "Promoted ${PACKAGE_NAME}@${VERSION} to latest"
-          else
-            echo "Not promoting to latest since major version $MAJOR is not the latest supported major version ($LATEST_MAJOR)"
-          fi
