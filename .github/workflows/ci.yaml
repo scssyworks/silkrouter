@@ -59,13 +59,17 @@ jobs:
           name: dist
           path: dist
 
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Deploy to GitHub Pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx gh-pages -d dist \
-            -r "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" \
-            -u "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+            -r "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
 
   publish:
     runs-on: ubuntu-latest
