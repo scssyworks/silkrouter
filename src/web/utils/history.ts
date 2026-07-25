@@ -14,6 +14,25 @@ import { createEmitter } from './event';
 import { getMemoryHistory } from './memory';
 import { PathUtils, SrPath } from './path';
 
+/**
+ * Router class that manages navigation and routing in a web application. It provides methods for navigating to different paths, subscribing to route changes, and handling browser history events.
+ *
+ * @class Router
+ * @implements {IRouter}
+ * @property {boolean} useHash - Indicates whether to use hash-based routing.
+ * @property {boolean} preservePath - Indicates whether to preserve the path when using hash-based routing.
+ * @property {SrHistory} history - The history object used for navigation.
+ * @property {IEmitter} target - The event emitter for route changes.
+ * @property {IEmitter} win - The event emitter for window events.
+ * @property {string} basePath - The base path for routing.
+ * @property {number} navId - The current navigation ID.
+ * @method navigate - Navigates to a specified pathname with optional state and replace options.
+ * @method forward - Navigates forward in the browser history.
+ * @method back - Navigates backward in the browser history.
+ * @method subscribe - Subscribes to route changes with a handler function.
+ * @method route - Creates a new route with a specified path.
+ * @method unsubscribe - Unsubscribes from route changes and cleans up event listeners.
+ */
 export class Router implements IRouter {
   #useHash: boolean;
   #preservePath: boolean;

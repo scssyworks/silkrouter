@@ -11,9 +11,10 @@ const packageName = packageJson.name;
 let versions = [];
 
 try {
-  versions = execSync(`npm view ${packageName} versions --json`, {
+  const output = execSync(`npm view ${packageName} versions --json`, {
     encoding: 'utf-8',
   });
+  versions = JSON.parse(output);
 } catch {
   versions = [];
 }
