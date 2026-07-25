@@ -12,7 +12,7 @@ export class RouterEvent {
     route: string;
     isHashRoute: boolean;
     router: import("../router").Router;
-    currentEvent: CustomEvent<any> | PopStateEvent;
+    currentEvent: PopStateEvent;
     query: {
         path: string;
         hash: string;
