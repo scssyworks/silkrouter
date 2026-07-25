@@ -193,8 +193,8 @@ jobs:
             fi
 
             VERSION="${GITHUB_TAG#v}"
-            TAG="v${VERSION}"
             MAJOR="${VERSION%%.*}"
+            TAG="stable-${MAJOR}"
 
           else
             echo "Unsupported ref: ${GITHUB_REF}"
