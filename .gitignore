@@ -1,2 +1,27 @@
+# Ignore node modules, coverage reports, and distribution files
 node_modules
 coverage
+dist
+dist-ssr
+build
+*.local
+# Ignore archive files
+archive
+# Ignore environment variable files
+.env*
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+# Editor directories and files
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

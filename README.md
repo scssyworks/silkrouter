@@ -1,126 +1,49 @@
-[![Node.js CI](https://github.com/scssyworks/silkrouter/actions/workflows/node.js.yml/badge.svg)](https://github.com/scssyworks/silkrouter/actions/workflows/node.js.yml)
-![License](https://img.shields.io/github/license/scssyworks/silkrouter)
-![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.min.js?label=minified)
-![GitHub file size in bytes](https://img.shields.io/github/size/scssyworks/silkrouter/dist/esm/silkrouter.esm.js?label=unminified)
+[![CI](https://github.com/scssyworks/silkrouter/actions/workflows/ci.yaml/badge.svg?branch=v6.0)](https://github.com/scssyworks/silkrouter/actions/workflows/ci.yaml) ![Codecov](https://codecov.io/gh/scssyworks/silkrouter/branch/v6.0/graph/badge.svg)
 
-# Silk router
+# Silkrouter
 
-Silk router is a reactive and light-weight (1.5kb gzipped) routing library.
+Silkrouter is a light-weight (&lt;2kb gzipped) and reactive routing library.
 
 # Installation
 
 ```sh
-npm install --save silkrouter rxjs
+npm i --save-exact silkrouter
 ```
 
-Silk router is dependant on `rxjs` for classes such as `Observable` and
-`Subscription`. Please install this package as a separate (peer) dependency.
+# API
 
-# Usage
+Silkrouter has been rewritten in TypeScript and has a relatively simple API.
 
-1. Import `Router` class
+## Instantiate
 
-```js
-import { Router } from 'silkrouter';
-...
+```ts
+import { getRouter } from 'silkrouter/web';
+
+const router = getRouter();
 ```
 
-2. Create an instance
+## Attach
 
-```js
-const router = new Router();
+```ts
+// Listen to all routes
+router.subscribe(() => { ... });
+
+// Listen to /path route
+router.route('/path').subscribe(() => { ... });
 ```
 
-3. Add a `route` handler
+## Trigger
 
-```js
-router.subscribe((e) => {
-  // Listens to changes to route
-});
+```ts
+router.navigate('/path');
 ```
 
-4. Navigate to a `route`
+For a detailed documentation and step-by-step tutorial please visit: https://silkrouter.dev
 
-```js
-router.set("/path/to/route"); // Route should always start with a '/'
-```
+# Migration
 
-# Hash router
+If you are using an older version of `silkrouter` then please visit <a href="https://github.com/scssyworks/silkrouter/blob/master/migration.md">migration</a> documentation for more details.
 
-Silkrouter also adds `hash` routing capability. Hash routes are useful when
-back-end doesn't have a way to support page paths. Hash routing can be enabled
-via `hashRouting` flag.
+# Support
 
-```js
-const router = new Router({
-  hashRouting: true,
-});
-```
-
-Please note that silkrouter replaces the current path with a hash path by
-default. To disable this behaviour you need to preserve the current path.
-
-```js
-const router = new Router({
-  hashRouting: true,
-  preservePath: true,
-});
-```
-
-Path preservation only works for hash routing.
-
-# Disable initialization
-
-Silkrouter automatically calls the handler as soon as it is attached. This
-behaviour allow consumers to mount components on page load. To attach the
-listeners silently, you can disable this behaviour.
-
-```js
-const router = new Router({
-  init: false,
-});
-```
-
-Please note that disabling initialization doesn't effect the routing
-functionality. Route changes are still caught by the handlers.
-
-# Operators
-
-From version 5 onwards `silkrouter` does not ship its own operators. You can
-create your own operators as needed, or use the ones built by the awesome
-JavaScript community.
-
-```js
-const router = new Router();
-
-router.pipe(myOperator()).subscribe((event) => {
-  // ...
-});
-```
-
-myOperator.js
-
-```js
-export function myOperator() {
-  return (observable) =>
-    new Observable((subscriber) => {
-      const currSubscription = observable.subscribe({
-        next(value) {
-          // ...
-          subscriber.next(/* updated value */);
-        },
-        error: subscriber.error,
-        complete: subscriber.complete,
-      });
-      // ...
-      return () => {
-        return currSubscription.unsubscribe();
-      };
-    });
-}
-```
-
-# Contribution
-
-We invite you all to contribute to `silkrouter` and make it better. Please feel
-free to open discussions, fork this repository and raise PRs.
+We recommend upgrading to latest version of silkrouter. However, we will continue to support `silkrouter` v4 and higher. We have completely dropped support for `silkrouter` v3 and older.

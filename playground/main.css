@@ -1,0 +1,152 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    'Open Sans',
+    'Helvetica Neue',
+    sans-serif;
+  font-size: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+footer {
+  margin-top: auto;
+  padding: 1rem 0;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 1440px;
+  padding: 0 1rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1;
+  font-weight: 300;
+  color: #393939;
+}
+
+h1 {
+  font-size: 3rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
+h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+main {
+  padding: 2rem 0;
+}
+
+section {
+  margin-bottom: 1rem;
+}
+
+button {
+  padding: 1rem 2rem;
+  font-size: 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #2373ab;
+  color: #fff;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+button#back {
+  border: 1px solid #2373ab;
+  background-color: transparent;
+  color: #2373ab;
+  margin-right: 0.5rem;
+}
+
+pre {
+  background-color: #333;
+  color: #fff;
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 2rem 0;
+  overflow-x: auto; /* Horizontal scrolling in code examples */
+}
+
+pre,
+code {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+code span#kw {
+  color: rgb(68, 150, 251);
+  font-weight: 600;
+}
+
+code span#sym {
+  color: rgb(114, 203, 255);
+  font-weight: 600;
+}
+
+code span#str {
+  color: rgb(221, 158, 107);
+  font-weight: 600;
+}
+
+code span#fc {
+  color: rgb(231, 211, 110);
+}
+
+code span#prop {
+  color: rgb(236, 177, 184);
+}
+
+code span#cmt {
+  color: gray;
+}
+
+span#version {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2373ab;
+  border: 1px solid #2373ab;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+span#copy {
+  font-size: 0.8rem;
+  color: #393939;
+}
