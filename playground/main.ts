@@ -86,7 +86,7 @@ router.route('/install').subscribe((props) => {
   <section>
     Silkrouter is available for installation via NPM
   </section>
-  <pre>npm i --save-exact silkrouter@canary-6</pre>
+  <pre>npm i --save-exact silkrouter</pre>
   <section>
     <b>Note:</b> Starting with <b>v6</b>, Silkrouter does not rely on any third-party libraries, favoring native Web APIs instead.
   </section>
